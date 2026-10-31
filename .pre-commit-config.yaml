@@ -1,0 +1,43 @@
+# Install once:  pre-commit install --hook-type pre-commit --hook-type commit-msg
+minimum_pre_commit_version: "4.0.0"
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.5.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, perf, refactor, docs, test, build, ci, chore, revert, style]
+  - repo: local
+    hooks:
+      - id: no-em-dash
+        name: no em-dashes
+        entry: scripts/check_no_em_dash.sh
+        language: script
+        types: [text]
+        exclude: ^LICENSE$
+      - id: ruff
+        name: ruff
+        entry: uv run --frozen ruff check --fix
+        language: system
+        types: [python]
+        require_serial: true
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format
+        language: system
+        types: [python]
+        require_serial: true
