@@ -16,8 +16,16 @@ dev = [
   "ruff>=0.8",
 ]
 
-[tool.uv]
-package = false
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "packages/evals/lineage_evals",
+  "packages/db/lineage_db",
+  "ingest/lineage_ingest",
+]
 
 [tool.ruff]
 line-length = 100
@@ -34,7 +42,6 @@ explicit_package_bases = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["packages/evals", "packages/db", "ingest"]
 addopts = "-ra --strict-markers --strict-config"
 markers = [
   "unit: fast tests with no network or database",

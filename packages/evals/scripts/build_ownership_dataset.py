@@ -9,24 +9,19 @@ exists.
 """
 
 import argparse
-import base64
 import datetime as dt
-import hashlib
 import json
-import os
 import random
-import time
-import urllib.error
 import urllib.parse
-import urllib.request
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from lineage_ingest.companies_house import CompaniesHouse
+
 # Companies House responses are untyped JSON.
 Json = dict[str, Any]
 
-API = "https://api.company-information.service.gov.uk"
 SEED = 20261031
 UK_COUNTRIES = {
     "england",
@@ -50,38 +45,6 @@ TARGET = {
 SEEDS = ["00519500", "03261722"]
 
 
-class Client:
-    def __init__(self, key: str, cache: Path) -> None:
-        self.auth = "Basic " + base64.b64encode(f"{key}:".encode()).decode()
-        self.cache = cache
-        cache.mkdir(parents=True, exist_ok=True)
-
-    def get(self, path: str) -> Json | None:
-        file = self.cache / (hashlib.sha256(path.encode()).hexdigest() + ".json")
-        if file.exists():
-            data: Json | None = json.loads(file.read_text())
-            return data
-        req = urllib.request.Request(API + path, headers={"Authorization": self.auth})
-        for attempt in range(5):
-            try:
-                with urllib.request.urlopen(req, timeout=30) as resp:
-                    data = json.loads(resp.read())
-                break
-            except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    data = None
-                    break
-                if e.code == 429:
-                    time.sleep(30 * (attempt + 1))
-                    continue
-                raise
-        else:
-            raise RuntimeError(f"gave up on {path}")
-        time.sleep(0.5)
-        file.write_text(json.dumps(data))
-        return data
-
-
 def is_uk(ident: dict[str, str]) -> bool:
     place = " ".join(
         ident.get(k) or "" for k in ("country_registered", "place_registered", "legal_authority")
@@ -99,7 +62,7 @@ def uk_number(ident: dict[str, str]) -> str | None:
     return number if len(number) == 8 else None
 
 
-def resolve(client: Client, number: str, seen: frozenset[str] = frozenset()) -> Json:
+def resolve(client: CompaniesHouse, number: str, seen: frozenset[str] = frozenset()) -> Json:
     """Return the chain above one company as a nested tree."""
     profile = client.get(f"/company/{number}") or {}
     node: Json = {
@@ -190,7 +153,7 @@ def main() -> None:
     ap.add_argument("--cache", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=Path("packages/evals/datasets"))
     args = ap.parse_args()
-    client = Client(os.environ["COMPANIES_HOUSE_API_KEY"], args.cache)
+    client = CompaniesHouse(cache=args.cache)
     rng = random.Random(SEED)
     chosen: dict[str, list[Json]] = {k: [] for k in TARGET}
     seen: set[str] = set()
