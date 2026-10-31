@@ -3,7 +3,8 @@
 [![CI](https://github.com/deavgprime/lineage/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/deavgprime/lineage/actions/workflows/ci.yml)
 [![Licence](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
 
-Lineage drafts due-diligence files for corporate onboarding at a national bank in the UAE. Give it a
+Lineage drafts due-diligence files for corporate onboarding at a bank that operates in the UK and the
+UAE. Give it a
 company name or registration number and it returns a file that says who the company is, who ultimately
 owns it, whether any of those owners is sanctioned or politically exposed, what the news says about
 them, and how risky the customer looks. Every statement links to the record it came from. A compliance
@@ -26,6 +27,19 @@ Lineage does the lookups and the first draft, so the analyst spends their time o
   quoted source does not exist.
 - **Accountable.** Only an analyst can finalise a file. The system never approves anything on its own.
 - **Auditable.** Every tool call, model call and analyst decision goes into a tamper-evident log.
+
+### Two jurisdictions
+
+The same agent serves a UK team and a UAE team. What differs by jurisdiction is configuration, not code:
+which sanctions lists apply, which company registry is searched, and which policy documents the agent
+cites.
+
+| | UK | UAE |
+| --- | --- | --- |
+| Sanctions | UK Sanctions List, with the UN, EU and US lists | UAE Local Terrorist List, with the UN list |
+| Ownership data | Companies House register of people with significant control | No open registry. GLEIF parent links, and documents the analyst supplies |
+| Policy corpus | Money Laundering Regulations 2017, JMLSG and FCA guidance | CBUAE guidance and Decree Law No. 10 of 2025 |
+| Languages in names | Latin, plus Cyrillic and other scripts on UK-listed people | Latin and Arabic |
 
 ### Terms used in this repository
 
@@ -117,7 +131,7 @@ Fargate, Cloud SQL becomes RDS, Secret Manager becomes AWS Secrets Manager, Terr
 Lineage is designed for a regulated bank: least-privilege access, redaction before any external model
 call, a tamper-evident audit log, human sign-off on every file, and a build that scans for secrets and
 unsafe workflows. The design follows or maps to ISO/IEC 27001, SOC 2, NIST SSDF, the OWASP ASVS and
-LLM Top 10, NIST AI RMF, the UAE PDPL and the CBUAE and FATF due diligence rules.
+LLM Top 10, NIST AI RMF, UK GDPR, the UAE PDPL, and the UK, CBUAE and FATF due diligence rules.
 
 ## Stack
 
