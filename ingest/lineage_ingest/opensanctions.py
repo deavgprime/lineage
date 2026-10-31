@@ -1,6 +1,6 @@
 """Load the OpenSanctions sanctions and PEP files for the UK and UAE packs.
 
-    DATABASE_URL=... PYTHONPATH=ingest python -m lineage_ingest.opensanctions \\
+    DATABASE_URL=... python -m lineage_ingest.opensanctions \\
         --sanctions sanctions.csv --peps peps.csv --version <dataset version>
 
 The inputs are `targets.simple.csv` from the `sanctions` and `peps` datasets. A record is written
