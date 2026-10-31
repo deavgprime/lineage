@@ -72,7 +72,8 @@ require. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the branch rules.
 ```bash
 uv sync --frozen
 uv run pytest -m unit
-uv run pytest -m integration
+docker compose up -d --wait db
+DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run pytest -m integration
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages tests
 ```
