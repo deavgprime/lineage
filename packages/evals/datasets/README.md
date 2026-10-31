@@ -2,27 +2,27 @@
 
 ## screening.jsonl
 
-200 labelled names for the sanctions and PEP screening eval. The release gate is recall of at least 98%
-on the 140 cases that should match, with precision reported over all 200.
+200 labelled names for the sanctions and PEP screening eval, split into a UK pack and a UAE pack. The
+release gate is recall of at least 98% on the cases that should match, reported for each pack, with
+precision reported over all 200.
 
-| Category | Cases | Expected | What it checks |
-| --- | --- | --- | --- |
-| `exact_name` | 60 | match | The primary name as listed, 30 people and 30 organisations |
-| `latin_variant` | 30 | match | Another Latin spelling that the same record lists |
-| `arabic_script` | 30 | match | The Arabic spelling that the record lists |
-| `pep` | 20 | match | Politically exposed people |
-| `token_collision` | 30 | no match | A given name from one listed person and a family name from another |
-| `common_name` | 15 | no match | Frequent given and family names in a pairing that is on no list |
-| `invented_company` | 15 | no match | Made-up trading names |
+| Category | UK | UAE | Expected | What it checks |
+| --- | --- | --- | --- | --- |
+| `exact_name` | 25 | 25 | match | The primary name as listed, people and organisations |
+| `latin_variant` | 15 | 15 | match | Another Latin spelling that the same record lists |
+| `native_script` | 15 | 15 | match | The Cyrillic (UK) or Arabic (UAE) spelling that the record lists |
+| `pep` | 15 | 15 | match | Politically exposed people linked to the UK or the UAE |
+| `token_collision` | 30 shared | | no match | A given name from one listed person and a family name from another |
+| `common_name` | 15 shared | | no match | Frequent given and family names in a pairing that is on no list |
+| `invented_company` | 15 shared | | no match | Made-up trading names |
 
-A case has the fields `id`, `query`, `script`, `entity_type`, `category`, `expected`, `expected_list`
-and `expected_entity_ids`. The entity IDs are OpenSanctions IDs, and a match is correct if it returns
-any of them. Negative cases are checked against every name and alias in both source lists after
-normalisation, so none of them is listed under that spelling.
+A case has the fields `id`, `query`, `script`, `entity_type`, `jurisdiction`, `category`, `expected`,
+`expected_list` and `expected_entity_ids`. The entity IDs are OpenSanctions IDs, and a match is correct
+if it returns any of them. Negative cases are checked against every name and alias in both source
+lists after normalisation, so none of them is listed under that spelling.
 
-Positive labels come from the source records, so each label is traceable to an entity ID. Lists used:
-US OFAC SDN, UN Security Council, EU Financial Sanctions Files, UK FCDO, UAE Local Terrorist List, Saudi
-Arabia National Terrorism List and the Qatar sanctions list, plus the OpenSanctions PEP dataset.
+Lists used: the UK Sanctions List for the UK pack, the UAE Local Terrorist List and the UN Security
+Council list for the UAE pack, and the OpenSanctions PEP dataset filtered by country for each.
 `screening.meta.json` records the data version.
 
 ## Licence and attribution

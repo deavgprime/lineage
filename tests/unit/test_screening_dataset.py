@@ -23,20 +23,32 @@ def test_dataset_is_valid(cases: list[screening.ScreeningCase]) -> None:
 def test_meta_describes_the_dataset(cases: list[screening.ScreeningCase]) -> None:
     meta = json.loads((DATASETS / "screening.meta.json").read_text("utf-8"))
     assert meta["cases"] == len(cases)
+    assert meta["jurisdictions"] == {"uk": 70, "uae": 70, "both": 60}
     assert meta["version"]
     assert sum(meta["categories"].values()) == len(cases)
 
 
 @pytest.mark.unit
-def test_recall_set_is_140_cases(cases: list[screening.ScreeningCase]) -> None:
-    assert sum(c.expected == "match" for c in cases) == 140
+@pytest.mark.parametrize("pack", screening.JURISDICTIONS)
+def test_each_pack_has_70_positive_cases(cases: list[screening.ScreeningCase], pack: str) -> None:
+    assert sum(c.expected == "match" and c.jurisdiction == pack for c in cases) == 70
 
 
 @pytest.mark.unit
-def test_arabic_cases_are_written_in_arabic(cases: list[screening.ScreeningCase]) -> None:
-    arabic = [c for c in cases if c.category == "arabic_script"]
-    assert arabic
-    assert all(script_of(c.query) == "arabic" for c in arabic)
+@pytest.mark.parametrize(("pack", "script"), screening.NATIVE_SCRIPT.items())
+def test_native_script_cases_use_the_pack_script(
+    cases: list[screening.ScreeningCase], pack: str, script: str
+) -> None:
+    native = [c for c in cases if c.category == "native_script" and c.jurisdiction == pack]
+    assert native
+    assert all(script_of(c.query) == script for c in native)
+
+
+@pytest.mark.unit
+def test_validation_catches_a_wrong_native_script(cases: list[screening.ScreeningCase]) -> None:
+    case = next(c for c in cases if c.category == "native_script" and c.jurisdiction == "uk")
+    broken = [replace(c, jurisdiction="uae") if c is case else c for c in cases]
+    assert any("native script" in p for p in screening.problems(broken))
 
 
 @pytest.mark.unit
