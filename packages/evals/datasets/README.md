@@ -25,9 +25,31 @@ Lists used: the UK Sanctions List for the UK pack, the UAE Local Terrorist List 
 Council list for the UAE pack, and the OpenSanctions PEP dataset filtered by country for each.
 `screening.meta.json` records the data version.
 
+## ownership.jsonl
+
+30 UK companies with the ownership chain the Companies House register of people with significant
+control showed on the retrieval date in `ownership.meta.json`. The release gate is an exact match on
+at least 90% of chains.
+
+| Category | Cases | Chain |
+| --- | --- | --- |
+| `individual_direct` | 10 | Owned directly by individuals |
+| `two_layers` | 8 | One UK holding company between the company and its individual owners |
+| `three_or_more_layers` | 6 | Two or more UK holding companies |
+| `ends_in_statement` | 3 | Ends at a company that states it has no registrable person, such as a widely held plc |
+| `ends_overseas` | 3 | Ends at a parent registered outside the UK |
+
+Each case holds the whole chain as a tree and its ultimate controllers. Private individuals are stored
+only as links to their register records, never by name, and a test fails if a name appears.
+Companies are stored by number and name. Companies were drawn at random from active private limited
+companies, plus two large retail groups. Cases where the register was incomplete, such as a UK
+controller filed without a registration number, were left out.
+
+Companies House data is published under the Open Government Licence v3.0.
+
 ## Licence and attribution
 
-The data comes from [OpenSanctions](https://www.opensanctions.org/) and is licensed CC BY-NC 4.0, which
+The screening data comes from [OpenSanctions](https://www.opensanctions.org/) and is licensed CC BY-NC 4.0, which
 allows non-commercial use with attribution. Files in this folder are not covered by the Apache-2.0
 licence of the code. Commercial use needs a licence from OpenSanctions.
 
