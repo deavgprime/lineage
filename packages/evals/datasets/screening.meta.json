@@ -4,11 +4,16 @@
   "seed": 20261031,
   "licence": "CC BY-NC 4.0, see README.md in this folder",
   "cases": 200,
+  "jurisdictions": {
+    "uk": 70,
+    "uae": 70,
+    "both": 60
+  },
   "categories": {
-    "exact_name": 60,
+    "exact_name": 50,
     "latin_variant": 30,
-    "arabic_script": 30,
-    "pep": 20,
+    "native_script": 30,
+    "pep": 30,
     "token_collision": 30,
     "common_name": 15,
     "invented_company": 15
