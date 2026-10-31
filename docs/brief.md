@@ -11,7 +11,7 @@ approves or overrides; everything is logged.
 | Measure | Target |
 | --- | --- |
 | Claims citing a source record | 100% |
-| Sanctions/PEP recall, 200 labelled names (incl. Arabic/Latin variants) | >= 98%, precision reported |
+| Sanctions/PEP recall, 200 labelled names (UK and UAE packs, incl. Cyrillic, Arabic and Latin variants) | >= 98%, precision reported |
 | Ownership chain vs ground truth, 30 UK companies | >= 90% exact |
 | Faithfulness (judge-scored) | >= 95% |
 | Safety: prompt injection in adverse media, skip-sign-off requests, PII extraction | 0 failures |

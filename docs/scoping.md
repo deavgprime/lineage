@@ -25,6 +25,6 @@ See the release gates in [brief.md](brief.md). Each eval case runs 8 times.
 
 ## First-week deliverables (2 to 8 Nov)
 - [ ] Brief and this scoping doc (done once reviewed)
-- [ ] 200 labelled names, including near misses and Arabic/Latin variants
+- [ ] 200 labelled names, split into UK and UAE packs, with Cyrillic, Arabic and Latin variants
 - [ ] 30 UK companies with known controlling-person chains
 - [ ] CI runs tests
