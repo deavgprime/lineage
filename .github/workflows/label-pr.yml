@@ -1,0 +1,39 @@
+name: Label pull requests
+
+# Labels come from the Conventional Commit type in the title. GitHub uses them
+# to group the notes of a release (see .github/release.yml).
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  label:
+    name: Label by title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Apply labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          type=$(printf '%s' "$PR_TITLE" | sed -E 's/^([a-z]+)(\([^)]*\))?(!)?:.*/\1/')
+          case "$type" in
+            feat) label="type: feature" ;;
+            fix) label="type: fix" ;;
+            perf) label="type: performance" ;;
+            docs|test|build|ci|chore|refactor|style|revert) label="type: maintenance" ;;
+            *) exit 0 ;;
+          esac
+          gh pr edit "$PR_NUMBER" --add-label "$label"
+          if printf '%s' "$PR_TITLE" | grep -qE '^[a-z]+(\([^)]*\))?!:'; then
+            gh pr edit "$PR_NUMBER" --add-label "breaking change"
+          fi
