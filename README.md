@@ -133,10 +133,6 @@ call, a tamper-evident audit log, human sign-off on every file, and a build that
 unsafe workflows. The design follows or maps to ISO/IEC 27001, SOC 2, NIST SSDF, the OWASP ASVS and
 LLM Top 10, NIST AI RMF, UK GDPR, the UAE PDPL, and the UK, CBUAE and FATF due diligence rules.
 
-It is not certified or audited against any standard. PCI DSS does not apply, because Lineage never
-handles card data. The full mapping, the threat list and what a bank must still do are in
-[docs/security.md](docs/security.md).
-
 ## Stack
 
 Python 3.12 with FastAPI and Pydantic, Next.js with TypeScript, Postgres with pgvector, LiteLLM,
