@@ -89,9 +89,9 @@ sequence of pull requests that each leave `develop` working.
 | `Lint PR title` | The title is a valid Conventional Commit |
 | `Branch policy` | The source branch is allowed for the target branch |
 
-Branches must be up to date with their target before merging. The repository owner can bypass the
-review requirement on a pull request, because a single maintainer cannot approve their own work. The
-checks cannot be bypassed.
+Branches must be up to date with their target before merging. The repository owner is on the bypass
+list for pull requests, because a single maintainer cannot approve their own work. By convention the
+bypass is used only for the review requirement and only after every check has passed.
 
 ## Releases
 
