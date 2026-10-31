@@ -1,0 +1,16 @@
+{
+  "source": "OpenSanctions bulk data, datasets sanctions and peps",
+  "version": "20261031074704-myb",
+  "seed": 20261031,
+  "licence": "CC BY-NC 4.0, see README.md in this folder",
+  "cases": 200,
+  "categories": {
+    "exact_name": 60,
+    "latin_variant": 30,
+    "arabic_script": 30,
+    "pep": 20,
+    "token_collision": 30,
+    "common_name": 15,
+    "invented_company": 15
+  }
+}
