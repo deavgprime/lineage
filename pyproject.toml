@@ -1,7 +1,7 @@
 [project]
 name = "lineage"
 version = "0.0.0"
-description = "Cited due-diligence drafting for corporate onboarding at a national bank in the UAE."
+description = "Cited due-diligence drafting for corporate onboarding at a bank operating in the UK and the UAE."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
@@ -27,9 +27,12 @@ select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
+mypy_path = "packages/evals"
+explicit_package_bases = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["packages/evals"]
 addopts = "-ra --strict-markers --strict-config"
 markers = [
   "unit: fast tests with no network or database",

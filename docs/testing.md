@@ -74,7 +74,7 @@ uv sync --frozen
 uv run pytest -m unit
 uv run pytest -m integration
 uv run ruff check . && uv run ruff format --check .
-uv run mypy tests
+uv run mypy packages tests
 ```
 
 ## Test data

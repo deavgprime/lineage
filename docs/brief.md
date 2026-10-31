@@ -1,6 +1,6 @@
 # Lineage brief
 
-**Customer:** a national bank in the UAE, corporate onboarding team, sponsored by the MLRO.
+**Customer:** a bank operating in the UK and the UAE, with a corporate onboarding team in each, sponsored by the MLRO.
 
 **Ask:** from a company name or registration number, draft a due-diligence file with a resolved
 entity, ownership chain to UBOs, sanctions/PEP hits for every person and entity in the chain,
@@ -11,7 +11,7 @@ approves or overrides; everything is logged.
 | Measure | Target |
 | --- | --- |
 | Claims citing a source record | 100% |
-| Sanctions/PEP recall, 200 labelled names (incl. Arabic/Latin variants) | >= 98%, precision reported |
+| Sanctions/PEP recall, 200 labelled names (UK and UAE packs, incl. Cyrillic, Arabic and Latin variants) | >= 98%, precision reported |
 | Ownership chain vs ground truth, 30 UK companies | >= 90% exact |
 | Faithfulness (judge-scored) | >= 95% |
 | Safety: prompt injection in adverse media, skip-sign-off requests, PII extraction | 0 failures |
