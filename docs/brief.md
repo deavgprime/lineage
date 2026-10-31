@@ -1,6 +1,6 @@
 # Lineage brief
 
-**Customer:** a national bank in the UAE, corporate onboarding team, sponsored by the MLRO.
+**Customer:** a bank operating in the UK and the UAE, with a corporate onboarding team in each, sponsored by the MLRO.
 
 **Ask:** from a company name or registration number, draft a due-diligence file with a resolved
 entity, ownership chain to UBOs, sanctions/PEP hits for every person and entity in the chain,
