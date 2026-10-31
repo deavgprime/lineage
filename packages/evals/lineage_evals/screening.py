@@ -8,16 +8,12 @@ from pathlib import Path
 from lineage_evals.names import normalise, script_of
 
 EXPECTED_SIZE = 200
-CATEGORIES = {
-    "exact_name": 60,
-    "latin_variant": 30,
-    "arabic_script": 30,
-    "pep": 20,
-    "token_collision": 30,
-    "common_name": 15,
-    "invented_company": 15,
-}
-POSITIVE_CATEGORIES = {"exact_name", "latin_variant", "arabic_script", "pep"}
+JURISDICTIONS = ("uk", "uae")
+# Positive cases per jurisdiction pack.
+PACK_CATEGORIES = {"exact_name": 25, "latin_variant": 15, "native_script": 15, "pep": 15}
+# Negative cases, which apply to both packs.
+SHARED_CATEGORIES = {"token_collision": 30, "common_name": 15, "invented_company": 15}
+NATIVE_SCRIPT = {"uk": "cyrillic", "uae": "arabic"}
 LISTS = {"sanctions", "pep"}
 ENTITY_TYPES = {"person", "organization"}
 
@@ -28,6 +24,7 @@ class ScreeningCase:
     query: str
     script: str
     entity_type: str
+    jurisdiction: str
     category: str
     expected: str
     expected_list: str | None
@@ -43,6 +40,7 @@ class ScreeningCase:
             query=str(raw["query"]),
             script=str(raw["script"]),
             entity_type=str(raw["entity_type"]),
+            jurisdiction=str(raw["jurisdiction"]),
             category=str(raw["category"]),
             expected=str(raw["expected"]),
             expected_list=None if expected_list is None else str(expected_list),
@@ -64,18 +62,26 @@ def problems(cases: list[ScreeningCase]) -> list[str]:
     found += [f"duplicate id {i}" for i, n in ids.items() if n > 1]
     queries = Counter(normalise(c.query) for c in cases)
     found += [f"duplicate query {q!r}" for q, n in queries.items() if n > 1]
-    counts = Counter(c.category for c in cases)
-    for category, want in CATEGORIES.items():
-        if counts[category] != want:
-            found.append(f"category {category}: expected {want}, found {counts[category]}")
+    counts = Counter((c.jurisdiction, c.category) for c in cases)
+    for pack in JURISDICTIONS:
+        for category, want in PACK_CATEGORIES.items():
+            if counts[(pack, category)] != want:
+                found.append(
+                    f"{pack} {category}: expected {want}, found {counts[(pack, category)]}"
+                )
+    for category, want in SHARED_CATEGORIES.items():
+        if counts[("both", category)] != want:
+            found.append(f"{category}: expected {want}, found {counts[('both', category)]}")
     for c in cases:
-        if c.category not in CATEGORIES:
-            found.append(f"{c.id}: unknown category {c.category}")
         if c.entity_type not in ENTITY_TYPES:
             found.append(f"{c.id}: unknown entity type {c.entity_type}")
         if c.script != script_of(c.query):
             found.append(f"{c.id}: script {c.script} does not match the query text")
-        positive = c.category in POSITIVE_CATEGORIES
+        if c.category == "native_script" and c.script != NATIVE_SCRIPT.get(c.jurisdiction):
+            found.append(f"{c.id}: native script case is not in the {c.jurisdiction} script")
+        positive = c.category in PACK_CATEGORIES
+        if positive and c.jurisdiction not in JURISDICTIONS:
+            found.append(f"{c.id}: a positive case needs a jurisdiction")
         if positive and (c.expected != "match" or not c.expected_entity_ids):
             found.append(f"{c.id}: a positive case needs expected=match and entity ids")
         if positive and c.expected_list not in LISTS:

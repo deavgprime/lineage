@@ -19,6 +19,7 @@ _ARABIC_MARKS = re.compile(
     + "]"
 )
 _ARABIC_RANGE = re.compile(f"[{_span(0x0600, 0x06FF)}]")
+_CYRILLIC_RANGE = re.compile(f"[{_span(0x0400, 0x04FF)}]")
 # Alef variants become bare alef, alef maksura becomes yeh, teh marbuta becomes heh.
 _ARABIC_LETTERS = str.maketrans(
     {0x0623: 0x0627, 0x0625: 0x0627, 0x0622: 0x0627, 0x0649: 0x064A, 0x0629: 0x0647}
@@ -38,5 +39,9 @@ def normalise(name: str) -> str:
 
 
 def script_of(name: str) -> str:
-    """Return "arabic" if the name has Arabic letters, otherwise "latin"."""
-    return "arabic" if _ARABIC_RANGE.search(name) else "latin"
+    """Return "arabic", "cyrillic" or "latin" by the letters the name uses."""
+    if _ARABIC_RANGE.search(name):
+        return "arabic"
+    if _CYRILLIC_RANGE.search(name):
+        return "cyrillic"
+    return "latin"
