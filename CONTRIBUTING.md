@@ -97,12 +97,24 @@ bypass is used only for the review requirement and only after every check has pa
 
 1. Open a pull request from `develop` (or a `release/x.y.z` branch) into `main`.
 2. Merge it with a merge commit once all checks pass.
-3. Tag the merge commit `vX.Y.Z` and publish a GitHub release with notes grouped by commit type.
-4. Versions follow [Semantic Versioning](https://semver.org/). Before 1.0.0, a breaking change raises
-   the minor version.
+3. Tag the merge commit with an annotated tag and push it:
+
+   ```bash
+   git tag -a v0.2.0 -m "v0.2.0"
+   git push origin v0.2.0
+   ```
+
+4. The `Release` workflow checks that the tag is on `main`, runs the tests and publishes the GitHub
+   release. Its notes are generated from the merged pull requests, grouped by the labels that the
+   `Label pull requests` workflow sets from each title.
+5. Versions follow [Semantic Versioning](https://semver.org/). Before 1.0.0, a breaking change raises
+   the minor version. A tag with a suffix such as `v0.2.0-rc.1` is published as a pre-release.
 
 A hotfix branches from `main`, is merged into `main` through a pull request, tagged as a patch release
 and then merged back into `develop`.
+
+Container images and the Helm chart are published as GitHub packages once the services exist. Each
+release will carry the same version tag on every image.
 
 ## Testing
 

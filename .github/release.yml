@@ -1,0 +1,19 @@
+changelog:
+  exclude:
+    labels:
+      - skip changelog
+    authors:
+      - dependabot
+  categories:
+    - title: Breaking changes
+      labels: [breaking change]
+    - title: Features
+      labels: ["type: feature"]
+    - title: Bug fixes
+      labels: ["type: fix"]
+    - title: Performance
+      labels: ["type: performance"]
+    - title: Maintenance
+      labels: ["type: maintenance"]
+    - title: Other changes
+      labels: ["*"]
