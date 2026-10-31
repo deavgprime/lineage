@@ -32,10 +32,15 @@ legal or compliance team.
 | NIST SP 800-218 (SSDF) | Secure software development | Reviewed pull requests, pinned dependencies, secret and workflow scanning, tests as a merge gate | Partly in place |
 | OWASP ASVS and OWASP Top 10 for LLM applications | Application and model security | Prompt injection, excessive agency, insecure output handling and data leakage each have a control and a test | Planned |
 | NIST AI RMF and ISO/IEC 42001 | Governance of AI systems | Human sign-off, measured release gates, full logging and documented limits | Designed |
-| Model risk management practice (for example SR 11-7) | Validation and monitoring of models | Evals with fixed datasets and eight runs per case, baselines recorded, drift visible in tracing | Designed |
+| Model risk management (PRA SS1/23 in the UK, and SR 11-7 style practice) | Validation and monitoring of models | Evals with fixed datasets and eight runs per case, baselines recorded, drift visible in tracing | Designed |
+| UK GDPR and Data Protection Act 2018 | Personal data protection in the UK | Data minimisation, redaction, purpose limits and retention. Lawful basis and the data protection impact assessment are the bank's | Bank to confirm |
+| UK Money Laundering Regulations 2017, JMLSG guidance, FCA Financial Crime Guide | The UK rules the product serves: due diligence, PEPs, beneficial ownership, record keeping | Ownership tracing from the people with significant control register, cited evidence, retention and audit traceability | Designed |
+| UK Sanctions List (FCDO) | The list a UK bank must screen against | Screened directly, with the UN, EU and US lists | Designed |
+| FCA and PRA operational resilience, SM&CR | Outsourcing, resilience and named accountability | Human sign-off keeps the decision with the accountable person. Resilience testing is the bank's | Bank to confirm |
+| NCSC Cloud Security Principles | UK baseline for cloud services | Mapped to the controls below | Designed |
 | UAE Federal Decree-Law No. 45 of 2021 (PDPL) | Personal data protection in the UAE | Data minimisation, redaction, purpose limits and retention rules. Lawful basis and cross-border transfer rules are the bank's | Bank to confirm |
 | DIFC Data Protection Law 2020, ADGM Data Protection Regulations 2021 | Data protection if the bank is licensed there | Same controls as above | Bank to confirm |
-| CBUAE AML/CFT guidance, FATF Recommendations 10, 11, 24 and 25, Wolfsberg CDD principles | The business rules the product serves: customer due diligence, beneficial ownership, record keeping | Ownership tracing through layers, cited evidence, retention and audit traceability | Designed |
+| CBUAE AML/CFT guidance, Decree Law No. 10 of 2025, FATF Recommendations 10, 11, 24 and 25, Wolfsberg CDD principles | The business rules the product serves: customer due diligence, beneficial ownership, record keeping | Ownership tracing through layers, cited evidence, retention and audit traceability | Designed |
 | UAE Information Assurance Regulation | National security baseline | Mapped to the controls below once the bank states which entities fall in scope | Bank to confirm |
 | GDPR, EU AI Act, DORA | Only if deployed for EU entities | Not assessed | Not assessed |
 
@@ -71,7 +76,8 @@ legal or compliance team.
 
 - TLS everywhere, encryption at rest, customer-managed keys where the bank requires them.
 - Backups with a tested restore.
-- Retention set by the bank, with at least five years assumed from FATF Recommendation 11.
+- Retention set by the bank, with at least five years after the relationship ends, as the UK
+  Money Laundering Regulations 2017 and FATF Recommendation 11 require.
 - Centralised logs and alerts, and an incident process with named owners.
 - Fix targets: critical vulnerabilities in 7 days, high in 30 days.
 
