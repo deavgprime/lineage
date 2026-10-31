@@ -1,0 +1,29 @@
+name: Stale pull requests
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          days-before-issue-stale: -1
+          days-before-pr-stale: 30
+          days-before-pr-close: 7
+          stale-pr-label: stale
+          exempt-draft-pr: true
+          stale-pr-message: >-
+            No activity for 30 days. This pull request will be closed in 7 days
+            unless there is a new comment or push.
+          close-pr-message: >-
+            Closed for inactivity. Reopen it or open a new pull request when you
+            are ready to continue.
