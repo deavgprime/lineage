@@ -18,5 +18,4 @@ The title becomes the commit message when this is squash-merged. -->
 - [ ] The title follows Conventional Commits
 - [ ] Tests added or updated, and a bug fix has a test that failed before the fix
 - [ ] Documentation updated
-- [ ] No secrets, personal data or em-dashes
 - [ ] Breaking changes are marked with `!` and explained

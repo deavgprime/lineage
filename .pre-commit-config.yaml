@@ -31,9 +31,9 @@ repos:
       - id: zizmor
   - repo: local
     hooks:
-      - id: no-em-dash
-        name: no em-dashes
-        entry: scripts/check_no_em_dash.sh
+      - id: text-style
+        name: text style
+        entry: scripts/check_text_style.sh
         language: script
         types: [text]
         exclude: ^LICENSE$

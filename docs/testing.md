@@ -59,7 +59,7 @@ change and goes through the same gates.
 
 | Stage | Checks |
 | --- | --- |
-| Local, before commit | Pre-commit hooks: formatting, lint, commit message format, no em-dashes |
+| Local, before commit | Pre-commit hooks: formatting, lint, commit message format, text style |
 | Pull request into `develop` | Pre-commit, lint, type check, unit and integration tests on Python 3.12 and 3.13, eval harness when relevant |
 | Pull request into `main` | Everything above, plus end to end tests |
 | Nightly | Full eval suite, performance, contract tests against the live APIs |
