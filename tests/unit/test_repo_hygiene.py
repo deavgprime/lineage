@@ -56,11 +56,11 @@ def test_layout_directory_exists(name: str) -> None:
 
 
 @pytest.mark.unit
-def test_no_em_dashes_in_tracked_text() -> None:
+def test_text_uses_only_allowed_punctuation() -> None:
     offenders = [
         str(p.relative_to(ROOT)) for p in tracked_text_files() if EM_DASH in p.read_text("utf-8")
     ]
-    assert not offenders, f"em-dash found in: {offenders}"
+    assert not offenders, f"disallowed punctuation in: {offenders}"
 
 
 @pytest.mark.unit
