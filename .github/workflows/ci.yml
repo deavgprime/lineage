@@ -51,7 +51,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen ruff check .
       - run: uv run --frozen ruff format --check .
-      - run: uv run --frozen mypy packages tests
+      - run: uv run --frozen mypy packages ingest tests
 
   test:
     name: Test (py${{ matrix.python }})

@@ -29,12 +29,12 @@ select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/evals:packages/db"
+mypy_path = "packages/evals:packages/db:ingest"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["packages/evals", "packages/db"]
+pythonpath = ["packages/evals", "packages/db", "ingest"]
 addopts = "-ra --strict-markers --strict-config"
 markers = [
   "unit: fast tests with no network or database",
