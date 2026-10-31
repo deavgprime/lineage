@@ -1,14 +1,21 @@
 # Lineage
 
+[![CI](https://github.com/deavgprime/lineage/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/deavgprime/lineage/actions/workflows/ci.yml)
+[![Licence](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
+
 Due-diligence drafting for corporate onboarding at a national bank in the UAE.
-Given a company name or registration number, Lineage drafts a cited KYC file: resolved entity,
-ownership chain to ultimate beneficial owners, sanctions/PEP hits, adverse media, and a risk
-rating. An analyst approves or overrides it; every step is logged.
+Given a company name or registration number, Lineage drafts a cited KYC file: the resolved entity,
+the ownership chain to ultimate beneficial owners, sanctions and PEP hits, adverse media, and a risk
+rating. An analyst approves or overrides it, and every step is logged.
 
-Stack: Python/FastAPI backend, Next.js console, Postgres (pgvector), deployed on GCP
-(Cloud Run + Cloud SQL, Terraform). Data: OpenSanctions, UK Companies House, GLEIF.
+Status: pre-alpha. The design is settled and the repository is set up. The code is being built in the
+order shown in the [delivery plan](#delivery-plan).
 
-Scope and release gates: [docs/brief.md](docs/brief.md) · [docs/scoping.md](docs/scoping.md) · [docs/decisions.md](docs/decisions.md)
+Stack: Python 3.12 with FastAPI, a Next.js console, Postgres with pgvector, deployed on GCP (Cloud Run
+and Cloud SQL, defined in Terraform). Data comes from OpenSanctions, UK Companies House and GLEIF.
+
+Documents: [brief](docs/brief.md), [scope](docs/scoping.md), [decisions](docs/decisions.md),
+[testing plan](docs/testing.md), [contributing](CONTRIBUTING.md).
 
 ## System architecture
 
@@ -54,3 +61,28 @@ ECS Fargate, Cloud SQL becomes RDS, Secret Manager becomes AWS Secrets Manager, 
 About 12 hours a week from 2 November 2026; live URL on 20 December.
 
 ![Weekly delivery plan](docs/images/7-delivery-plan.png)
+
+## Repository layout
+
+```
+apps/api/          FastAPI service
+apps/console/      Next.js analyst console
+packages/agent/    plan-and-execute core and tools
+packages/evals/    datasets, harness, release gates
+packages/mcp/      MCP server over the same tools
+ingest/            bulk loaders for the three data sources
+infra/terraform/   GCP infrastructure
+infra/helm/        chart for installs on Kubernetes
+docs/              brief, scope, decisions, testing plan
+tests/             repository and cross-package tests
+```
+
+## Contributing
+
+Work happens on short topic branches into `develop`, and `main` holds released code. Commits and pull
+request titles follow Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+Apache-2.0, see [LICENSE](LICENSE). The data sources keep their own terms. OpenSanctions bulk data is
+licensed CC BY-NC.
