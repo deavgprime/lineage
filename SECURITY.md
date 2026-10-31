@@ -14,6 +14,8 @@ Include what you found, how to reproduce it and what you think the impact is. Yo
 within 5 working days. Confirmed issues are fixed on a `hotfix/*` branch and disclosed in the release
 notes once a fix is available.
 
+The controls and standards the project follows are in [docs/security.md](docs/security.md).
+
 ## Scope
 
 In scope: authentication and case access, the audit log, personal data handling and redaction, prompt

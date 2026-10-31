@@ -93,7 +93,7 @@ Model behaviour is measured, not assumed. Five evals run on every pull request, 
 to expose variance: sanctions and PEP recall, ownership chain accuracy, citations and faithfulness,
 safety against prompt injection, and time per file. A change that misses a target is blocked, and prompt
 changes go through the same gate as code. The targets are in the [brief](docs/brief.md), and the way
-the tests are organised is in the [testing plan](docs/testing.md).
+the tests are organised is in the [testing plan](docs/testing.md), [security and compliance](docs/security.md).
 
 ![Pull request to production](docs/images/4-ci-cd.png)
 
@@ -112,6 +112,17 @@ Fargate, Cloud SQL becomes RDS, Secret Manager becomes AWS Secrets Manager, Terr
 
 ![The same deployment on AWS](docs/images/6-deployment-aws.png)
 
+## Security and compliance
+
+Lineage is designed for a regulated bank: least-privilege access, redaction before any external model
+call, a tamper-evident audit log, human sign-off on every file, and a build that scans for secrets and
+unsafe workflows. The design follows or maps to ISO/IEC 27001, SOC 2, NIST SSDF, the OWASP ASVS and
+LLM Top 10, NIST AI RMF, the UAE PDPL and the CBUAE and FATF due diligence rules.
+
+It is not certified or audited against any standard. PCI DSS does not apply, because Lineage never
+handles card data. The full mapping, the threat list and what a bank must still do are in
+[docs/security.md](docs/security.md).
+
 ## Stack
 
 Python 3.12 with FastAPI and Pydantic, Next.js with TypeScript, Postgres with pgvector, LiteLLM,
@@ -121,7 +132,7 @@ Data: OpenSanctions, UK Companies House and GLEIF.
 ## Documents
 
 Read next: [brief](docs/brief.md), [scope](docs/scoping.md), [decisions](docs/decisions.md),
-[testing plan](docs/testing.md).
+[testing plan](docs/testing.md), [security and compliance](docs/security.md).
 
 ## Contributing
 

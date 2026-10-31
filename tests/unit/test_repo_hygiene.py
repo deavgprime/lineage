@@ -15,6 +15,7 @@ REQUIRED_FILES = [
     "docs/scoping.md",
     "docs/decisions.md",
     "docs/testing.md",
+    "docs/security.md",
     ".github/CODEOWNERS",
     ".github/pull_request_template.md",
     ".github/dependabot.yml",
