@@ -6,7 +6,8 @@ Lineage has no stable release yet. Only the latest commit on `main` and `develop
 
 ## Reporting a vulnerability
 
-Use GitHub private vulnerability reporting: open the **Security** tab of this repository and choose
+While the repository is private, tell the owner directly. Once it is public, use GitHub private
+vulnerability reporting: open the **Security** tab of this repository and choose
 **Report a vulnerability**. Please do not open a public issue.
 
 Include what you found, how to reproduce it and what you think the impact is. You will get a reply
