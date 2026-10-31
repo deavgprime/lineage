@@ -5,7 +5,9 @@ description = "Cited due-diligence drafting for corporate onboarding at a bank o
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "psycopg[binary]>=3.2",
+]
 
 [dependency-groups]
 dev = [
@@ -27,12 +29,12 @@ select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/evals"
+mypy_path = "packages/evals:packages/db"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["packages/evals"]
+pythonpath = ["packages/evals", "packages/db"]
 addopts = "-ra --strict-markers --strict-config"
 markers = [
   "unit: fast tests with no network or database",
