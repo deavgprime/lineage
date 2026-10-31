@@ -132,18 +132,15 @@ uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 uv run pytest -m "not eval"
 ```
 
-The hooks check formatting, lint, the commit message format and the writing rules below.
+The hooks check formatting, lint, secrets, workflows and the commit message format.
 
-## Writing rules
+## Writing
 
 These apply to code comments, documentation, commit messages and pull request text.
 
-- Plain, specific sentences. Say what the thing does and why.
-- No em-dashes. Use a full stop, a comma or a colon.
-- No filler or marketing words, for example "robust", "seamless", "leverage" or "cutting-edge".
-- Spell it "arbiter", not "arbitrator".
+- Use plain, specific sentences. Say what the thing does and why.
 - Documentation describes what is true now. Planned work lives in issues and milestones.
-- Do not commit anything you could not explain line by line, whoever or whatever wrote it.
+- Do not commit anything you could not explain line by line.
 
 ## Security
 
