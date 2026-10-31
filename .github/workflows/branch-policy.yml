@@ -1,0 +1,36 @@
+name: Branch policy
+
+# main only takes release/* and hotfix/* branches. develop takes topic branches
+# named <type>/<description>, and dependabot.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check source branch against target
+        env:
+          HEAD: ${{ github.head_ref }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          topic='^(feat|fix|perf|refactor|docs|test|build|ci|chore|revert|style)/[a-z0-9][a-z0-9._-]*$'
+          if [ "$BASE" = "main" ]; then
+            if [[ "$HEAD" =~ ^(release|hotfix)/[a-z0-9][a-z0-9._-]*$ ]] || [ "$HEAD" = "develop" ]; then
+              exit 0
+            fi
+            echo "main accepts only develop, release/* or hotfix/*, got '$HEAD'." >&2
+            exit 1
+          fi
+          if [[ "$HEAD" =~ $topic ]] || [[ "$HEAD" =~ ^(release|hotfix)/ ]] || [[ "$HEAD" =~ ^dependabot/ ]]; then
+            exit 0
+          fi
+          echo "'$HEAD' is not a valid branch name. Use <type>/<description>, see CONTRIBUTING.md." >&2
+          exit 1

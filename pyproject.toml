@@ -1,0 +1,38 @@
+[project]
+name = "lineage"
+version = "0.0.0"
+description = "Cited due-diligence drafting for corporate onboarding at a national bank in the UAE."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "mypy>=1.13",
+  "pytest>=8.3",
+  "ruff>=0.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+markers = [
+  "unit: fast tests with no network or database",
+  "integration: tests that need Postgres or a recorded external API",
+  "eval: model evaluations, run by the eval harness and not by default",
+]

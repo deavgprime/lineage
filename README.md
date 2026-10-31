@@ -1,56 +1,145 @@
 # Lineage
 
-Due-diligence drafting for corporate onboarding at a national bank in the UAE.
-Given a company name or registration number, Lineage drafts a cited KYC file: resolved entity,
-ownership chain to ultimate beneficial owners, sanctions/PEP hits, adverse media, and a risk
-rating. An analyst approves or overrides it; every step is logged.
+[![CI](https://github.com/deavgprime/lineage/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/deavgprime/lineage/actions/workflows/ci.yml)
+[![Licence](https://img.shields.io/badge/licence-Apache--2.0-blue.svg)](LICENSE)
 
-Stack: Python/FastAPI backend, Next.js console, Postgres (pgvector), deployed on GCP
-(Cloud Run + Cloud SQL, Terraform). Data: OpenSanctions, UK Companies House, GLEIF.
+Lineage drafts due-diligence files for corporate onboarding at a national bank in the UAE. Give it a
+company name or registration number and it returns a file that says who the company is, who ultimately
+owns it, whether any of those owners is sanctioned or politically exposed, what the news says about
+them, and how risky the customer looks. Every statement links to the record it came from. A compliance
+analyst reviews the file, approves or changes it, and every step is logged.
 
-Scope and release gates: [docs/brief.md](docs/brief.md) · [docs/scoping.md](docs/scoping.md) · [docs/decisions.md](docs/decisions.md)
+Status: pre-alpha. The design is settled and the code is being built. Progress is tracked in the
+repository milestones.
 
-## System architecture
+## What it is for
 
-Every model call is redacted first; every step is traced and audited. The agent core is the only
-component that calls models, always through redaction.
+Before a bank opens an account for a company, it must find out who really owns that company and whether
+any person or firm in the ownership chain is sanctioned, holds a public position, or is linked to
+crime. Analysts do this by hand across registries, sanctions lists and news sites. One file takes hours,
+and the way each analyst reached a conclusion is hard to check later.
 
-![System architecture](docs/images/1-architecture.png)
+Lineage does the lookups and the first draft, so the analyst spends their time on judgement:
 
-## Agent run
+- **Faster files.** The target is a draft in under two minutes.
+- **Traceable.** Each claim names the record that supports it, and a check rejects any claim whose
+  quoted source does not exist.
+- **Accountable.** Only an analyst can finalise a file. The system never approves anything on its own.
+- **Auditable.** Every tool call, model call and analyst decision goes into a tamper-evident log.
 
-Only an analyst can make a file final; uncited drafts never reach them.
+### Terms used in this repository
+
+| Term | Meaning |
+| --- | --- |
+| KYC | Know your customer: the checks a bank does before and during a relationship |
+| Ultimate beneficial owner (UBO) | The real person who owns or controls a company, however many companies sit in between |
+| Sanctions | Official lists of people and firms a bank must not deal with |
+| PEP | Politically exposed person: someone with a public role, who carries higher risk |
+| Adverse media | News that links a person or company to crime or misconduct |
+| MLRO | Money laundering reporting officer, the senior compliance role at a bank |
+
+Lineage is a drafting tool for the analyst. It is not a decision system, and it uses only public data.
+
+## How a case works
+
+1. An analyst opens a case with a company name or number.
+2. The agent plans the checks for that case.
+3. It runs three tools: sanctions and PEP screening, the company registry, and the LEI lookup for
+   parent companies.
+4. It drafts the file. Each claim carries a claim, a source ID and a quote.
+5. A check confirms every quote exists in the record it cites. Drafts that fail go back for another
+   attempt, and the analyst never sees them.
+6. The agent rates the risk and gives reasons.
+7. The analyst approves the file or edits it and records why.
 
 ![Agent run: request to approved file](docs/images/2-agent-run.png)
 
-## Security and audit
+## Architecture
 
-Three controls a bank will test: access, data egress and tamper evidence.
+The system has one agent core with two entrances: the analyst console and an MCP server, which lets
+other AI agents use the same tools. Both entrances pass through the same access checks and write to
+the same audit log.
+
+![System architecture](docs/images/1-architecture.png)
+
+- **Analyst console** (Next.js): the case queue, file review, sign-off and a view of how the agent
+  reached its draft.
+- **API** (FastAPI): signs analysts in through OIDC and enforces which cases each analyst may see.
+- **MCP server:** exposes the same tools to other agents, with the same logging.
+- **Agent core:** a plan-and-execute loop written by hand, so each step can be tested and audited. It is
+  the only component that calls a language model.
+- **Tools:** screening against OpenSanctions, company officers and controlling persons from UK
+  Companies House, parent companies from GLEIF, and search over KYC policy documents.
+- **PII redaction and LLM gateway:** personal data is removed before any request leaves for an
+  external model. The gateway lets the bank choose Cohere, Claude, OpenAI or a model it hosts itself.
+- **Postgres:** cases, the vector index for policy search, and the audit log. One database to secure,
+  back up and audit.
+- **Ingestion jobs:** load the three data sources into Postgres. Tools read these local copies, which
+  keeps screening fast and evaluation inputs repeatable.
+- **Tracing:** OpenTelemetry from every component, viewed in Langfuse and Grafana.
+
+### Security and audit
+
+Three controls decide whether a bank will accept the system. Access: analysts see only the cases
+assigned to them, enforced in the database as well as the API. Data leaving the bank: personal data is
+redacted before any external model call, and a self-hosted model keeps everything inside. Tamper
+evidence: each audit row stores a hash of the row before it, so editing history breaks the chain.
 
 ![Access control, data egress and tamper evidence](docs/images/3-security-audit.png)
 
-## Evals and CI/CD
+### Evaluation and releases
 
-A release that misses any eval gate never reaches production. Prompt changes go through the same gate as code.
+Model behaviour is measured, not assumed. Five evals run on every pull request, each case eight times
+to expose variance: sanctions and PEP recall, ownership chain accuracy, citations and faithfulness,
+safety against prompt injection, and time per file. A change that misses a target is blocked, and prompt
+changes go through the same gate as code. The targets are in the [brief](docs/brief.md), and the way
+the tests are organised is in the [testing plan](docs/testing.md), [security and compliance](docs/security.md).
 
 ![Pull request to production](docs/images/4-ci-cd.png)
 
-## Deployment
+### Deployment
 
-The demo runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL, Secret Manager, all defined in
-Terraform. The same container images run as an in-house install for a bank; only the values file changes.
+The demo runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
+Terraform. The same container images install into a bank's own Kubernetes cluster with a Helm chart,
+where the bank supplies its own sign-in, database and model choice.
 
 ![Cloud demo on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
 
-### AWS equivalent
+#### AWS equivalent
 
-Kept for reference, since a customer may run on AWS. The mapping is one to one: Cloud Run becomes
-ECS Fargate, Cloud SQL becomes RDS, Secret Manager becomes AWS Secrets Manager, Terraform becomes CDK.
+Kept for reference, since a customer may run on AWS. The mapping is one to one: Cloud Run becomes ECS
+Fargate, Cloud SQL becomes RDS, Secret Manager becomes AWS Secrets Manager, Terraform becomes CDK.
 
 ![The same deployment on AWS](docs/images/6-deployment-aws.png)
 
-## Delivery plan
+## Security and compliance
 
-About 12 hours a week from 2 November 2026; live URL on 20 December.
+Lineage is designed for a regulated bank: least-privilege access, redaction before any external model
+call, a tamper-evident audit log, human sign-off on every file, and a build that scans for secrets and
+unsafe workflows. The design follows or maps to ISO/IEC 27001, SOC 2, NIST SSDF, the OWASP ASVS and
+LLM Top 10, NIST AI RMF, the UAE PDPL and the CBUAE and FATF due diligence rules.
 
-![Weekly delivery plan](docs/images/7-delivery-plan.png)
+It is not certified or audited against any standard. PCI DSS does not apply, because Lineage never
+handles card data. The full mapping, the threat list and what a bank must still do are in
+[docs/security.md](docs/security.md).
+
+## Stack
+
+Python 3.12 with FastAPI and Pydantic, Next.js with TypeScript, Postgres with pgvector, LiteLLM,
+Presidio, Keycloak, OpenTelemetry, Langfuse, Grafana, Terraform, Helm and GitHub Actions.
+Data: OpenSanctions, UK Companies House and GLEIF.
+
+## Documents
+
+Read next: [brief](docs/brief.md), [scope](docs/scoping.md), [decisions](docs/decisions.md),
+[testing plan](docs/testing.md), [security and compliance](docs/security.md).
+
+## Contributing
+
+Work happens on short topic branches into `develop`, and `main` holds released code. Commits and pull
+request titles follow Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+Apache-2.0, see [LICENSE](LICENSE). The data sources keep their own terms. OpenSanctions bulk data is
+licensed CC BY-NC.
