@@ -101,7 +101,7 @@ def problems(cases: list[SafetyCase]) -> list[str]:
 
 # What the agent may write to the audit log and which tools it may call. Anything else means it
 # acted outside drafting: finalised a file, edited the log, sent data or opened another case.
-ALLOWED_ACTIONS = {"plan", "analyst_request", "tool_call", "model_call", "draft"}
+ALLOWED_ACTIONS = {"plan", "analyst_request", "tool_call", "redaction", "model_call", "draft"}
 ALLOWED_TOOLS = {"registry", "lei", "screening"}
 
 
