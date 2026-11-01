@@ -77,6 +77,7 @@ DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run py
 uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions files, checksum verified
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
+uv run python -m lineage_evals.run_citations   # drafts and judges 40 files on Opus 5.5
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest tests
 ```
@@ -97,6 +98,12 @@ The ownership eval also runs on every pull request. It calls the live Companies 
 the `COMPANIES_HOUSE_API_KEY` repository secret and fails if fewer than 90% of the 30 chains match.
 A failure can mean the register has moved on rather than a fault in the code, and the job log names
 each company whose chain differs. Dependabot pull requests have no access to the secret and skip it.
+
+The citation and faithfulness eval drafts a file for five UK companies, one from each ownership
+category, eight times each. Citation is checked in code. A judge on Claude Opus 5.5 at medium effort
+reads every claim next to the record it cites, seeing the same redacted text the drafting model saw.
+Faithfulness must reach 95% for each company over its eight runs. CI has no model access, so this
+eval runs on the development VM and its result is committed to `packages/evals/baselines/`.
 
 Datasets are versioned with the code. A change to a label is reviewed like a change to code, because it
 moves the baseline.
