@@ -80,6 +80,8 @@ class AuditRow(BaseModel):
     payload: dict[str, Any]
     prev_hash: str
     row_hash: str
+    # Whether the row's own hash and its link back to the chain both check out.
+    verified: bool
 
 
 SUMMARY = """
@@ -251,8 +253,9 @@ def audit_trail(case_id: uuid.UUID, user: CurrentUser, request: Request) -> list
     with as_user(request.app.state.db, user) as conn:
         _visible(conn, case_id)
         rows = conn.execute(
-            "SELECT seq, at, actor, action, payload, prev_hash, row_hash FROM audit_log "
-            "WHERE case_id = %s ORDER BY seq",
+            "SELECT a.seq, a.at, a.actor, a.action, a.payload, a.prev_hash, a.row_hash, "
+            "v.hash_ok AND v.link_ok FROM audit_log a JOIN audit_verify(%s) v USING (seq) "
+            "ORDER BY a.seq",
             (case_id,),
         )
         keys = AuditRow.model_fields.keys()

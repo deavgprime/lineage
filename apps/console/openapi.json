@@ -32,6 +32,10 @@
           "seq": {
             "title": "Seq",
             "type": "integer"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
           }
         },
         "required": [
@@ -41,7 +45,8 @@
           "action",
           "payload",
           "prev_hash",
-          "row_hash"
+          "row_hash",
+          "verified"
         ],
         "title": "AuditRow",
         "type": "object"

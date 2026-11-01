@@ -120,3 +120,27 @@ def test_a_failed_run_is_recorded() -> None:
     assert body["status"] == "failed"
     assert body["draft"] is None
     assert [r["action"] for r in rows] == ["case_opened", "plan", "failed"]
+
+
+def test_every_audit_row_verifies(client: TestClient, case_id: str) -> None:
+    rows = client.get(f"/cases/{case_id}/audit", headers=ANALYST_1).json()
+    assert rows and all(r["verified"] for r in rows)
+
+
+def test_an_edited_audit_row_fails_verification(client: TestClient, case_id: str) -> None:
+    import psycopg
+
+    # Edit one row behind the append-only trigger, check it, then roll the edit back.
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        conn.execute("ALTER TABLE audit_log DISABLE TRIGGER audit_log_append_only")
+        conn.execute(
+            "UPDATE audit_log SET payload = '{\"tampered\": true}' WHERE seq = "
+            "(SELECT min(seq) FROM audit_log WHERE case_id = %s)",
+            (uuid.UUID(case_id),),
+        )
+        results = conn.execute(
+            "SELECT hash_ok, link_ok FROM audit_verify(%s)", (uuid.UUID(case_id),)
+        ).fetchall()
+        conn.rollback()
+    assert results[0] == (False, True)
+    assert all(r == (True, True) for r in results[1:])
