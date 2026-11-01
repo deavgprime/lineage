@@ -1,8 +1,9 @@
 """Replace known people with placeholders before text reaches an external model.
 
 This is the first pass from decision 0001: the agent knows the people in a case from its tools, so
-each gets a stable placeholder such as [PERSON_1] for every spelling it has. The Presidio pass for
-addresses and identifiers is added in phase 5.
+each gets a stable placeholder such as [PERSON_1] for every spelling it has. Identifiers the case
+already holds, such as a passport number from an onboarding document, get [ID_1] and are never put
+back. The Presidio pass for identifiers the agent does not know about is added in phase 5.
 """
 
 import re
@@ -21,6 +22,7 @@ class Redactor:
         self._tags: dict[str, str] = {}  # normalised spelling -> placeholder
         self._spellings: dict[str, str] = {}  # spelling as written -> placeholder
         self._names: dict[str, str] = {}  # placeholder -> name shown to the analyst
+        self._ids: set[str] = set()  # placeholders for identifiers, never restored
 
     def add_person(self, *spellings: str) -> str:
         """Register every spelling of one person and return their placeholder."""
@@ -33,6 +35,14 @@ class Redactor:
         for spelling in usable:
             self._tags[normalise(spelling)] = tag
             self._spellings[spelling] = tag
+        return tag
+
+    def add_identifier(self, value: str) -> str:
+        """Register an identifier such as a passport number or address. Its placeholder is never
+        restored, so the value cannot reach the drafted file either."""
+        tag = self._spellings.get(value) or f"[ID_{len(self._ids) + 1}]"
+        self._spellings[value] = tag
+        self._ids.add(tag)
         return tag
 
     def redact(self, text: str) -> str:
