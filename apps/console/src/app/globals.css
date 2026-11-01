@@ -52,3 +52,17 @@ table.queue th { color: var(--muted); font-weight: 500; }
 .rating.low { color: var(--low); }
 .rating.medium { color: var(--medium); }
 .rating.high { color: var(--high); }
+.file h2 { font-size: 16px; margin: 0 0 8px; }
+.file section.panel { margin-bottom: 12px; }
+.columns { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.source { position: sticky; top: 16px; }
+.record { white-space: pre-wrap; }
+mark { background: #fff1b8; padding: 0 2px; }
+.mono { font-family: ui-monospace, monospace; font-size: 13px; }
+ul.claims { margin: 0; padding-left: 18px; }
+ul.claims li { margin: 4px 0; }
+ul.claims li.active { background: #eef3f8; }
+a.cite { font-size: 13px; color: var(--accent); }
+.flags { border-color: var(--high); }
+.alerts { border-color: var(--medium); }
+@media (max-width: 800px) { .columns { grid-template-columns: 1fr; } .source { position: static; } }

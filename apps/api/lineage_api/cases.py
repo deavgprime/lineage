@@ -90,6 +90,18 @@ def _audit_row(conn: Any, case_id: uuid.UUID, actor: str, action: str, payload: 
     )
 
 
+def subject_of(result: Result, number: str) -> str:
+    """The company's own name from its register record. Parents in the chain have records too, so
+    match on the case's number. Falls back to the LEI name, then to the number itself."""
+    for record in result.evidence:
+        if record["source_id"] == f"companies-house:company:{number}":
+            return record["text"].removeprefix("Company ").split(", number")[0]
+    for record in result.evidence:
+        if record["source_id"].startswith("gleif:") and record["source_id"].count(":") == 1:
+            return record["text"].split("Legal name: ", 1)[-1].split(". Registered", 1)[0]
+    return number
+
+
 def run_case(
     pool: Any, runner: Runner, user: User, case_id: uuid.UUID, number: str, pack: str
 ) -> None:
@@ -111,11 +123,7 @@ def run_case(
             )
         return
     with as_user(pool, user) as conn:
-        subject = number
-        for record in result.evidence:
-            if record["source_id"].startswith("companies-house:company:"):
-                subject = record["text"].removeprefix("Company ").split(", number")[0]
-                break
+        subject = subject_of(result, number)
         conn.execute(
             "INSERT INTO drafts (case_id, draft, evidence, alerts, minimum_rating, attempts, "
             "citation_failures) VALUES (%s, %s, %s, %s, %s, %s, %s)",
