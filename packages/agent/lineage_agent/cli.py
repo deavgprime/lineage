@@ -57,6 +57,7 @@ def draft(company_number: str, pack: str) -> dict[str, Any]:
         )
         result = agent.run(company_number, pack)
         out = asdict(result)
+        del out["redacted_evidence"], out["redacted_draft"]
         out["draft"] = result.draft.model_dump() if result.draft else None
         out["case_id"] = str(case_id)
         out["status"] = "draft"

@@ -208,3 +208,26 @@ def test_a_rating_below_the_floor_is_sent_back() -> None:
     assert result.minimum_rating == "high"
     assert any("below the minimum high" in f for f in result.citation_failures)
     assert "below the minimum high" in model.prompts[-1]
+
+
+@pytest.mark.unit
+def test_rating_rules_are_citable_evidence(run: tuple[Any, Model, list[str]]) -> None:
+    result, model, _ = run
+    assert "policy:rating" in result.evidence_ids
+    assert "Minimum rating for this case: medium." in model.prompts[0]
+
+
+@pytest.mark.unit
+def test_an_evidence_id_cannot_be_reused() -> None:
+    from lineage_agent.evidence import EvidenceStore
+
+    store = EvidenceStore()
+    store.add("screening:x", "first", "one")
+    with pytest.raises(ValueError, match="already used"):
+        store.add("screening:x", "second", "two")
+
+
+@pytest.mark.unit
+def test_screening_summary_counts_the_whole_file(run: tuple[Any, Model, list[str]]) -> None:
+    _, model, _ = run
+    assert "Strong candidates: 1. Weak candidates: 0." in model.prompts[0]

@@ -15,6 +15,8 @@ class EvidenceStore:
         self._items: dict[str, Evidence] = {}
 
     def add(self, source_id: str, title: str, text: str) -> None:
+        if source_id in self._items:
+            raise ValueError(f"evidence id {source_id!r} is already used")
         self._items[source_id] = Evidence(source_id, title, text)
 
     def get(self, source_id: str) -> Evidence | None:
