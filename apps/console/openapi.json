@@ -148,8 +148,7 @@
           },
           "sign_offs": {
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/SignOffRecord"
             },
             "title": "Sign Offs",
             "type": "array"
@@ -380,6 +379,78 @@
           "rating"
         ],
         "title": "SignOff",
+        "type": "object"
+      },
+      "SignOffRecord": {
+        "properties": {
+          "alert_notes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Alert Notes",
+            "type": "object"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "drafted_rating": {
+            "title": "Drafted Rating",
+            "type": "string"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "role": {
+            "enum": [
+              "analyst",
+              "mlro"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "signer": {
+            "title": "Signer",
+            "type": "string"
+          },
+          "signer_name": {
+            "title": "Signer Name",
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage",
+          "signer",
+          "signer_name",
+          "role",
+          "at",
+          "drafted_rating",
+          "rating",
+          "reason",
+          "alert_notes"
+        ],
+        "title": "SignOffRecord",
         "type": "object"
       },
       "ValidationError": {

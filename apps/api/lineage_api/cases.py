@@ -54,7 +54,22 @@ class CaseFile(CaseSummary):
     minimum_rating: str | None
     attempts: int | None
     citation_failures: list[str]
-    sign_offs: list[dict[str, Any]]
+    sign_offs: list["SignOffRecord"]
+
+
+class SignOffRecord(BaseModel):
+    stage: Literal["first", "second"]
+    signer: str
+    signer_name: str
+    role: Literal["analyst", "mlro"]
+    at: datetime
+    drafted_rating: str
+    rating: str
+    reason: str | None
+    alert_notes: dict[str, str]
+
+
+CaseFile.model_rebuild()
 
 
 class AuditRow(BaseModel):
@@ -210,12 +225,14 @@ def case_file(case_id: uuid.UUID, user: CurrentUser, request: Request) -> CaseFi
             (case_id,),
         ).fetchone()
         signed = conn.execute(
-            "SELECT stage, signer, signer_role, at, drafted_rating, rating, reason, alert_notes "
+            "SELECT stage, signer, coalesce(signer_name, signer), signer_role, at, drafted_rating, "
+            "rating, reason, alert_notes "
             "FROM sign_offs WHERE case_id = %s ORDER BY id",
             (case_id,),
         )
-        keys = ("stage", "signer", "role", "at", "drafted_rating", "rating", "reason", "alerts")
-        sign_offs = [dict(zip(keys, r, strict=True)) for r in signed]
+        sign_offs = [
+            SignOffRecord(**dict(zip(SignOffRecord.model_fields, r, strict=True))) for r in signed
+        ]
     draft, evidence, alerts, floor, attempts, failures = row or (None, [], [], None, None, [])
     return CaseFile(
         **summary.model_dump(),

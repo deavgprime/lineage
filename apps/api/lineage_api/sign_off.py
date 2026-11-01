@@ -78,13 +78,14 @@ def sign_off(case_id: uuid.UUID, body: SignOff, user: CurrentUser, request: Requ
             )
 
         conn.execute(
-            "INSERT INTO sign_offs (case_id, draft_id, signer, signer_role, stage, "
+            "INSERT INTO sign_offs (case_id, draft_id, signer, signer_name, signer_role, stage, "
             "drafted_rating, rating, reason, alert_notes) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 case_id,
                 draft_id,
                 user.id,
+                user.username,
                 user.role,
                 stage,
                 basis,

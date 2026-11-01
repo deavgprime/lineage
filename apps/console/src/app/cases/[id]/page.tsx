@@ -6,6 +6,7 @@ import { statusLabel } from "@/lib/format";
 import { locate } from "@/lib/quote";
 
 import { Header } from "../../header";
+import { SignOffForm } from "./sign-off-form";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +34,20 @@ const SECTIONS: [keyof Draft, string][] = [
 export default async function CasePage({ params, searchParams }: Props) {
   const { id } = await params;
   const { cite } = await searchParams;
-  const { data: file } = await (await api(`/cases/${id}`)).GET("/cases/{case_id}", {
-    params: { path: { case_id: id } },
-  });
-  if (!file) notFound();
+  const client = await api(`/cases/${id}`);
+  const [{ data: file }, { data: me }] = await Promise.all([
+    client.GET("/cases/{case_id}", { params: { path: { case_id: id } } }),
+    client.GET("/me"),
+  ]);
+  if (!file || !me) notFound();
+  // Which sign-off, if any, this user can give now. The API checks the same rules again.
+  const first = file.sign_offs.find((s) => s.stage === "first");
+  const stage =
+    file.status === "draft" && (me.role === "mlro" || (me.role === "analyst" && file.assigned_to === me.id))
+      ? "first"
+      : file.status === "awaiting_mlro" && me.role === "mlro" && first?.signer !== me.id
+        ? "second"
+        : null;
   const draft = file.draft as Draft | null;
   const evidence = new Map(file.evidence.map((e) => [e.source_id ?? "", e]));
   // The cited claim, as "section.index", whose quote is shown in its record.
@@ -96,6 +107,34 @@ export default async function CasePage({ params, searchParams }: Props) {
                     ))}
                   </ul>
                 </section>
+              )}
+
+              {file.sign_offs.length > 0 && (
+                <section className="panel">
+                  <h2>Sign-offs</h2>
+                  <ul className="sign-offs">
+                    {file.sign_offs.map((s) => (
+                      <li key={s.stage}>
+                        <strong>{s.stage === "first" ? "First" : "Second"}</strong>: {s.signer_name} ({s.role}),{" "}
+                        {new Date(s.at).toLocaleString("en-GB", { timeZone: "UTC" })} UTC. Rated {s.rating}
+                        {s.rating !== s.drafted_rating ? `, changed from ${s.drafted_rating}` : ""}.
+                        {s.reason && <span className="muted"> {s.reason}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                  {file.status === "awaiting_mlro" && !stage && (
+                    <p className="muted">Waiting for a second sign-off by a different MLRO.</p>
+                  )}
+                </section>
+              )}
+
+              {stage && draft && (
+                <SignOffForm
+                  caseId={id}
+                  stage={stage}
+                  basis={stage === "first" ? draft.risk_rating : (first?.rating ?? draft.risk_rating)}
+                  alerts={file.alerts}
+                />
               )}
 
               {SECTIONS.map(([key, title]) => {

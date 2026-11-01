@@ -66,3 +66,8 @@ a.cite { font-size: 13px; color: var(--accent); }
 .flags { border-color: var(--high); }
 .alerts { border-color: var(--medium); }
 @media (max-width: 800px) { .columns { grid-template-columns: 1fr; } .source { position: static; } }
+.sign-off { display: flex; flex-direction: column; gap: 10px; border-color: var(--accent); }
+.sign-off label { display: flex; flex-direction: column; gap: 4px; }
+.sign-off fieldset { border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
+textarea { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; }
+ul.sign-offs { margin: 0; padding-left: 18px; }
