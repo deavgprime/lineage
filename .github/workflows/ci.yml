@@ -236,6 +236,52 @@ jobs:
       - run: npm run -s build
       - run: npm audit --omit=dev --audit-level=high
 
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OIDC_ISSUER: http://localhost:8080/realms/lineage
+      OIDC_CLIENT_ID: lineage-console
+      APP_URL: http://localhost:3000
+      LINEAGE_API_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The API drafts from fixtures here, so the run needs no model or register access.
+      - run: docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait db keycloak api
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/console/package-lock.json
+      - working-directory: apps/console
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npm run -s build
+      - name: Start the console
+        working-directory: apps/console
+        run: |
+          SESSION_SECRET="$(openssl rand -base64 32)" PORT=3000 HOSTNAME=127.0.0.1 \
+            nohup node .next/standalone/server.js > console.log 2>&1 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:3000/auth/login && exit 0; sleep 1; done
+          cat console.log; exit 1
+      - working-directory: apps/console
+        run: npm run -s e2e
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            apps/console/playwright-report
+            apps/console/test-results
+            apps/console/console.log
+          retention-days: 7
+      - if: failure()
+        run: docker compose logs api keycloak | tail -200
+
   # Posts the eval scores next to the base branch's baselines as one comment
   # that is updated on every run. It reports and does not gate.
   eval-report:
@@ -289,7 +335,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security, console]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security, console, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
