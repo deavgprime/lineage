@@ -9,37 +9,17 @@ exists.
 """
 
 import argparse
-import base64
 import datetime as dt
-import hashlib
 import json
-import os
 import random
-import time
-import urllib.error
 import urllib.parse
-import urllib.request
 from collections import Counter
 from pathlib import Path
-from typing import Any
 
-# Companies House responses are untyped JSON.
-Json = dict[str, Any]
+from lineage_agent.tools.registry import Json, depth, resolve, ultimate
+from lineage_ingest.companies_house import CompaniesHouse
 
-API = "https://api.company-information.service.gov.uk"
 SEED = 20261031
-UK_COUNTRIES = {
-    "england",
-    "wales",
-    "scotland",
-    "northern ireland",
-    "united kingdom",
-    "england and wales",
-    "england & wales",
-    "uk",
-    "great britain",
-}
-MAX_DEPTH = 8
 TARGET = {
     "individual_direct": 10,
     "two_layers": 8,
@@ -48,122 +28,6 @@ TARGET = {
     "ends_overseas": 3,
 }
 SEEDS = ["00519500", "03261722"]
-
-
-class Client:
-    def __init__(self, key: str, cache: Path) -> None:
-        self.auth = "Basic " + base64.b64encode(f"{key}:".encode()).decode()
-        self.cache = cache
-        cache.mkdir(parents=True, exist_ok=True)
-
-    def get(self, path: str) -> Json | None:
-        file = self.cache / (hashlib.sha256(path.encode()).hexdigest() + ".json")
-        if file.exists():
-            data: Json | None = json.loads(file.read_text())
-            return data
-        req = urllib.request.Request(API + path, headers={"Authorization": self.auth})
-        for attempt in range(5):
-            try:
-                with urllib.request.urlopen(req, timeout=30) as resp:
-                    data = json.loads(resp.read())
-                break
-            except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    data = None
-                    break
-                if e.code == 429:
-                    time.sleep(30 * (attempt + 1))
-                    continue
-                raise
-        else:
-            raise RuntimeError(f"gave up on {path}")
-        time.sleep(0.5)
-        file.write_text(json.dumps(data))
-        return data
-
-
-def is_uk(ident: dict[str, str]) -> bool:
-    place = " ".join(
-        ident.get(k) or "" for k in ("country_registered", "place_registered", "legal_authority")
-    ).lower()
-    return "companies act" in place or any(c in place for c in UK_COUNTRIES)
-
-
-def uk_number(ident: dict[str, str]) -> str | None:
-    country = (ident.get("country_registered") or ident.get("place_registered") or "").lower()
-    number = (ident.get("registration_number") or "").strip().upper().replace(" ", "")
-    if not number or not any(c in country for c in UK_COUNTRIES):
-        return None
-    if number.isdigit():
-        number = number.zfill(8)
-    return number if len(number) == 8 else None
-
-
-def resolve(client: Client, number: str, seen: frozenset[str] = frozenset()) -> Json:
-    """Return the chain above one company as a nested tree."""
-    profile = client.get(f"/company/{number}") or {}
-    node: Json = {
-        "company_number": number,
-        "company_name": profile.get("company_name"),
-        "controllers": [],
-    }
-    if number in seen or len(seen) >= MAX_DEPTH:
-        node["stop"] = "loop_or_depth"
-        return node
-    pscs = client.get(f"/company/{number}/persons-with-significant-control?items_per_page=100")
-    controllers: list[Json] = []
-    for item in (pscs or {}).get("items", []):
-        if item.get("ceased_on"):
-            continue
-        kind = item.get("kind", "")
-        if kind.startswith("individual"):
-            # Private individuals are kept as their register record, never by name.
-            controllers.append({"type": "individual", "psc": item["links"]["self"]})
-        elif kind.startswith("corporate-entity"):
-            ident = item.get("identification") or {}
-            child = uk_number(ident)
-            if child:
-                controllers.append(
-                    {"type": "uk_company", **resolve(client, child, seen | {number})}
-                )
-            elif is_uk(ident):
-                # A UK company filed without a usable registration number.
-                controllers.append({"type": "unidentified_uk_company", "name": item.get("name")})
-            else:
-                controllers.append({"type": "overseas_company", "name": item.get("name")})
-        elif kind.startswith("legal-person"):
-            controllers.append({"type": "legal_person", "name": item.get("name")})
-        elif kind.startswith("super-secure"):
-            controllers.append({"type": "protected"})
-    if not controllers:
-        statements = (
-            client.get(f"/company/{number}/persons-with-significant-control-statements") or {}
-        )
-        active = [s for s in statements.get("items", []) if not s.get("ceased_on")]
-        node["stop"] = "statement" if active else "none_filed"
-    node["controllers"] = controllers
-    return node
-
-
-def depth(node: Json) -> int:
-    kids = [c for c in node["controllers"] if c["type"] == "uk_company"]
-    return 1 + max((depth(k) for k in kids), default=0)
-
-
-def ultimate(node: Json) -> list[Json]:
-    found: list[Json] = []
-    for c in node["controllers"]:
-        if c["type"] == "uk_company":
-            found += ultimate(c) or [
-                {"type": "uk_company_without_controllers", "company_number": c["company_number"]}
-            ]
-        else:
-            found.append({k: v for k, v in c.items() if k in ("type", "name", "psc")})
-    unique: list[Json] = []
-    for f in found:
-        if f not in unique:
-            unique.append(f)
-    return unique
 
 
 def classify(node: Json) -> str | None:
@@ -190,7 +54,7 @@ def main() -> None:
     ap.add_argument("--cache", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=Path("packages/evals/datasets"))
     args = ap.parse_args()
-    client = Client(os.environ["COMPANIES_HOUSE_API_KEY"], args.cache)
+    client = CompaniesHouse(cache=args.cache)
     rng = random.Random(SEED)
     chosen: dict[str, list[Json]] = {k: [] for k in TARGET}
     seen: set[str] = set()
