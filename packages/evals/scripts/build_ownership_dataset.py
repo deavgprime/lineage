@@ -55,7 +55,8 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=Path("packages/evals/datasets"))
     args = ap.parse_args()
     client = CompaniesHouse(cache=args.cache)
-    rng = random.Random(SEED)
+    # Seeded so the dataset rebuilds the same way. Not used for anything secret.
+    rng = random.Random(SEED)  # noqa: S311
     chosen: dict[str, list[Json]] = {k: [] for k in TARGET}
     seen: set[str] = set()
 

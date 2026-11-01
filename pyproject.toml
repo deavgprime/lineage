@@ -44,7 +44,11 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+select = ["B", "E", "F", "I", "RUF", "S", "SIM", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert, use fixed test secrets and build SQL from fixed table names.
+"tests/**" = ["S101", "S105", "S106", "S603", "S607", "S608"]
 
 [tool.mypy]
 strict = true

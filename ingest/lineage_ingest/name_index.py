@@ -12,7 +12,8 @@ def rebuild(conn: psycopg.Connection[tuple[object, ...]]) -> int:
     ).fetchall()
     names: list[tuple[str, str, str, str, str, list[str]]] = []
     for record_id, record in rows:
-        assert isinstance(record, dict)
+        if not isinstance(record, dict):
+            raise TypeError(f"{record_id}: record is not an object")
         seen: set[str] = set()
         for name in [record["name"], *record["aliases"]]:
             if name in seen or not normalise(name):

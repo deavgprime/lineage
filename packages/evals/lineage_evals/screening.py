@@ -35,7 +35,8 @@ class ScreeningCase:
     @classmethod
     def from_json(cls, raw: dict[str, object]) -> "ScreeningCase":
         ids = raw["expected_entity_ids"]
-        assert isinstance(ids, list)
+        if not isinstance(ids, list):
+            raise TypeError("expected_entity_ids must be a list")
         expected_list = raw["expected_list"]
         return cls(
             id=str(raw["id"]),

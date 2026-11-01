@@ -108,7 +108,8 @@ def main() -> None:
     ap.add_argument("--version", required=True)
     ap.add_argument("--out", type=Path, default=Path("packages/evals/datasets"))
     args = ap.parse_args()
-    rng = random.Random(SEED)
+    # Seeded so the dataset rebuilds the same way. Not used for anything secret.
+    rng = random.Random(SEED)  # noqa: S311
 
     sanctions = read(args.sanctions, {"Person", *ORG_SCHEMAS})
     peps = read(args.peps, {"Person"})
@@ -153,7 +154,8 @@ def main() -> None:
             if query and normalise(query) not in used:
                 add(query, kind(r), category, pack, listed, index[normalise(query)])
                 done += 1
-        assert done == want, f"{pack} {category}: only {done} of {want}"
+        if done != want:
+            raise SystemExit(f"{pack} {category}: only {done} of {want}")
 
     for pack in ("uk", "uae"):
         want = PACK_CATEGORIES

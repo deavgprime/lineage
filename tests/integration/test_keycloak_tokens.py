@@ -26,7 +26,7 @@ def password_token(username: str) -> str:
         }
     ).encode()
     url = f"{BASE}/realms/lineage/protocol/openid-connect/token"
-    with urllib.request.urlopen(url, body, timeout=10) as response:
+    with urllib.request.urlopen(url, body, timeout=10) as response:  # noqa: S310
         return str(json.load(response)["access_token"])
 
 
