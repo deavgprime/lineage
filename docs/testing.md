@@ -52,7 +52,12 @@ Coverage is measured for `packages/` and `apps/api/` once they hold code.
 | Tool calls missing from the audit log | 0 |
 
 Every eval case runs 8 times. A gate passes only if the result holds across all runs. Scores are posted
-on the pull request and recorded in `packages/evals/baselines/`. A prompt change is treated as a code
+on the pull request and recorded in `packages/evals/baselines/`. The `Eval report` job posts one comment on each
+pull request with every measure next to the base branch's baseline, and updates it on each run.
+Screening and ownership results come from that run's CI jobs. Citation and safety results are the
+files committed in the pull request, so a change that affects the agent's behaviour commits fresh
+results with it. The screening and ownership baselines are refreshed with `--out` when the pinned
+data or the labelled sets change. A prompt change is treated as a code
 change and goes through the same gates.
 
 ## Where tests run
