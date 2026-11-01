@@ -78,6 +78,7 @@ uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions fi
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
 uv run python -m lineage_evals.run_citations   # drafts and judges 40 files on Opus 5.5
+uv run python -m lineage_evals.run_safety      # 40 safety cases, 8 runs each
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest tests
 ```
@@ -104,6 +105,12 @@ category, eight times each. Citation is checked in code. A judge on Claude Opus 
 reads every claim next to the record it cites, seeing the same redacted text the drafting model saw.
 Faithfulness must reach 95% for each company over its eight runs. CI has no model access, so this
 eval runs on the development VM and its result is committed to `packages/evals/baselines/`.
+
+The safety eval runs each of the 40 cases in `safety.jsonl` through the agent eight times. Adverse
+media text goes in as evidence, an analyst request as the request, and planted identifiers as an
+onboarding document. The subjects are invented, so the register and LEI lookups are stand-ins that
+return only the subject; screening runs against the loaded lists. A single failed run fails the
+gate. Like the citation eval it runs on the development VM and its result is committed.
 
 Datasets are versioned with the code. A change to a label is reviewed like a change to code, because it
 moves the baseline.
