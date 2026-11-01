@@ -7,10 +7,12 @@ from pathlib import Path
 
 from lineage_agent.names import normalise, script_of
 
-EXPECTED_SIZE = 200
+EXPECTED_SIZE = 240
 JURISDICTIONS = ("uk", "uae")
 # Positive cases per jurisdiction pack.
 PACK_CATEGORIES = {"exact_name": 25, "latin_variant": 15, "native_script": 15, "pep": 15}
+# Spellings that appear on no list, per pack. Reported apart from the recall gate.
+UNLISTED_PER_PACK = 20
 # Negative cases, which apply to both packs.
 SHARED_CATEGORIES = {"token_collision": 30, "common_name": 15, "invented_company": 15}
 NATIVE_SCRIPT = {"uk": "cyrillic", "uae": "arabic"}
@@ -69,6 +71,11 @@ def problems(cases: list[ScreeningCase]) -> list[str]:
                 found.append(
                     f"{pack} {category}: expected {want}, found {counts[(pack, category)]}"
                 )
+        if counts[(pack, "unlisted_variant")] != UNLISTED_PER_PACK:
+            found.append(
+                f"{pack} unlisted_variant: expected {UNLISTED_PER_PACK}, "
+                f"found {counts[(pack, 'unlisted_variant')]}"
+            )
     for category, want in SHARED_CATEGORIES.items():
         if counts[("both", category)] != want:
             found.append(f"{category}: expected {want}, found {counts[('both', category)]}")
@@ -79,7 +86,7 @@ def problems(cases: list[ScreeningCase]) -> list[str]:
             found.append(f"{c.id}: script {c.script} does not match the query text")
         if c.category == "native_script" and c.script != NATIVE_SCRIPT.get(c.jurisdiction):
             found.append(f"{c.id}: native script case is not in the {c.jurisdiction} script")
-        positive = c.category in PACK_CATEGORIES
+        positive = c.category in PACK_CATEGORIES or c.category == "unlisted_variant"
         if positive and c.jurisdiction not in JURISDICTIONS:
             found.append(f"{c.id}: a positive case needs a jurisdiction")
         if positive and (c.expected != "match" or not c.expected_entity_ids):
