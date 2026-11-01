@@ -147,3 +147,29 @@ def test_spellings_of_one_person_share_a_placeholder() -> None:
     tag = redactor.add_person("Jane Quill", "QUILL, Jane")
     assert redactor.add_person("jane quill") == tag
     assert redactor.redact("QUILL, Jane and Jane Quill") == f"{tag} and {tag}"
+
+
+@pytest.mark.unit
+def test_claude_code_runs_headless_with_opus_at_medium_effort(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import json
+    import subprocess
+
+    from lineage_agent.model import ClaudeCode
+
+    seen: dict[str, Any] = {}
+    draft = Model().draft("", "")
+
+    def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen["command"], seen["input"] = command, kwargs["input"]
+        out = {"is_error": False, "subtype": "success", "structured_output": draft.model_dump()}
+        return subprocess.CompletedProcess(command, 0, json.dumps(out), "")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert ClaudeCode().draft("system", "the prompt") == draft
+    command = seen["command"]
+    assert command[command.index("--model") + 1] == "claude-opus-5-5"
+    assert command[command.index("--effort") + 1] == "medium"
+    assert command[command.index("--tools") + 1] == ""
+    assert seen["input"] == "the prompt"
