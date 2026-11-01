@@ -1,22 +1,17 @@
 """The case endpoints against Postgres, with signed test tokens and a stub agent."""
 
 import os
-import time
 import uuid
 from collections.abc import Iterator
 from typing import Any
 
-import jwt
 import pytest
-from cryptography.hazmat.primitives.asymmetric import rsa
+from apitest import ANALYST_1, ANALYST_2, AUDITOR, MLRO
+from apitest import app as make_app
 from fastapi.testclient import TestClient
 from lineage_agent.agent import Result
 from lineage_agent.claims import Claim, Draft
-from lineage_api.app import create_app
-from lineage_api.auth import Verifier
-from lineage_api.settings import Settings
 from lineage_db.migrate import migrate
-from psycopg_pool import ConnectionPool
 
 URL = os.environ.get("DATABASE_URL", "")
 pytestmark = [
@@ -24,32 +19,8 @@ pytestmark = [
     pytest.mark.skipif(not URL, reason="DATABASE_URL is not set"),
 ]
 
-ISSUER = "http://localhost:8080/realms/lineage"
-KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-RUN = uuid.uuid4().hex[:8]
 SOURCE = "companies-house:company:00000001"
 RECORD = "Company EXAMPLE TRADING LTD, number 00000001."
-
-
-def headers(user: str, role: str, packs: list[str]) -> dict[str, str]:
-    now = int(time.time())
-    claims = {
-        "iss": ISSUER,
-        "aud": "lineage-api",
-        "sub": f"{user}-{RUN}",
-        "preferred_username": user,
-        "iat": now,
-        "exp": now + 300,
-        "roles": [role],
-        "packs": packs,
-    }
-    return {"Authorization": f"Bearer {jwt.encode(claims, KEY, algorithm='RS256')}"}
-
-
-ANALYST_1 = headers("analyst-uk-1", "analyst", ["uk"])
-ANALYST_2 = headers("analyst-uk-2", "analyst", ["uk"])
-MLRO = headers("mlro-uk-1", "mlro", ["uk"])
-AUDITOR = headers("auditor-1", "auditor", ["uk", "uae"])
 
 
 def stub_runner(number: str, pack: str, audit: Any) -> Result:
@@ -77,10 +48,8 @@ def failing_runner(number: str, pack: str, audit: Any) -> Result:
     raise RuntimeError("register unavailable")
 
 
-def app(runner: Any = stub_runner) -> TestClient:
-    pool = ConnectionPool(URL, min_size=1, max_size=4, open=False)
-    verifier = Verifier(ISSUER, "lineage-api", lambda _: KEY.public_key())
-    return TestClient(create_app(Settings(database_url=URL), pool, verifier, runner))
+def app(runner: Any = None) -> TestClient:
+    return make_app(runner or stub_runner)
 
 
 @pytest.fixture(scope="module")

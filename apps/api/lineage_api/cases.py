@@ -54,6 +54,7 @@ class CaseFile(CaseSummary):
     minimum_rating: str | None
     attempts: int | None
     citation_failures: list[str]
+    sign_offs: list[dict[str, Any]]
 
 
 class AuditRow(BaseModel):
@@ -68,7 +69,7 @@ class AuditRow(BaseModel):
 
 SUMMARY = """
 SELECT c.id, c.jurisdiction, c.subject, c.company_number, c.status, c.assigned_to,
-       d.draft ->> 'risk_rating', c.created_at, c.updated_at
+       coalesce(c.rating, d.draft ->> 'risk_rating'), c.created_at, c.updated_at
 FROM cases c
 LEFT JOIN LATERAL (
     SELECT draft FROM drafts WHERE case_id = c.id ORDER BY id DESC LIMIT 1
@@ -200,6 +201,13 @@ def case_file(case_id: uuid.UUID, user: CurrentUser, request: Request) -> CaseFi
             "FROM drafts WHERE case_id = %s ORDER BY id DESC LIMIT 1",
             (case_id,),
         ).fetchone()
+        signed = conn.execute(
+            "SELECT stage, signer, signer_role, at, drafted_rating, rating, reason, alert_notes "
+            "FROM sign_offs WHERE case_id = %s ORDER BY id",
+            (case_id,),
+        )
+        keys = ("stage", "signer", "role", "at", "drafted_rating", "rating", "reason", "alerts")
+        sign_offs = [dict(zip(keys, r, strict=True)) for r in signed]
     draft, evidence, alerts, floor, attempts, failures = row or (None, [], [], None, None, [])
     return CaseFile(
         **summary.model_dump(),
@@ -209,6 +217,7 @@ def case_file(case_id: uuid.UUID, user: CurrentUser, request: Request) -> CaseFi
         minimum_rating=floor,
         attempts=attempts,
         citation_failures=failures,
+        sign_offs=sign_offs,
     )
 
 
