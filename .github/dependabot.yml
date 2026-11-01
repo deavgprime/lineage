@@ -28,3 +28,24 @@ updates:
     groups:
       python-dev-tools:
         patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /apps/console
+    target-branch: develop
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build"
+      include: scope
+    labels: [dependencies]
+    # openapi-typescript supports TypeScript 5 only, and ESLint 10 breaks the peer dependencies of
+    # eslint-config-next. Move these majors by hand when their dependents catch up.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
+    groups:
+      console:
+        patterns: ["*"]

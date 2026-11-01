@@ -38,7 +38,8 @@ def draft(company_number: str, pack: str) -> dict[str, Any]:
             "VALUES (%s, %s, %s, 'cli') RETURNING id",
             (pack, company_number, company_number),
         ).fetchone()
-        assert row is not None
+        if row is None:
+            raise RuntimeError("the case was not created")
         case_id = row[0]
 
         def audit(action: str, payload: dict[str, Any]) -> None:
@@ -57,7 +58,7 @@ def draft(company_number: str, pack: str) -> dict[str, Any]:
         )
         result = agent.run(company_number, pack)
         out = asdict(result)
-        del out["redacted_evidence"], out["redacted_draft"]
+        del out["redacted_evidence"], out["redacted_draft"], out["evidence"]
         out["draft"] = result.draft.model_dump() if result.draft else None
         out["case_id"] = str(case_id)
         out["status"] = "draft"

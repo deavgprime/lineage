@@ -1,5 +1,7 @@
 # Local services for development and integration tests.
 #   docker compose up -d db
+#   docker compose up -d --build api
+#   docker compose up -d keycloak
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17
@@ -14,3 +16,37 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://lineage:lineage-local@db:5432/lineage
+      OIDC_ISSUER: http://localhost:8080/realms/lineage
+      OIDC_JWKS_URL: http://keycloak:8080/realms/lineage/protocol/openid-connect/certs
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Local sign-in only: development mode, HTTP, and the test realm in infra/keycloak.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    command: ["start-dev", "--import-realm", "--http-port=8080", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-local-test
+      # One issuer for tokens from the browser, the tests and other containers.
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    volumes:
+      - ./infra/keycloak/lineage-realm.json:/opt/keycloak/data/import/lineage-realm.json:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30

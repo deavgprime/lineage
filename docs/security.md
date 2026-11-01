@@ -29,7 +29,7 @@ legal or compliance team.
 | PCI DSS v4.0.1 | Applies to systems that store, process or transmit cardholder data | Lineage handles none, so the standard does not apply. A redaction rule and an eval case will check that card numbers are never forwarded. A deployment that did handle card data would put that environment in scope | Not applicable |
 | ISO/IEC 27001:2022 | Information security management | Access control, logging, secure development, supplier and change management follow the Annex A themes. Certification belongs to an organisation, not a codebase | Designed |
 | SOC 2 (security, confidentiality, processing integrity) | Assurance report for service providers | Controls below map to these criteria. No attestation exists | Designed |
-| NIST SP 800-218 (SSDF) | Secure software development | Reviewed pull requests, pinned dependencies, secret and workflow scanning, tests as a merge gate | Partly in place |
+| NIST SP 800-218 (SSDF) | Secure software development | Reviewed pull requests, pinned dependencies, secret, dependency, image and workflow scanning, tests as a merge gate | Partly in place |
 | OWASP ASVS and OWASP Top 10 for LLM applications | Application and model security | Prompt injection, excessive agency, insecure output handling and data leakage each have a control and a test | Planned |
 | NIST AI RMF and ISO/IEC 42001 | Governance of AI systems | Human sign-off, measured release gates, full logging and documented limits | Designed |
 | Model risk management (PRA SS1/23 in the UK, and SR 11-7 style practice) | Validation and monitoring of models | Evals with fixed datasets and eight runs per case, baselines recorded, drift visible in tracing | Designed |
@@ -48,7 +48,7 @@ legal or compliance team.
 
 | Threat | Control | Status |
 | --- | --- | --- |
-| An analyst sees a case that is not theirs | OIDC sign-in, roles, Postgres row-level security as well as API checks | Planned |
+| An analyst sees a case that is not theirs | OIDC sign-in, roles, Postgres row-level security as well as API checks. See [decision 0003](decisions/0003-access-model.md) | Sign-in and row-level security in place |
 | Text in adverse media tells the agent to change behaviour | Fetched text is treated as data, tools come from a fixed list, no tool can finalise a file, and a safety eval must show zero failures | Planned |
 | A file is finalised without an analyst | Only the analyst role can set the final state, enforced in the database and covered by a test | Planned |
 | Personal data reaches an external model | Redaction before every external call, a self-hosted option, and an egress allow-list | Planned |
@@ -67,6 +67,16 @@ legal or compliance team.
 - Commits and titles follow a fixed format, so every change is traceable to a reason.
 - Pre-commit and CI run secret scanning (gitleaks), workflow auditing (zizmor), linting, type checks
   and tests.
+- A security workflow runs inside `CI gate` on every pull request and push, and on its own every
+  Monday so new advisories against unchanged code still show up. It checks:
+  - every commit in the history for secrets (gitleaks), and the current files with a second
+    scanner (Trivy)
+  - every package in the lock file against the PyPI advisory database (pip-audit)
+  - the API image for fixable high and critical vulnerabilities, and the Dockerfile and compose
+    files for insecure configuration (Trivy)
+  - the Python code with ruff's security rules. Each reviewed exception carries its reason next to
+    it, and no code relies on `assert` for checks.
+- Scanner images are pinned by digest, like the actions.
 - Tests fail the build if a workflow uses an action that is not pinned to a commit SHA, lacks a
   permissions block or a timeout, or interpolates pull request text into a script.
 - Dependabot proposes updates weekly with a cooldown.

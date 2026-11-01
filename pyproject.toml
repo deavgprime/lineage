@@ -7,12 +7,17 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
 dependencies = [
   "anthropic>=1.0",
+  "fastapi>=0.115",
+  "psycopg-pool>=3.2",
   "psycopg[binary]>=3.2",
   "pydantic>=2.9",
+  "pyjwt[crypto]>=2.9",
+  "uvicorn[standard]>=0.32",
 ]
 
 [dependency-groups]
 dev = [
+  "httpx>=0.27",
   "mypy>=1.13",
   "pytest>=8.3",
   "ruff>=0.8",
@@ -31,6 +36,7 @@ packages = [
   "packages/evals/lineage_evals",
   "packages/db/lineage_db",
   "ingest/lineage_ingest",
+  "apps/api/lineage_api",
 ]
 
 [tool.ruff]
@@ -38,12 +44,16 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+select = ["B", "E", "F", "I", "RUF", "S", "SIM", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert, use fixed test secrets and build SQL from fixed table names.
+"tests/**" = ["S101", "S105", "S106", "S603", "S607", "S608"]
 
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/agent:packages/evals:packages/db:ingest"
+mypy_path = "packages/agent:packages/evals:packages/db:ingest:apps/api:tests/integration"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]

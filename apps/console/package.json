@@ -1,0 +1,39 @@
+{
+  "name": "lineage-console",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "postbuild": "cp -r .next/static .next/standalone/.next/",
+    "start": "node .next/standalone/server.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "gen:api": "openapi-typescript openapi.json -o src/lib/api-types.ts",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "iron-session": "9.0.1",
+    "next": "16.4.2",
+    "openapi-fetch": "0.17.0",
+    "openid-client": "6.8.8",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

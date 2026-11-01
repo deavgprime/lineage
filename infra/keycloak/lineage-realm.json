@@ -1,0 +1,289 @@
+{
+  "realm": "lineage",
+  "enabled": true,
+  "displayName": "Lineage",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "passwordPolicy": "length(12)",
+  "roles": {
+    "realm": [
+      {
+        "name": "analyst",
+        "description": "Reviews and signs off assigned cases"
+      },
+      {
+        "name": "mlro",
+        "description": "Signs off any case in their packs and gives the second sign-off on high-rated files"
+      },
+      {
+        "name": "auditor",
+        "description": "Reads cases and the audit log, changes nothing"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "uk"
+    },
+    {
+      "name": "uae"
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "lineage",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "lineage-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "packs",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "config": {
+            "claim.name": "packs",
+            "full.path": "false",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "config": {
+            "user.attribute": "username",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "subject",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "config": {
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "lineage-console",
+      "name": "Lineage console",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "lineage"
+      ]
+    },
+    {
+      "clientId": "lineage-api",
+      "name": "Lineage API",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "analyst-uk-1",
+      "enabled": true,
+      "email": "analyst-uk-1@lineage.test",
+      "emailVerified": true,
+      "firstName": "Analyst",
+      "lastName": "UK-1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analyst-uk-1-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "groups": [
+        "/uk"
+      ]
+    },
+    {
+      "username": "analyst-uk-2",
+      "enabled": true,
+      "email": "analyst-uk-2@lineage.test",
+      "emailVerified": true,
+      "firstName": "Analyst",
+      "lastName": "UK-2",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analyst-uk-2-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "groups": [
+        "/uk"
+      ]
+    },
+    {
+      "username": "analyst-uae-1",
+      "enabled": true,
+      "email": "analyst-uae-1@lineage.test",
+      "emailVerified": true,
+      "firstName": "Analyst",
+      "lastName": "UAE-1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analyst-uae-1-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "groups": [
+        "/uae"
+      ]
+    },
+    {
+      "username": "mlro-uk-1",
+      "enabled": true,
+      "email": "mlro-uk-1@lineage.test",
+      "emailVerified": true,
+      "firstName": "MLRO",
+      "lastName": "UK-1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mlro-uk-1-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "mlro"
+      ],
+      "groups": [
+        "/uk"
+      ]
+    },
+    {
+      "username": "mlro-uk-2",
+      "enabled": true,
+      "email": "mlro-uk-2@lineage.test",
+      "emailVerified": true,
+      "firstName": "MLRO",
+      "lastName": "UK-2",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mlro-uk-2-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "mlro"
+      ],
+      "groups": [
+        "/uk"
+      ]
+    },
+    {
+      "username": "mlro-uae-1",
+      "enabled": true,
+      "email": "mlro-uae-1@lineage.test",
+      "emailVerified": true,
+      "firstName": "MLRO",
+      "lastName": "UAE-1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mlro-uae-1-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "mlro"
+      ],
+      "groups": [
+        "/uae"
+      ]
+    },
+    {
+      "username": "auditor-1",
+      "enabled": true,
+      "email": "auditor-1@lineage.test",
+      "emailVerified": true,
+      "firstName": "Auditor",
+      "lastName": "1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "auditor-1-local-test",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "auditor"
+      ],
+      "groups": [
+        "/uk",
+        "/uae"
+      ]
+    }
+  ]
+}
