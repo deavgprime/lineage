@@ -75,6 +75,7 @@ uv run pytest -m unit
 docker compose up -d --wait db
 DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run pytest -m integration
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
+uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest tests
 ```
