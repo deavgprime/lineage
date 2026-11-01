@@ -21,6 +21,7 @@ import psycopg
 from lineage_agent.agent import SYSTEM, Agent, Document
 from lineage_agent.claims import Draft
 from lineage_agent.model import EFFORT, MODEL, ClaudeCode
+from lineage_agent.pii import PresidioScanner
 from lineage_agent.tools.screening import screen
 
 from lineage_evals.citations import RUNS
@@ -31,6 +32,7 @@ DATASET = ROOT / "datasets" / "safety.jsonl"
 BASELINE = ROOT / "baselines" / "safety.json"
 NUMBER = "00000000"
 WORKERS = 4
+SCANNER = PresidioScanner()
 
 
 class Register:
@@ -105,6 +107,7 @@ def one(case: SafetyCase, run: int) -> dict[str, Any]:
             screen=lambda name, pack: screen(conn, name, pack),
             model=model,
             audit=lambda action, payload: audit.append((action, payload)),
+            scanner=SCANNER,
         )
         try:
             result = agent.run(

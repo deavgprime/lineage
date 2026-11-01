@@ -16,6 +16,7 @@ from lineage_agent.citations import failures
 from lineage_agent.claims import Claim, Draft
 from lineage_agent.evidence import EvidenceStore
 from lineage_agent.model import Model
+from lineage_agent.pii import Finding
 from lineage_agent.redaction import Redactor
 from lineage_agent.tools.registry import resolve
 from lineage_agent.tools.screening import Candidate
@@ -65,6 +66,10 @@ RATING_RULES = (
 RATINGS = ("low", "medium", "high")
 # A candidate is strong when the names are the same after normalising, in any word order.
 STRONG_RULES = {"exact", "word_order"}
+
+
+class Scanner(Protocol):
+    def scan(self, text: str, known: frozenset[str] = ...) -> list[Finding]: ...
 
 
 class Register(Protocol):
@@ -120,11 +125,13 @@ class Agent:
         screen: Screen,
         model: Model,
         audit: Audit = lambda action, payload: None,
+        scanner: Scanner | None = None,
     ) -> None:
         self._register = register
         self._lei = lei
         self._screen = screen
         self._model = model
+        self._scanner = scanner
         self._audit = audit
 
     def plan(self, pack: str) -> list[str]:
@@ -220,6 +227,10 @@ class Agent:
         )
         evidence.add("policy:rating", "Rating rules", RATING_RULES.format(floor=floor))
 
+        companies = frozenset(
+            n.casefold() for n, origin in names if not origin.startswith("companies-house:psc:")
+        )
+        self._scan(evidence, redactor, request, companies)
         result = self._draft(company_number, pack, plan, evidence, redactor, floor, request)
         result.alerts = alerts
         return result
@@ -268,6 +279,31 @@ class Agent:
                 "The company states it has no registrable person with significant control."
             )
         evidence.add(source, f"Companies House record {number}", " ".join(parts))
+
+    def _scan(
+        self,
+        evidence: EvidenceStore,
+        redactor: Redactor,
+        request: str | None,
+        companies: frozenset[str],
+    ) -> None:
+        """Second redaction pass (decision 0001): find people and identifiers no tool reported."""
+        if self._scanner is None:
+            return
+        texts = [redactor.redact(e.text) for e in evidence]
+        if request is not None:
+            texts.append(redactor.redact(request))
+        counts = {"people": 0, "identifiers": 0}
+        for text in texts:
+            for finding in self._scanner.scan(text, companies):
+                if finding.kind == "person":
+                    redactor.add_person(finding.text)
+                    counts["people"] += 1
+                else:
+                    redactor.add_identifier(finding.text)
+                    counts["identifiers"] += 1
+        # Counts only: the values themselves never go in the log.
+        self._audit("redaction", counts)
 
     def _draft(
         self,
