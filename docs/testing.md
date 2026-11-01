@@ -86,6 +86,7 @@ uv run python -m lineage_evals.run_citations   # drafts and judges 40 files on O
 uv run python -m lineage_evals.run_safety      # 40 safety cases, 8 runs each
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest apps tests
+cd apps/console && npm ci && npm run lint && npm run typecheck && npm test && npm run build
 ```
 
 Keycloak runs locally with the realm in `infra/keycloak/lineage-realm.json`: two UK analysts, one UAE

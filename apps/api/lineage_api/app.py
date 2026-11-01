@@ -12,14 +12,22 @@ from typing import Any, Protocol
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
+from pydantic import BaseModel
 
-from lineage_api.auth import CurrentUser, Verifier
+from lineage_api.auth import CurrentUser, Role, Verifier
 from lineage_api.cases import Runner, router
 from lineage_api.logs import configure
 from lineage_api.settings import Settings
 from lineage_api.sign_off import router as sign_off_router
 
 log = logging.getLogger("lineage_api")
+
+
+class Me(BaseModel):
+    id: str
+    username: str
+    role: Role
+    packs: list[str]
 
 
 class Pool(Protocol):
@@ -86,13 +94,8 @@ def create_app(
         return {"status": "ok"}
 
     @app.get("/me")
-    def me(user: CurrentUser) -> dict[str, object]:
-        return {
-            "id": user.id,
-            "username": user.username,
-            "role": user.role,
-            "packs": sorted(user.packs),
-        }
+    def me(user: CurrentUser) -> Me:
+        return Me(id=user.id, username=user.username, role=user.role, packs=sorted(user.packs))
 
     app.include_router(router)
     app.include_router(sign_off_router)

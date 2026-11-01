@@ -203,6 +203,39 @@ jobs:
     name: Security
     uses: $/.github/workflows/security.yml
 
+  console:
+    name: Console
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/console
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/console/package-lock.json
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: npm ci --no-audit --no-fund
+      # The typed client must match the API. Regenerate both and fail on any difference.
+      - name: Check the API client is current
+        run: |
+          uv run --frozen python -m lineage_api.openapi > openapi.json
+          npm run -s gen:api
+          git diff --exit-code -- openapi.json src/lib/api-types.ts
+      - run: npm run -s lint
+      - run: npm run -s typecheck
+      - run: npm test
+      - run: npm run -s build
+      - run: npm audit --omit=dev --audit-level=high
+
   # Posts the eval scores next to the base branch's baselines as one comment
   # that is updated on every run. It reports and does not gate.
   eval-report:
@@ -256,7 +289,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security, console]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
