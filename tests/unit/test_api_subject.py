@@ -32,3 +32,21 @@ def test_falls_back_to_the_lei_name_then_the_number() -> None:
     )
     assert subject_of(result(lei), "00000001") == "EXAMPLE FZE"
     assert subject_of(result(), "00000001") == "00000001"
+
+
+@pytest.mark.unit
+def test_the_fixture_runner_drafts_cited_files() -> None:
+    from lineage_agent.citations import failures
+    from lineage_agent.evidence import EvidenceStore
+    from lineage_api.runner import FixtureRunner
+
+    steps: list[str] = []
+    for number, rating in [("00000001", "low"), ("99000001", "high")]:
+        r = FixtureRunner()(number, "uk", lambda action, payload: steps.append(action))
+        store = EvidenceStore()
+        for e in r.evidence:
+            store.add(e["source_id"], e["title"], e["text"])
+        assert r.draft is not None and r.draft.risk_rating == rating
+        assert failures(r.draft.claims(), store) == []
+        assert subject_of(r, number) == f"FIXTURE COMPANY {number} LIMITED"
+    assert steps[:2] == ["plan", "tool_call"]

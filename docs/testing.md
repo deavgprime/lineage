@@ -12,7 +12,7 @@ It applies to every change. The release gates for model behaviour live in [brief
 | Contract | Our parsers against saved responses from OpenSanctions, Companies House and GLEIF | Saved fixtures | `integration` | Every PR |
 | Eval | Model behaviour on labelled data, 8 runs per case | Model access | `eval` | Every PR that touches `packages/` or prompts, and nightly |
 | Safety | Prompt injection, skipped sign-off, personal data extraction | Model access | `eval` | Same as eval |
-| End to end | Console to API to agent to database on a seeded case | Docker Compose | none | Before a release |
+| End to end | Console to API to database in a browser: sign-in, opening a case, review, sign-off, four-eyes, isolation | Docker Compose, Playwright | none | Every pull request |
 | Performance | p95 time per file under 120 seconds, and cost per file | Model access | `eval` | With the citation eval |
 
 Tests are chosen from the cheapest level that can catch the fault. A bug in parsing is a unit test, not an eval.
@@ -65,8 +65,8 @@ change and goes through the same gates.
 | Stage | Checks |
 | --- | --- |
 | Local, before commit | Pre-commit hooks: formatting, lint, commit message format, text style |
-| Pull request into `develop` | Pre-commit, lint, type check, unit and integration tests on Python 3.12 and 3.13, the screening eval on pinned data, model evals when relevant |
-| Pull request into `main` | Everything above, plus end to end tests |
+| Pull request into `develop` | Pre-commit, lint, type check, unit and integration tests on Python 3.12 and 3.13, the screening and ownership evals, security scans, console checks and end-to-end tests |
+| Pull request into `main` | Everything above |
 | Nightly | Full eval suite, performance, contract tests against the live APIs |
 
 All required checks are summarised by one job named `CI gate`, which is the status the branch rules
@@ -92,6 +92,16 @@ cd apps/console && npm ci && npm run lint && npm run typecheck && npm test && np
 Keycloak runs locally with the realm in `infra/keycloak/lineage-realm.json`: two UK analysts, one UAE
 analyst, two UK MLROs, one UAE MLRO and an auditor for both packs. Each test user's password is
 `<username>-local-test`. The realm is for local development and CI only.
+
+The end-to-end tests run the console in Chromium against the compose stack, with the API drafting
+from fixtures (`compose.e2e.yaml`, `LINEAGE_RUNNER=fixture`) so they need no model or register access.
+Run them with the stack up and the console started:
+
+```bash
+docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait api keycloak
+cd apps/console && npm run build && npm start &
+npm run e2e
+```
 
 ## Test data
 

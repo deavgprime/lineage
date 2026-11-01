@@ -1,0 +1,6 @@
+# End-to-end tests only: the API drafts with fixtures instead of the live agent.
+#   docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait api keycloak
+services:
+  api:
+    environment:
+      LINEAGE_RUNNER: fixture

@@ -4,6 +4,7 @@ uvicorn --factory lineage_api.app:create_app
 """
 
 import logging
+import os
 import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -56,9 +57,15 @@ def create_app(
     app.state.db = db
     app.state.log = log
     if runner is None:
-        from lineage_api.runner import LiveRunner
+        from lineage_api.runner import FixtureRunner, LiveRunner
 
-        runner = LiveRunner(settings.database_url)
+        runner = (
+            FixtureRunner()
+            if os.environ.get("LINEAGE_RUNNER") == "fixture"
+            else LiveRunner(settings.database_url)
+        )
+        if isinstance(runner, FixtureRunner):
+            log.warning("drafting with fixtures: LINEAGE_RUNNER=fixture is for end-to-end tests")
     app.state.runner = runner
     app.state.verifier = verifier or Verifier.from_jwks(
         settings.oidc_issuer, settings.oidc_audience, settings.jwks_url
