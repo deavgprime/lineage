@@ -2,7 +2,8 @@
 
     lineage draft 00519500 --pack uk
 
-Needs DATABASE_URL, COMPANIES_HOUSE_API_KEY and Anthropic credentials. Opens a case,
+Needs DATABASE_URL and COMPANIES_HOUSE_API_KEY. Drafting runs through Claude Code on the
+signed-in subscription, or through the Anthropic API when LINEAGE_MODEL=api. Opens a case,
 records every step in the audit log, and prints the draft as JSON. The file stays a draft
 until an analyst signs it off in the console.
 """
@@ -20,10 +21,14 @@ from lineage_ingest.companies_house import CompaniesHouse
 from lineage_ingest.gleif import Gleif
 
 from lineage_agent.agent import Agent
-from lineage_agent.model import Claude
+from lineage_agent.model import Claude, ClaudeCode, Model
 from lineage_agent.tools.screening import screen
 
 CACHE = Path.home() / ".cache" / "lineage" / "companies-house"
+
+
+def model() -> Model:
+    return Claude() if os.environ.get("LINEAGE_MODEL") == "api" else ClaudeCode()
 
 
 def draft(company_number: str, pack: str) -> dict[str, Any]:
@@ -47,7 +52,7 @@ def draft(company_number: str, pack: str) -> dict[str, Any]:
             register=CompaniesHouse(cache=CACHE),
             lei=Gleif(),
             screen=lambda name, p: screen(conn, name, p),
-            model=Claude(),
+            model=model(),
             audit=audit,
         )
         result = agent.run(company_number, pack)
