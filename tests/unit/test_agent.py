@@ -86,7 +86,7 @@ class Model:
                 claim(
                     "[PERSON_1] is a PEP candidate.",
                     "screening:companies-house:psc:" + PSC,
-                    "Candidate opensanctions:pep:Q1 (pep)",
+                    "Candidate opensanctions:pep:Q1 (pep, strong)",
                 )
             ],
             risk_rating="medium",
@@ -163,13 +163,82 @@ def test_claude_code_runs_headless_with_opus_at_medium_effort(
 
     def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
         seen["command"], seen["input"] = command, kwargs["input"]
-        out = {"is_error": False, "subtype": "success", "structured_output": draft.model_dump()}
+        out = {
+            "is_error": False,
+            "subtype": "success",
+            "structured_output": draft.model_dump(),
+            "duration_ms": 1500,
+            "total_cost_usd": 0.25,
+            "usage": {"input_tokens": 10, "cache_read_input_tokens": 90, "output_tokens": 40},
+        }
         return subprocess.CompletedProcess(command, 0, json.dumps(out), "")
 
     monkeypatch.setattr(subprocess, "run", fake_run)
-    assert ClaudeCode().draft("system", "the prompt") == draft
+    model = ClaudeCode()
+    assert model.draft("system", "the prompt") == draft
+    assert model.usage[0].input_tokens == 100
+    assert model.usage[0].output_tokens == 40
+    assert (model.usage[0].seconds, model.usage[0].cost_usd) == (1.5, 0.25)
     command = seen["command"]
     assert command[command.index("--model") + 1] == "claude-opus-5-5"
     assert command[command.index("--effort") + 1] == "medium"
     assert command[command.index("--tools") + 1] == ""
     assert seen["input"] == "the prompt"
+
+
+def agent_with(hits: dict[str, list[Candidate]], model: Any) -> Agent:
+    return Agent(Register(), Gleif(), lambda name, pack: hits.get(name, []), model)
+
+
+@pytest.mark.unit
+def test_a_strong_pep_sets_a_medium_floor(run: tuple[Any, Model, list[str]]) -> None:
+    result, model, _ = run
+    assert result.minimum_rating == "medium"
+    assert "Minimum risk rating for this case: medium" in model.prompts[0]
+    assert result.alerts == []
+
+
+@pytest.mark.unit
+def test_a_weak_match_is_an_alert_and_leaves_the_floor_low() -> None:
+    weak = Candidate(
+        "opensanctions:sanctions:X1", "EXAMPLE TRADES LTD", "sanctions", 0.7, "similar"
+    )
+    result = agent_with({"EXAMPLE TRADING LTD": [weak]}, Model()).run("00000001", "uk")
+    assert result.minimum_rating == "low"
+    assert result.alerts == [
+        "opensanctions:sanctions:X1 for companies-house:company:00000001",
+        "opensanctions:sanctions:X1 for gleif:LEI0000000000000001",
+    ]
+
+
+@pytest.mark.unit
+def test_a_rating_below_the_floor_is_sent_back() -> None:
+    strong = Candidate("opensanctions:sanctions:X2", "Jane Quill", "sanctions", 1.0, "exact")
+    model = Model()
+    result = agent_with({"Jane Quill": [strong]}, model).run("00000001", "uk")
+    assert result.minimum_rating == "high"
+    assert any("below the minimum high" in f for f in result.citation_failures)
+    assert "below the minimum high" in model.prompts[-1]
+
+
+@pytest.mark.unit
+def test_rating_rules_are_citable_evidence(run: tuple[Any, Model, list[str]]) -> None:
+    result, model, _ = run
+    assert "policy:rating" in result.evidence_ids
+    assert "Minimum rating for this case: medium." in model.prompts[0]
+
+
+@pytest.mark.unit
+def test_an_evidence_id_cannot_be_reused() -> None:
+    from lineage_agent.evidence import EvidenceStore
+
+    store = EvidenceStore()
+    store.add("screening:x", "first", "one")
+    with pytest.raises(ValueError, match="already used"):
+        store.add("screening:x", "second", "two")
+
+
+@pytest.mark.unit
+def test_screening_summary_counts_the_whole_file(run: tuple[Any, Model, list[str]]) -> None:
+    _, model, _ = run
+    assert "Strong candidates: 1. Weak candidates: 0." in model.prompts[0]
