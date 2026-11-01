@@ -77,7 +77,7 @@ require. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the branch rules.
 ```bash
 uv sync --frozen
 uv run pytest -m unit
-docker compose up -d --wait db
+docker compose up -d --wait db keycloak
 DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run pytest -m integration
 uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions files, checksum verified
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
@@ -87,6 +87,10 @@ uv run python -m lineage_evals.run_safety      # 40 safety cases, 8 runs each
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest apps tests
 ```
+
+Keycloak runs locally with the realm in `infra/keycloak/lineage-realm.json`: two UK analysts, one UAE
+analyst, two UK MLROs, one UAE MLRO and an auditor for both packs. Each test user's password is
+`<username>-local-test`. The realm is for local development and CI only.
 
 ## Test data
 
