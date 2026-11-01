@@ -21,7 +21,7 @@ def test_skips_files_that_match_and_rejects_files_that_do_not(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     good = b"id,name\n"
-    pin = Pin("sanctions", "v1", hashlib.sha1(good).hexdigest())
+    pin = Pin("sanctions", "v1", hashlib.sha1(good, usedforsecurity=False).hexdigest())
     monkeypatch.setattr(fetch, "PINS", (pin,))
     (tmp_path / "sanctions.csv").write_bytes(good)
 

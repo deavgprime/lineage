@@ -98,6 +98,8 @@ class Result:
     attempts: int
     citation_failures: list[str]
     evidence_ids: list[str] = field(default_factory=list)
+    # The full evidence, for the analyst to read each cited passage in its record.
+    evidence: list[dict[str, str]] = field(default_factory=list)
     minimum_rating: str = "low"
     alerts: list[str] = field(default_factory=list)
     # What the model was sent and what it returned, with people as placeholders. Kept so a judge
@@ -321,6 +323,9 @@ class Agent:
             attempts=attempt,
             citation_failures=problems,
             evidence_ids=[e.source_id for e in evidence],
+            evidence=[
+                {"source_id": e.source_id, "title": e.title, "text": e.text} for e in evidence
+            ],
             minimum_rating=floor,
             redacted_evidence=blocks,
             redacted_draft=redacted,

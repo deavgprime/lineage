@@ -77,7 +77,8 @@ CHANGES = [drop_middle, transliterate, drop_letter, swap_letters]
 
 
 def main() -> None:
-    rng = random.Random(SEED)
+    # Seeded so the dataset rebuilds the same way. Not used for anything secret.
+    rng = random.Random(SEED)  # noqa: S311
     path = DATASETS / "screening.jsonl"
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
     rows = [r for r in rows if r["category"] != "unlisted_variant"]
@@ -130,7 +131,8 @@ def main() -> None:
                 }
             )
             done += 1
-        assert done == UNLISTED_PER_PACK, f"{pack}: only {done} variants"
+        if done != UNLISTED_PER_PACK:
+            raise SystemExit(f"{pack}: only {done} variants")
     path.write_text(
         "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows + added), encoding="utf-8"
     )

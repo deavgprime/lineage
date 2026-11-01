@@ -111,7 +111,8 @@ class ClaudeCode:
         ]
         # An empty working directory, so no project instructions are picked up.
         with tempfile.TemporaryDirectory() as cwd:
-            done = subprocess.run(
+            # A fixed argument list with no shell; the prompt goes in on stdin.
+            done = subprocess.run(  # noqa: S603
                 command,
                 input=prompt,
                 capture_output=True,
