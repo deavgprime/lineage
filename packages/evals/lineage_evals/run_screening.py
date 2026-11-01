@@ -7,6 +7,7 @@ a false positive when any candidate is returned at all. Spellings that appear on
 reported as their own recall figure and are not part of the gate.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -88,8 +89,14 @@ def run(url: str) -> tuple[list[Result], list[str]]:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", type=Path, help="also write the results to this JSON file")
+    args = ap.parse_args()
     results, misses = run(os.environ["DATABASE_URL"])
-    print(json.dumps([asdict(r) for r in results], indent=2))
+    body = json.dumps([asdict(r) for r in results], indent=2)
+    print(body)
+    if args.out:
+        args.out.write_text(body + "\n")
     for miss in misses:
         print(miss)
     if any(r.recall < RECALL_GATE for r in results):
