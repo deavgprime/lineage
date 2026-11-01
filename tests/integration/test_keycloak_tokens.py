@@ -11,8 +11,9 @@ import urllib.request
 import pytest
 from lineage_api.auth import Refused, Verifier
 
-BASE = os.environ.get("KEYCLOAK_URL", "http://127.0.0.1:8080")
+BASE = os.environ.get("KEYCLOAK_URL", "")
 ISSUER = "http://localhost:8080/realms/lineage"
+pytestmark = pytest.mark.skipif(not BASE, reason="KEYCLOAK_URL is not set")
 
 
 def password_token(username: str) -> str:
