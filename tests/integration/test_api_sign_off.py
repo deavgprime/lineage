@@ -69,6 +69,7 @@ def test_a_low_file_is_final_after_one_sign_off(client: TestClient) -> None:
     body = response.json()
     assert (body["status"], body["rating"]) == ("final", "low")
     assert body["sign_offs"][0]["stage"] == "first"
+    assert body["sign_offs"][0]["signer_name"] == "analyst-uk-1"
     actions = [r["action"] for r in client.get(f"/cases/{case}/audit", headers=ANALYST_1).json()]
     assert actions[-1] == "sign_off"
     assert sign(client, case, ANALYST_1, rating="low").status_code == 409

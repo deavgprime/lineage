@@ -187,9 +187,7 @@ export interface components {
             /** Rating */
             rating: string | null;
             /** Sign Offs */
-            sign_offs: {
-                [key: string]: unknown;
-            }[];
+            sign_offs: components["schemas"]["SignOffRecord"][];
             /**
              * Status
              * @enum {string}
@@ -278,6 +276,38 @@ export interface components {
             rating: "low" | "medium" | "high";
             /** Reason */
             reason?: string | null;
+        };
+        /** SignOffRecord */
+        SignOffRecord: {
+            /** Alert Notes */
+            alert_notes: {
+                [key: string]: string;
+            };
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Drafted Rating */
+            drafted_rating: string;
+            /** Rating */
+            rating: string;
+            /** Reason */
+            reason: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "analyst" | "mlro";
+            /** Signer */
+            signer: string;
+            /** Signer Name */
+            signer_name: string;
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "first" | "second";
         };
         /** ValidationError */
         ValidationError: {
