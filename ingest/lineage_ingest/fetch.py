@@ -36,8 +36,8 @@ PINS = (
 
 
 def sha1(path: Path) -> str:
-    # SHA-1 because it is the checksum OpenSanctions publishes.
-    digest = hashlib.sha1()
+    # SHA-1 because it is the checksum OpenSanctions publishes. It checks integrity, not secrecy.
+    digest = hashlib.sha1(usedforsecurity=False)
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             digest.update(chunk)
@@ -51,7 +51,7 @@ def fetch(directory: Path) -> None:
         if path.exists() and sha1(path) == pin.sha1:
             continue
         partial = path.with_suffix(".part")
-        urllib.request.urlretrieve(pin.url, partial)
+        urllib.request.urlretrieve(pin.url, partial)  # noqa: S310 - fixed https URL
         if (got := sha1(partial)) != pin.sha1:
             partial.unlink()
             raise SystemExit(f"{pin.dataset}: checksum {got} does not match pin {pin.sha1}")

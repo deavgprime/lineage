@@ -150,7 +150,8 @@ def open_case(
             "opened_by) VALUES (%s, %s, %s, 'drafting', %s, %s) RETURNING id",
             (body.jurisdiction, body.company_number, body.company_number, user.id, user.id),
         ).fetchone()
-        assert row is not None
+        if row is None:
+            raise RuntimeError("the case was not created")
         case_id = row[0]
         _audit_row(conn, case_id, user.id, "case_opened", body.model_dump())
         summary = _summary(_visible(conn, case_id))

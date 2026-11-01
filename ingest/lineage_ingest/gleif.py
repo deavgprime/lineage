@@ -65,7 +65,9 @@ class Gleif:
         self._last = -MIN_INTERVAL
 
     def _get(self, path: str) -> dict[str, Any] | None:
-        request = urllib.request.Request(API + path, headers={"Accept": "application/vnd.api+json"})
+        # API is a fixed https base, so no other scheme can be opened.
+        headers = {"Accept": "application/vnd.api+json"}
+        request = urllib.request.Request(API + path, headers=headers)  # noqa: S310
         for attempt in range(RETRIES):
             gap = self._clock() - self._last
             if gap < MIN_INTERVAL:

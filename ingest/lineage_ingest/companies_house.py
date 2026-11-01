@@ -30,7 +30,8 @@ Transport = Callable[[urllib.request.Request], tuple[int, bytes]]
 
 def http(request: urllib.request.Request) -> tuple[int, bytes]:
     try:
-        with urllib.request.urlopen(request, timeout=30) as resp:
+        # Requests only ever go to the fixed https API base.
+        with urllib.request.urlopen(request, timeout=30) as resp:  # noqa: S310
             return resp.status, resp.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read()
@@ -74,7 +75,8 @@ class CompaniesHouse:
         if cached and cached.exists():
             data: Json | None = json.loads(cached.read_text())
             return data
-        request = urllib.request.Request(API + path, headers={"Authorization": self._auth})
+        # API is a fixed https base, so no other scheme can be opened.
+        request = urllib.request.Request(API + path, headers={"Authorization": self._auth})  # noqa: S310
         for attempt in range(RETRIES):
             self._wait_for_slot()
             status, body = self._transport(request)
