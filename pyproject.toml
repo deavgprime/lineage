@@ -22,6 +22,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+  "packages/agent/lineage_agent",
   "packages/evals/lineage_evals",
   "packages/db/lineage_db",
   "ingest/lineage_ingest",
@@ -37,7 +38,7 @@ select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/evals:packages/db:ingest"
+mypy_path = "packages/agent:packages/evals:packages/db:ingest"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]

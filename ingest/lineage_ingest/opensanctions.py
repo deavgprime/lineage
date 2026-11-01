@@ -20,6 +20,7 @@ from pathlib import Path
 
 import psycopg
 
+from lineage_ingest.name_index import rebuild
 from lineage_ingest.packs import PEP_COUNTRIES, SANCTIONS_LISTS, SCHEMAS
 
 SOURCE = "opensanctions"
@@ -81,6 +82,8 @@ def load(url: str, sanctions: Path, peps: Path, version: str) -> Counter[str]:
             cur.execute(UPSERT, (key, SOURCE, version, body, checksum))
             counts["written" if cur.rowcount else "unchanged"] += 1
             counts[str(record["kind"])] += 1
+        conn.commit()
+        counts["names_indexed"] = rebuild(conn)
     return counts
 
 
