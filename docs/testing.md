@@ -78,7 +78,8 @@ require. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the branch rules.
 uv sync --frozen
 uv run pytest -m unit
 docker compose up -d --wait db keycloak
-DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run pytest -m integration
+DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage KEYCLOAK_URL=http://127.0.0.1:8080 \
+  uv run pytest -m integration
 uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions files, checksum verified
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
