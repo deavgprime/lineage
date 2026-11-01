@@ -17,6 +17,7 @@ from lineage_api.auth import CurrentUser, Verifier
 from lineage_api.cases import Runner, router
 from lineage_api.logs import configure
 from lineage_api.settings import Settings
+from lineage_api.sign_off import router as sign_off_router
 
 log = logging.getLogger("lineage_api")
 
@@ -94,4 +95,5 @@ def create_app(
         }
 
     app.include_router(router)
+    app.include_router(sign_off_router)
     return app

@@ -53,7 +53,7 @@ select = ["B", "E", "F", "I", "RUF", "S", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/agent:packages/evals:packages/db:ingest:apps/api"
+mypy_path = "packages/agent:packages/evals:packages/db:ingest:apps/api:tests/integration"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]
