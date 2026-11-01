@@ -15,6 +15,11 @@ npm run dev
 
 Open http://localhost:3000 and sign in as a test user from `infra/keycloak/lineage-realm.json`.
 
+The API container has no model access of its own, so a case opened against it ends as failed. To
+draft cases, run the API on a machine signed in to Claude Code
+(`uv run uvicorn --factory lineage_api.app:create_app`), or set `LINEAGE_MODEL=api` and
+`ANTHROPIC_API_KEY` for the container.
+
 After an API change, regenerate the typed client:
 
 ```bash
