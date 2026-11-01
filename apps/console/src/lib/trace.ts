@@ -23,6 +23,8 @@ export function describe(action: string, payload: Payload): string {
       return `${payload.stage === "second" ? "Second sign-off" : "Sign-off"}: rated ${String(payload.rating)}${
         payload.changed_from ? `, changed from ${String(payload.changed_from)}` : ""
       }, status ${String(payload.status)}`;
+    case "redaction":
+      return `Redaction: ${String(payload.people)} name(s) and ${String(payload.identifiers)} identifier(s) found and replaced`;
     case "analyst_request":
       return "Analyst request received";
     case "failed":
