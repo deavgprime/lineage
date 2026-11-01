@@ -43,3 +43,13 @@ def test_judge_sees_numbered_claims_with_placeholders_only() -> None:
     prompt = judge_prompt('<evidence id="ch:1">[PERSON_1] controls</evidence>', DRAFT)
     assert "1. [ch:1] [PERSON_1] controls Example Ltd." in prompt
     assert "3. [ch:1] Low risk." in prompt
+
+
+@pytest.mark.unit
+def test_percentile_is_nearest_rank() -> None:
+    from lineage_evals.run_citations import percentile
+
+    values = [float(v) for v in range(1, 21)]
+    assert percentile(values, 0.95) == 19.0
+    assert percentile(values, 0.5) == 10.0
+    assert percentile([7.0], 0.95) == 7.0
