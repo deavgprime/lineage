@@ -62,7 +62,7 @@ export default async function CasePage({ params, searchParams }: Props) {
       <Header />
       <main className="file">
         <p>
-          <Link href="/">Cases</Link>
+          <Link href="/">Cases</Link> · <Link href={`/cases/${id}/trace`}>Trace</Link>
         </p>
         <h1>{file.subject}</h1>
         <p className="muted">
