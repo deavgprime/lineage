@@ -5,24 +5,35 @@
     "files": 40,
     "runs_per_company": 8,
     "cited": 1.0,
-    "claims": 525,
-    "supported": 518,
-    "faithful": 0.9867,
+    "claims": 495,
+    "supported": 491,
+    "faithful": 0.9919,
     "faithful_by_company": {
       "own-001": 1.0,
       "own-011": 1.0,
-      "own-019": 0.963,
+      "own-019": 0.9697,
       "own-025": 1.0,
-      "own-028": 0.9762
+      "own-028": 1.0
     },
-    "p95_seconds": 19.1,
+    "p95_seconds": 19.2,
     "passed": true
   },
   "runs": [
     {
       "case": "own-001",
       "run": 1,
-      "seconds": 11.8,
+      "seconds": 11.6,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 8,
+      "supported": 8,
+      "unsupported": []
+    },
+    {
+      "case": "own-001",
+      "run": 2,
+      "seconds": 13.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -32,19 +43,8 @@
     },
     {
       "case": "own-001",
-      "run": 2,
-      "seconds": 13.2,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 11,
-      "supported": 11,
-      "unsupported": []
-    },
-    {
-      "case": "own-001",
       "run": 3,
-      "seconds": 11.6,
+      "seconds": 13.0,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -55,61 +55,94 @@
     {
       "case": "own-001",
       "run": 4,
-      "seconds": 12.0,
+      "seconds": 11.8,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 9,
-      "supported": 9,
+      "claims": 8,
+      "supported": 8,
       "unsupported": []
     },
     {
       "case": "own-001",
       "run": 5,
-      "seconds": 12.3,
+      "seconds": 10.9,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 11,
+      "claims": 8,
+      "supported": 8,
       "unsupported": []
     },
     {
       "case": "own-001",
       "run": 6,
-      "seconds": 12.5,
+      "seconds": 11.0,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 11,
+      "claims": 8,
+      "supported": 8,
       "unsupported": []
     },
     {
       "case": "own-001",
       "run": 7,
-      "seconds": 11.7,
+      "seconds": 10.8,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 9,
-      "supported": 9,
+      "claims": 8,
+      "supported": 8,
       "unsupported": []
     },
     {
       "case": "own-001",
       "run": 8,
-      "seconds": 12.4,
+      "seconds": 11.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 11,
+      "claims": 8,
+      "supported": 8,
       "unsupported": []
     },
     {
       "case": "own-011",
       "run": 1,
+      "seconds": 15.7,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 13,
+      "supported": 13,
+      "unsupported": []
+    },
+    {
+      "case": "own-011",
+      "run": 2,
+      "seconds": 17.0,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 13,
+      "supported": 13,
+      "unsupported": []
+    },
+    {
+      "case": "own-011",
+      "run": 3,
+      "seconds": 15.1,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 13,
+      "supported": 13,
+      "unsupported": []
+    },
+    {
+      "case": "own-011",
+      "run": 4,
       "seconds": 15.3,
       "attempts": 1,
       "cited": true,
@@ -120,52 +153,19 @@
     },
     {
       "case": "own-011",
-      "run": 2,
-      "seconds": 16.3,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 13,
-      "supported": 13,
-      "unsupported": []
-    },
-    {
-      "case": "own-011",
-      "run": 3,
-      "seconds": 15.6,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 13,
-      "supported": 13,
-      "unsupported": []
-    },
-    {
-      "case": "own-011",
-      "run": 4,
-      "seconds": 15.0,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 13,
-      "supported": 13,
-      "unsupported": []
-    },
-    {
-      "case": "own-011",
       "run": 5,
-      "seconds": 15.6,
+      "seconds": 14.8,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 15,
-      "supported": 15,
+      "claims": 13,
+      "supported": 13,
       "unsupported": []
     },
     {
       "case": "own-011",
       "run": 6,
-      "seconds": 15.2,
+      "seconds": 15.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -176,7 +176,7 @@
     {
       "case": "own-011",
       "run": 7,
-      "seconds": 15.6,
+      "seconds": 18.0,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -187,7 +187,7 @@
     {
       "case": "own-011",
       "run": 8,
-      "seconds": 15.8,
+      "seconds": 15.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -198,20 +198,31 @@
     {
       "case": "own-019",
       "run": 1,
-      "seconds": 18.7,
+      "seconds": 17.6,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 17,
+      "supported": 17,
+      "unsupported": []
+    },
+    {
+      "case": "own-019",
+      "run": 2,
+      "seconds": 19.2,
       "attempts": 1,
       "cited": true,
       "rating": "low",
       "claims": 17,
       "supported": 16,
       "unsupported": [
-        "[PERSON_1] holds 25 to 50 percent of voting rights and of the right to share surplus assets in TECHSTART VENTURES LLP. (The record says [PERSON_1]'s voting rights are held 'as firm', but the claim drops this and presents them as held directly.)"
+        "[PERSON_1] controls TECHSTART VENTURES LLP with 25 to 50 percent voting rights and 25 to 50 percent right to share surplus assets. (The record says the voting rights are held 'as-firm', and the claim drops that qualifier, presenting them as directly held voting rights.)"
       ]
     },
     {
       "case": "own-019",
-      "run": 2,
-      "seconds": 17.7,
+      "run": 3,
+      "seconds": 18.9,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -221,82 +232,69 @@
     },
     {
       "case": "own-019",
-      "run": 3,
-      "seconds": 19.7,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 17,
-      "supported": 16,
-      "unsupported": [
-        "Under the policy, only strong sanctions or strong PEP candidates raise the rating above the minimum. (The policy states what strong candidates do and that weak ones do not raise the rating, but it never says these are the only things that can raise the rating, so 'only' adds an exclusivity the record does not give.)"
-      ]
-    },
-    {
-      "case": "own-019",
       "run": 4,
-      "seconds": 18.2,
+      "seconds": 18.4,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 17,
+      "claims": 16,
       "supported": 16,
-      "unsupported": [
-        "Only strong sanctions or PEP candidates raise the rating under the policy. (The policy says what strong candidates do and that weak ones don't raise the rating, but it never says no other factor can raise the rating, so 'only' goes beyond the record.)"
-      ]
+      "unsupported": []
     },
     {
       "case": "own-019",
       "run": 5,
-      "seconds": 19.1,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 17,
-      "supported": 16,
-      "unsupported": [
-        "Under the policy, only a strong sanctions candidate sets the rating to high and a strong PEP candidate sets it to at least medium. (The policy does not say these are the only routes to high or medium; 'only' adds an exclusivity the record does not state.)"
-      ]
-    },
-    {
-      "case": "own-019",
-      "run": 6,
-      "seconds": 19.4,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 17,
-      "supported": 17,
-      "unsupported": []
-    },
-    {
-      "case": "own-019",
-      "run": 7,
-      "seconds": 19.0,
-      "attempts": 1,
-      "cited": true,
-      "rating": "low",
-      "claims": 17,
-      "supported": 17,
-      "unsupported": []
-    },
-    {
-      "case": "own-019",
-      "run": 8,
       "seconds": 18.9,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 17,
-      "supported": 16,
+      "claims": 16,
+      "supported": 15,
       "unsupported": [
-        "Under the policy, only strong sanctions or strong PEP candidates raise the rating. (The policy describes how strong candidates affect the rating and that weak ones do not, but never says nothing else can raise the rating, so 'only' goes beyond the record.)"
+        "[PERSON_1] holds 25 to 50 percent of voting rights and of the right to share surplus assets in TECHSTART VENTURES LLP. (The record says [PERSON_1] holds the voting rights 'as firm', meaning as a member of a firm, but the claim presents it as a plain holding and drops that qualification.)"
+      ]
+    },
+    {
+      "case": "own-019",
+      "run": 6,
+      "seconds": 19.9,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 18,
+      "supported": 18,
+      "unsupported": []
+    },
+    {
+      "case": "own-019",
+      "run": 7,
+      "seconds": 19.3,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 16,
+      "supported": 15,
+      "unsupported": [
+        "[PERSON_1] holds 25 to 50 percent of voting rights and 25 to 50 percent of the right to share surplus assets in TECHSTART VENTURES LLP. (The record says the voting rights are held 'as firm', but the claim drops this and presents them as held by [PERSON_1] personally.)"
+      ]
+    },
+    {
+      "case": "own-019",
+      "run": 8,
+      "seconds": 18.4,
+      "attempts": 1,
+      "cited": true,
+      "rating": "low",
+      "claims": 16,
+      "supported": 15,
+      "unsupported": [
+        "[PERSON_1] holds 25 to 50 percent of voting rights and of the right to share surplus assets in TECHSTART VENTURES LLP. (The record says the voting rights are held 'as firm', but the claim drops that qualifier and presents them as held directly by [PERSON_1].)"
       ]
     },
     {
       "case": "own-025",
       "run": 1,
-      "seconds": 17.9,
+      "seconds": 18.6,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -307,7 +305,7 @@
     {
       "case": "own-025",
       "run": 2,
-      "seconds": 18.3,
+      "seconds": 17.7,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -318,7 +316,7 @@
     {
       "case": "own-025",
       "run": 3,
-      "seconds": 17.4,
+      "seconds": 17.6,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -329,7 +327,7 @@
     {
       "case": "own-025",
       "run": 4,
-      "seconds": 17.1,
+      "seconds": 18.7,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -340,7 +338,7 @@
     {
       "case": "own-025",
       "run": 5,
-      "seconds": 18.3,
+      "seconds": 17.8,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -351,7 +349,7 @@
     {
       "case": "own-025",
       "run": 6,
-      "seconds": 18.0,
+      "seconds": 18.1,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -362,7 +360,7 @@
     {
       "case": "own-025",
       "run": 7,
-      "seconds": 17.9,
+      "seconds": 18.3,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -373,7 +371,7 @@
     {
       "case": "own-025",
       "run": 8,
-      "seconds": 17.4,
+      "seconds": 17.7,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -384,44 +382,40 @@
     {
       "case": "own-028",
       "run": 1,
-      "seconds": 12.7,
+      "seconds": 11.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 10,
-      "unsupported": [
-        "Under the policy, only strong sanctions or PEP candidates raise the rating. (The policy says what strong candidates do and that weak ones don't raise the rating, but it never says that nothing else can raise it, so 'only' adds a certainty the record doesn't give.)"
-      ]
+      "claims": 9,
+      "supported": 9,
+      "unsupported": []
     },
     {
       "case": "own-028",
       "run": 2,
-      "seconds": 13.0,
+      "seconds": 11.6,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 10,
-      "unsupported": [
-        "Under the policy, only a strong sanctions candidate sets the rating to high and only a strong PEP candidate sets it to at least medium. (The policy states what strong sanctions and strong PEP candidates do, but never says these are the only ways to raise the rating, so 'only' adds an exclusivity it does not give.)"
-      ]
+      "claims": 9,
+      "supported": 9,
+      "unsupported": []
     },
     {
       "case": "own-028",
       "run": 3,
-      "seconds": 12.1,
+      "seconds": 11.4,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 10,
-      "supported": 10,
+      "claims": 9,
+      "supported": 9,
       "unsupported": []
     },
     {
       "case": "own-028",
       "run": 4,
-      "seconds": 11.9,
+      "seconds": 12.1,
       "attempts": 1,
       "cited": true,
       "rating": "low",
@@ -432,45 +426,45 @@
     {
       "case": "own-028",
       "run": 5,
-      "seconds": 12.1,
+      "seconds": 11.5,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 10,
-      "supported": 10,
+      "claims": 9,
+      "supported": 9,
       "unsupported": []
     },
     {
       "case": "own-028",
       "run": 6,
-      "seconds": 12.2,
+      "seconds": 10.9,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 11,
+      "claims": 9,
+      "supported": 9,
       "unsupported": []
     },
     {
       "case": "own-028",
       "run": 7,
-      "seconds": 12.5,
+      "seconds": 11.6,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 10,
-      "supported": 10,
+      "claims": 9,
+      "supported": 9,
       "unsupported": []
     },
     {
       "case": "own-028",
       "run": 8,
-      "seconds": 13.4,
+      "seconds": 11.7,
       "attempts": 1,
       "cited": true,
       "rating": "low",
-      "claims": 11,
-      "supported": 11,
+      "claims": 9,
+      "supported": 9,
       "unsupported": []
     }
   ]
