@@ -103,12 +103,143 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen pytest -m integration
 
+  screening-eval:
+    name: Screening eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      db:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: lineage
+          POSTGRES_PASSWORD: lineage-ci
+          POSTGRES_DB: lineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lineage -d lineage"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://lineage:lineage-ci@localhost:5432/lineage
+      DATA_DIR: ${{ github.workspace }}/.opensanctions
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      # The key changes only when the pins change, and the fetch step checks
+      # every file against its pinned checksum, so a cache entry cannot change
+      # what the eval loads.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .opensanctions
+          key: opensanctions-${{ hashFiles('ingest/lineage_ingest/fetch.py') }}
+      - run: uv run --frozen python -m lineage_ingest.fetch "$DATA_DIR"
+      - run: uv run --frozen python -m lineage_db.migrate
+      - run: >-
+          uv run --frozen python -m lineage_ingest.opensanctions
+          --sanctions "$DATA_DIR/sanctions.csv" --peps "$DATA_DIR/peps.csv"
+          --version "$(cat "$DATA_DIR/version.txt")"
+      - run: uv run --frozen python -m lineage_evals.run_screening --out "$RUNNER_TEMP/screening.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-screening
+          path: ${{ runner.temp }}/screening.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  ownership-eval:
+    name: Ownership eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      # Calls the live register. Dependabot pull requests cannot read Actions
+      # secrets, so they skip the eval and say so in the log.
+      - env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: |
+          if [ -z "$COMPANIES_HOUSE_API_KEY" ]; then
+            echo "::warning::COMPANIES_HOUSE_API_KEY is not available, ownership eval skipped"
+            exit 0
+          fi
+          uv run --frozen python -m lineage_evals.run_ownership --out "$RUNNER_TEMP/ownership.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-ownership
+          path: ${{ runner.temp }}/ownership.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Posts the eval scores next to the base branch's baselines as one comment
+  # that is updated on every run. It reports and does not gate.
+  eval-report:
+    name: Eval report
+    if: always() && github.event_name == 'pull_request'
+    needs: [screening-eval, ownership-eval]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: eval-*
+          path: current
+          merge-multiple: true
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: |
+          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json current/ 2>/dev/null || true
+          uv run --frozen python -m lineage_evals.report \
+            --current current --baseline base/packages/evals/baselines > report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- lineage-evals -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@report.md >/dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F body=@report.md >/dev/null
+          fi
+
   # One status for the branch rules to require. It fails if any job above
   # failed, was cancelled or was skipped.
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

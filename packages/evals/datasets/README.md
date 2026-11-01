@@ -2,7 +2,7 @@
 
 ## screening.jsonl
 
-200 labelled names for the sanctions and PEP screening eval, split into a UK pack and a UAE pack. The
+240 labelled names for the sanctions and PEP screening eval, split into a UK pack and a UAE pack. The
 release gate is recall of at least 98% on the cases that should match, reported for each pack, with
 precision reported over all 200.
 
@@ -12,6 +12,7 @@ precision reported over all 200.
 | `latin_variant` | 15 | 15 | match | Another Latin spelling that the same record lists |
 | `native_script` | 15 | 15 | match | The Cyrillic (UK) or Arabic (UAE) spelling that the record lists |
 | `pep` | 15 | 15 | match | Politically exposed people linked to the UK or the UAE |
+| `unlisted_variant` | 20 | 20 | match | A listed person's name spelled in a way no list carries: a dropped middle name, a common transliteration, a missing letter or two letters swapped. Reported as its own recall figure, outside the gate |
 | `token_collision` | 30 shared | | no match | A given name from one listed person and a family name from another |
 | `common_name` | 15 shared | | no match | Frequent given and family names in a pairing that is on no list |
 | `invented_company` | 15 shared | | no match | Made-up trading names |

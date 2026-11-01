@@ -9,9 +9,11 @@ import json
 import os
 import subprocess
 import tempfile
-from typing import Final, Protocol
+from dataclasses import dataclass
+from typing import Final, Protocol, TypeVar
 
 import anthropic
+from pydantic import BaseModel
 
 from lineage_agent.claims import Draft
 
@@ -19,9 +21,22 @@ MODEL = "claude-opus-5-5"
 EFFORT: Final = "medium"
 TIMEOUT = 900
 
+T = TypeVar("T", bound=BaseModel)
+
 
 class ModelRefused(RuntimeError):
     pass
+
+
+@dataclass(frozen=True)
+class Usage:
+    """What one model call used. Cost is the list price Claude Code reports for the same tokens;
+    on a subscription it is what the call would cost through the API, not what was billed."""
+
+    input_tokens: int
+    output_tokens: int
+    seconds: float
+    cost_usd: float | None
 
 
 class Model(Protocol):
@@ -40,12 +55,15 @@ class Claude:
         self._model = model
 
     def draft(self, system: str, prompt: str) -> Draft:
+        return self.structured(system, prompt, Draft)
+
+    def structured(self, system: str, prompt: str, output: type[T]) -> T:
         response = self._client.beta.messages.parse(
             model=self._model,
             max_tokens=16000,
             system=system,
             messages=[{"role": "user", "content": prompt}],
-            output_format=Draft,
+            output_format=output,
             output_config={"effort": EFFORT},
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
@@ -64,9 +82,13 @@ class ClaudeCode:
         self._model = model
         self._effort = effort
         self._binary = binary
+        self.usage: list[Usage] = []
 
     def draft(self, system: str, prompt: str) -> Draft:
-        schema = json.dumps(Draft.model_json_schema())
+        return self.structured(system, prompt, Draft)
+
+    def structured(self, system: str, prompt: str, output: type[T]) -> T:
+        schema = json.dumps(output.model_json_schema())
         command = [
             self._binary,
             "-p",
@@ -102,6 +124,22 @@ class ClaudeCode:
         if done.returncode != 0:
             raise ModelRefused(f"claude exited with {done.returncode}: {done.stderr.strip()[:300]}")
         result = json.loads(done.stdout)
+        tokens = result.get("usage") or {}
+        self.usage.append(
+            Usage(
+                input_tokens=sum(
+                    tokens.get(k, 0)
+                    for k in (
+                        "input_tokens",
+                        "cache_creation_input_tokens",
+                        "cache_read_input_tokens",
+                    )
+                ),
+                output_tokens=tokens.get("output_tokens", 0),
+                seconds=result.get("duration_ms", 0) / 1000,
+                cost_usd=result.get("total_cost_usd"),
+            )
+        )
         if result.get("is_error") or result.get("structured_output") is None:
             raise ModelRefused(f"no structured output: {result.get('subtype')}")
-        return Draft.model_validate(result["structured_output"])
+        return output.model_validate(result["structured_output"])

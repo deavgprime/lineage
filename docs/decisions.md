@@ -17,6 +17,7 @@ Source: Plan and architecture, 31 Oct 2026 (PDF). Project renamed from Sentinel 
 | 9 | Not adding: Temporal, LangChain, LlamaIndex, a separate vector database | Weight without payoff at about 12 hours a week |
 | 10 | Customer: a bank operating in the UK and the UAE. Jurisdiction is configuration (lists, registry source, policy corpus) with a UK pack and a UAE pack | One agent core serves both teams, and a new jurisdiction is a new pack |
 | 11 | Redaction happens only between the agent core and an external model. Known entities from tool results are replaced first, then Presidio catches the rest | Tools need real names, models must not see them. See [0001](decisions/0001-redaction.md) |
+| 12 | Strong screening matches set a minimum rating in code: sanctions means high, PEP means at least medium. Weak matches are alerts for the analyst and do not change the rating | Ratings should follow facts, not unreviewed fuzzy matches. See [0002](decisions/0002-risk-rating.md) |
 
 ## Proposed, awaiting decision
 
