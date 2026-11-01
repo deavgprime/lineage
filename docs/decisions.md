@@ -16,6 +16,7 @@ Source: Plan and architecture, 31 Oct 2026 (PDF). Project renamed from Sentinel 
 | 8 | CI/CD: GitHub Actions (test, eval gate, build, deploy) | |
 | 9 | Not adding: Temporal, LangChain, LlamaIndex, a separate vector database | Weight without payoff at about 12 hours a week |
 | 10 | Customer: a bank operating in the UK and the UAE. Jurisdiction is configuration (lists, registry source, policy corpus) with a UK pack and a UAE pack | One agent core serves both teams, and a new jurisdiction is a new pack |
+| 11 | Redaction happens only between the agent core and an external model. Known entities from tool results are replaced first, then Presidio catches the rest | Tools need real names, models must not see them. See [0001](decisions/0001-redaction.md) |
 
 ## Proposed, awaiting decision
 
@@ -30,9 +31,6 @@ Source: Plan and architecture, 31 Oct 2026 (PDF). Project renamed from Sentinel 
 
 ## Open design risks
 
-- Presidio redaction versus the task: names are the input to screening. Redaction must apply to
-  model prompts only, using stable placeholders mapped back after the call, and screening and registry
-  tools must run on unredacted data inside the trust boundary.
 - Companies House covers UK companies only, and no open UAE registry exists. The 30 ground-truth
   companies are UK, UAE ownership cases rely on GLEIF parent links and analyst-supplied documents, and
   that limit is stated wherever results are reported.

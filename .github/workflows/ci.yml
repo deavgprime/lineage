@@ -51,7 +51,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen ruff check .
       - run: uv run --frozen ruff format --check .
-      - run: uv run --frozen mypy packages tests
+      - run: uv run --frozen mypy packages ingest tests
 
   test:
     name: Test (py${{ matrix.python }})
@@ -70,14 +70,45 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
       - run: uv sync --frozen --python ${{ matrix.python }}
-      - run: uv run --frozen --python ${{ matrix.python }} pytest -m "not eval"
+      - run: uv run --frozen --python ${{ matrix.python }} pytest -m "not eval and not integration"
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      db:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: lineage
+          POSTGRES_PASSWORD: lineage-ci
+          POSTGRES_DB: lineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lineage -d lineage"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://lineage:lineage-ci@localhost:5432/lineage
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest -m integration
 
   # One status for the branch rules to require. It fails if any job above
   # failed, was cancelled or was skipped.
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test]
+    needs: [pre-commit, lint, test, integration]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
