@@ -6,7 +6,9 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
 dependencies = [
+  "anthropic>=1.0",
   "psycopg[binary]>=3.2",
+  "pydantic>=2.9",
 ]
 
 [dependency-groups]
@@ -15,6 +17,9 @@ dev = [
   "pytest>=8.3",
   "ruff>=0.8",
 ]
+
+[project.scripts]
+lineage = "lineage_agent.cli:main"
 
 [build-system]
 requires = ["hatchling>=1.25"]
