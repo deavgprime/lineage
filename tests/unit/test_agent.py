@@ -86,7 +86,7 @@ class Model:
                 claim(
                     "[PERSON_1] is a PEP candidate.",
                     "screening:companies-house:psc:" + PSC,
-                    "Candidate opensanctions:pep:Q1 (pep)",
+                    "Candidate opensanctions:pep:Q1 (pep, strong)",
                 )
             ],
             risk_rating="medium",
@@ -173,3 +173,38 @@ def test_claude_code_runs_headless_with_opus_at_medium_effort(
     assert command[command.index("--effort") + 1] == "medium"
     assert command[command.index("--tools") + 1] == ""
     assert seen["input"] == "the prompt"
+
+
+def agent_with(hits: dict[str, list[Candidate]], model: Any) -> Agent:
+    return Agent(Register(), Gleif(), lambda name, pack: hits.get(name, []), model)
+
+
+@pytest.mark.unit
+def test_a_strong_pep_sets_a_medium_floor(run: tuple[Any, Model, list[str]]) -> None:
+    result, model, _ = run
+    assert result.minimum_rating == "medium"
+    assert "Minimum risk rating for this case: medium" in model.prompts[0]
+    assert result.alerts == []
+
+
+@pytest.mark.unit
+def test_a_weak_match_is_an_alert_and_leaves_the_floor_low() -> None:
+    weak = Candidate(
+        "opensanctions:sanctions:X1", "EXAMPLE TRADES LTD", "sanctions", 0.7, "similar"
+    )
+    result = agent_with({"EXAMPLE TRADING LTD": [weak]}, Model()).run("00000001", "uk")
+    assert result.minimum_rating == "low"
+    assert result.alerts == [
+        "opensanctions:sanctions:X1 for companies-house:company:00000001",
+        "opensanctions:sanctions:X1 for gleif:LEI0000000000000001",
+    ]
+
+
+@pytest.mark.unit
+def test_a_rating_below_the_floor_is_sent_back() -> None:
+    strong = Candidate("opensanctions:sanctions:X2", "Jane Quill", "sanctions", 1.0, "exact")
+    model = Model()
+    result = agent_with({"Jane Quill": [strong]}, model).run("00000001", "uk")
+    assert result.minimum_rating == "high"
+    assert any("below the minimum high" in f for f in result.citation_failures)
+    assert "below the minimum high" in model.prompts[-1]
