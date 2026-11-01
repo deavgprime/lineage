@@ -103,12 +103,57 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen pytest -m integration
 
+  screening-eval:
+    name: Screening eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      db:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: lineage
+          POSTGRES_PASSWORD: lineage-ci
+          POSTGRES_DB: lineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lineage -d lineage"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://lineage:lineage-ci@localhost:5432/lineage
+      DATA_DIR: ${{ github.workspace }}/.opensanctions
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      # The key changes only when the pins change, and the fetch step checks
+      # every file against its pinned checksum, so a cache entry cannot change
+      # what the eval loads.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .opensanctions
+          key: opensanctions-${{ hashFiles('ingest/lineage_ingest/fetch.py') }}
+      - run: uv run --frozen python -m lineage_ingest.fetch "$DATA_DIR"
+      - run: uv run --frozen python -m lineage_db.migrate
+      - run: >-
+          uv run --frozen python -m lineage_ingest.opensanctions
+          --sanctions "$DATA_DIR/sanctions.csv" --peps "$DATA_DIR/peps.csv"
+          --version "$(cat "$DATA_DIR/version.txt")"
+      - run: uv run --frozen python -m lineage_evals.run_screening
+
   # One status for the branch rules to require. It fails if any job above
   # failed, was cancelled or was skipped.
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration]
+    needs: [pre-commit, lint, test, integration, screening-eval]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
