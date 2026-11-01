@@ -148,12 +148,36 @@ jobs:
           --version "$(cat "$DATA_DIR/version.txt")"
       - run: uv run --frozen python -m lineage_evals.run_screening
 
+  ownership-eval:
+    name: Ownership eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      # Calls the live register. Dependabot pull requests cannot read Actions
+      # secrets, so they skip the eval and say so in the log.
+      - env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: |
+          if [ -z "$COMPANIES_HOUSE_API_KEY" ]; then
+            echo "::warning::COMPANIES_HOUSE_API_KEY is not available, ownership eval skipped"
+            exit 0
+          fi
+          uv run --frozen python -m lineage_evals.run_ownership
+
   # One status for the branch rules to require. It fails if any job above
   # failed, was cancelled or was skipped.
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
