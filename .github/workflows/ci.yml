@@ -101,6 +101,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
       - run: uv sync --frozen
+      - run: docker compose up -d --wait keycloak
       - run: uv run --frozen pytest -m integration
 
   screening-eval:

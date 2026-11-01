@@ -23,6 +23,8 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       DATABASE_URL: postgresql://lineage:lineage-local@db:5432/lineage
+      OIDC_ISSUER: http://localhost:8080/realms/lineage
+      OIDC_JWKS_URL: http://keycloak:8080/realms/lineage/protocol/openid-connect/certs
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -36,6 +38,9 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin-local-test
+      # One issuer for tokens from the browser, the tests and other containers.
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     volumes:
       - ./infra/keycloak/lineage-realm.json:/opt/keycloak/data/import/lineage-realm.json:ro
     ports:
