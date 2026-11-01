@@ -60,7 +60,7 @@ change and goes through the same gates.
 | Stage | Checks |
 | --- | --- |
 | Local, before commit | Pre-commit hooks: formatting, lint, commit message format, text style |
-| Pull request into `develop` | Pre-commit, lint, type check, unit and integration tests on Python 3.12 and 3.13, eval harness when relevant |
+| Pull request into `develop` | Pre-commit, lint, type check, unit and integration tests on Python 3.12 and 3.13, the screening eval on pinned data, model evals when relevant |
 | Pull request into `main` | Everything above, plus end to end tests |
 | Nightly | Full eval suite, performance, contract tests against the live APIs |
 
@@ -74,6 +74,7 @@ uv sync --frozen
 uv run pytest -m unit
 docker compose up -d --wait db
 DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage uv run pytest -m integration
+uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions files, checksum verified
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
 uv run ruff check . && uv run ruff format --check .
@@ -87,6 +88,10 @@ uv run mypy packages ingest tests
 | Labelled screening names | 200 | `packages/evals` | `packages/evals/datasets/screening.jsonl` |
 | Ownership ground truth | 30 UK companies | `packages/evals` | `packages/evals/datasets/ownership.jsonl` |
 | Adverse media with injected instructions | To be set | `packages/evals` | `packages/evals/datasets/safety.jsonl` |
+
+The screening eval runs in CI on every pull request against the OpenSanctions versions pinned in
+`ingest/lineage_ingest/fetch.py`, and fails if recall in either pack drops below 98%. Moving the pins
+is a reviewed change like any other.
 
 Datasets are versioned with the code. A change to a label is reviewed like a change to code, because it
 moves the baseline.
