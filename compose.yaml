@@ -1,6 +1,7 @@
 # Local services for development and integration tests.
 #   docker compose up -d db
 #   docker compose up -d --build api
+#   docker compose up -d keycloak
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17
@@ -27,3 +28,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Local sign-in only: development mode, HTTP, and the test realm in infra/keycloak.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    command: ["start-dev", "--import-realm", "--http-port=8080", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-local-test
+    volumes:
+      - ./infra/keycloak/lineage-realm.json:/opt/keycloak/data/import/lineage-realm.json:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
