@@ -149,6 +149,8 @@ export interface components {
             row_hash: string;
             /** Seq */
             seq: number;
+            /** Verified */
+            verified: boolean;
         };
         /** CaseFile */
         CaseFile: {
