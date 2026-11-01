@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 from lineage_api.app import create_app
+from lineage_api.auth import Verifier
 from lineage_api.settings import Settings
 
 
@@ -30,7 +31,8 @@ class Pool:
 
 
 def client(pool: Pool) -> TestClient:
-    return TestClient(create_app(Settings(database_url="postgresql://unused"), pool=pool))
+    verifier = Verifier("issuer", "lineage-api", lambda _: None)
+    return TestClient(create_app(Settings(database_url="postgresql://unused"), pool, verifier))
 
 
 @pytest.mark.unit
@@ -60,4 +62,7 @@ def test_pool_opens_and_closes_with_the_app() -> None:
 def test_settings_come_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DATABASE_URL", "postgresql://x")
     monkeypatch.delenv("LOG_LEVEL", raising=False)
-    assert Settings.from_env() == Settings(database_url="postgresql://x", log_level="INFO")
+    monkeypatch.delenv("OIDC_ISSUER", raising=False)
+    settings = Settings.from_env()
+    assert settings.database_url == "postgresql://x"
+    assert settings.jwks_url.endswith("/realms/lineage/protocol/openid-connect/certs")

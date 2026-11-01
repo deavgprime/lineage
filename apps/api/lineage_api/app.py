@@ -13,6 +13,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 
+from lineage_api.auth import CurrentUser, Verifier
 from lineage_api.logs import configure
 from lineage_api.settings import Settings
 
@@ -25,7 +26,9 @@ class Pool(Protocol):
     def close(self, timeout: float = 5.0) -> None: ...
 
 
-def create_app(settings: Settings | None = None, pool: Pool | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None, pool: Pool | None = None, verifier: Verifier | None = None
+) -> FastAPI:
     settings = settings or Settings.from_env()
     configure(settings.log_level)
     db: Pool = pool or ConnectionPool(settings.database_url, min_size=1, max_size=10, open=False)
@@ -38,6 +41,10 @@ def create_app(settings: Settings | None = None, pool: Pool | None = None) -> Fa
 
     app = FastAPI(title="Lineage API", version="0.4.0", lifespan=lifespan)
     app.state.db = db
+    app.state.log = log
+    app.state.verifier = verifier or Verifier.from_jwks(
+        settings.oidc_issuer, settings.oidc_audience, settings.jwks_url
+    )
 
     @app.middleware("http")
     async def access_log(
@@ -67,5 +74,14 @@ def create_app(settings: Settings | None = None, pool: Pool | None = None) -> Fa
             log.exception("database not ready")
             return JSONResponse({"status": "unavailable"}, status_code=503)
         return {"status": "ok"}
+
+    @app.get("/me")
+    def me(user: CurrentUser) -> dict[str, object]:
+        return {
+            "id": user.id,
+            "username": user.username,
+            "role": user.role,
+            "packs": sorted(user.packs),
+        }
 
     return app
