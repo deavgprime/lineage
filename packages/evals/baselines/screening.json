@@ -1,0 +1,26 @@
+[
+  {
+    "pack": "uk",
+    "positives": 70,
+    "found": 70,
+    "recall": 1.0,
+    "negatives": 60,
+    "false_positives": 3,
+    "precision": 0.958904109589041,
+    "unlisted": 20,
+    "unlisted_found": 19,
+    "unlisted_recall": 0.95
+  },
+  {
+    "pack": "uae",
+    "positives": 70,
+    "found": 70,
+    "recall": 1.0,
+    "negatives": 60,
+    "false_positives": 1,
+    "precision": 0.9859154929577465,
+    "unlisted": 20,
+    "unlisted_found": 18,
+    "unlisted_recall": 0.9
+  }
+]

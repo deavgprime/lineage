@@ -146,7 +146,14 @@ jobs:
           uv run --frozen python -m lineage_ingest.opensanctions
           --sanctions "$DATA_DIR/sanctions.csv" --peps "$DATA_DIR/peps.csv"
           --version "$(cat "$DATA_DIR/version.txt")"
-      - run: uv run --frozen python -m lineage_evals.run_screening
+      - run: uv run --frozen python -m lineage_evals.run_screening --out "$RUNNER_TEMP/screening.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-screening
+          path: ${{ runner.temp }}/screening.json
+          if-no-files-found: ignore
+          retention-days: 7
 
   ownership-eval:
     name: Ownership eval
@@ -170,7 +177,62 @@ jobs:
             echo "::warning::COMPANIES_HOUSE_API_KEY is not available, ownership eval skipped"
             exit 0
           fi
-          uv run --frozen python -m lineage_evals.run_ownership
+          uv run --frozen python -m lineage_evals.run_ownership --out "$RUNNER_TEMP/ownership.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-ownership
+          path: ${{ runner.temp }}/ownership.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Posts the eval scores next to the base branch's baselines as one comment
+  # that is updated on every run. It reports and does not gate.
+  eval-report:
+    name: Eval report
+    if: always() && github.event_name == 'pull_request'
+    needs: [screening-eval, ownership-eval]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: eval-*
+          path: current
+          merge-multiple: true
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: |
+          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json current/ 2>/dev/null || true
+          uv run --frozen python -m lineage_evals.report \
+            --current current --baseline base/packages/evals/baselines > report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- lineage-evals -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@report.md >/dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F body=@report.md >/dev/null
+          fi
 
   # One status for the branch rules to require. It fails if any job above
   # failed, was cancelled or was skipped.
