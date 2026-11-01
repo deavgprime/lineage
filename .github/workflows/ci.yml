@@ -51,7 +51,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen ruff check .
       - run: uv run --frozen ruff format --check .
-      - run: uv run --frozen mypy packages ingest tests
+      - run: uv run --frozen mypy packages ingest apps tests
 
   test:
     name: Test (py${{ matrix.python }})
@@ -186,6 +186,18 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  api-image:
+    name: API image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: docker build -f apps/api/Dockerfile -t lineage-api:ci .
+      - run: |
+          docker run --rm lineage-api:ci python -c "import lineage_api.app, lineage_agent.agent"
+
   # Posts the eval scores next to the base branch's baselines as one comment
   # that is updated on every run. It reports and does not gate.
   eval-report:
@@ -239,7 +251,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
