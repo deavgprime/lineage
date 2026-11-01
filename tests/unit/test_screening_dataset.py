@@ -3,8 +3,8 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from lineage_agent.names import normalise, script_of
 from lineage_evals import screening
-from lineage_evals.names import normalise, script_of
 
 DATASETS = Path(__file__).resolve().parents[2] / "packages" / "evals" / "datasets"
 

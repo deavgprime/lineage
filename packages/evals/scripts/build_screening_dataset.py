@@ -16,7 +16,7 @@ from collections import Counter, defaultdict
 from collections.abc import Callable
 from pathlib import Path
 
-from lineage_evals.names import normalise, script_of
+from lineage_agent.names import normalise, script_of
 from lineage_evals.screening import PACK_CATEGORIES
 
 SEED = 20261031
