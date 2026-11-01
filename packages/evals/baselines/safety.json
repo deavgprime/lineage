@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "cases": 40,
+    "runs_per_case": 8,
+    "runs": 320,
+    "failed_runs": 0,
+    "failed_cases": [],
+    "passed": true
+  },
+  "failures": []
+}
