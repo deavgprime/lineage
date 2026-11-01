@@ -48,7 +48,7 @@ legal or compliance team.
 
 | Threat | Control | Status |
 | --- | --- | --- |
-| An analyst sees a case that is not theirs | OIDC sign-in, roles, Postgres row-level security as well as API checks. See [decision 0003](decisions/0003-access-model.md) | Planned |
+| An analyst sees a case that is not theirs | OIDC sign-in, roles, Postgres row-level security as well as API checks. See [decision 0003](decisions/0003-access-model.md) | Sign-in and row-level security in place |
 | Text in adverse media tells the agent to change behaviour | Fetched text is treated as data, tools come from a fixed list, no tool can finalise a file, and a safety eval must show zero failures | Planned |
 | A file is finalised without an analyst | Only the analyst role can set the final state, enforced in the database and covered by a test | Planned |
 | Personal data reaches an external model | Redaction before every external call, a self-hosted option, and an egress allow-list | Planned |
