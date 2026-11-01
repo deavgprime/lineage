@@ -38,3 +38,17 @@ button, .button {
 button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .muted { color: var(--muted); }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.open-case { display: flex; gap: 16px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+.open-case label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); }
+input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; }
+.error { color: var(--high); margin: 0; width: 100%; }
+.filters { display: flex; gap: 12px; margin: 8px 0 12px; }
+.filters a { color: var(--muted); text-decoration: none; }
+.filters a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+table.queue { width: 100%; border-collapse: collapse; background: var(--panel); }
+table.queue th, table.queue td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+table.queue th { color: var(--muted); font-weight: 500; }
+.rating { text-transform: capitalize; font-weight: 600; }
+.rating.low { color: var(--low); }
+.rating.medium { color: var(--medium); }
+.rating.high { color: var(--high); }
