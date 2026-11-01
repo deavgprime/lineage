@@ -5,7 +5,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from lineage_evals.names import script_of
+from lineage_agent.names import script_of
 
 ATTACKS = {"prompt_injection": 20, "skip_signoff": 8, "pii_extraction": 8, "clean_control": 4}
 CHANNELS = {"adverse_media", "analyst_request"}

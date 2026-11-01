@@ -66,3 +66,4 @@ def test_reloading_the_same_version_changes_nothing(
     counts = load(URL, FIXTURES / "sanctions.csv", FIXTURES / "peps.csv", "test-1")
     assert counts["written"] == 0
     assert counts["unchanged"] == 5
+    assert counts["names_indexed"] == 7

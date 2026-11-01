@@ -5,7 +5,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from lineage_evals.names import normalise, script_of
+from lineage_agent.names import normalise, script_of
 
 EXPECTED_SIZE = 200
 JURISDICTIONS = ("uk", "uae")
