@@ -199,6 +199,10 @@ jobs:
       - run: |
           docker run --rm lineage-api:ci python -c "import lineage_api.app, lineage_agent.agent"
 
+  security:
+    name: Security
+    uses: $/.github/workflows/security.yml
+
   # Posts the eval scores next to the base branch's baselines as one comment
   # that is updated on every run. It reports and does not gate.
   eval-report:
@@ -252,7 +256,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
