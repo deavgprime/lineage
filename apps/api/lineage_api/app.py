@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 
 from lineage_api.auth import CurrentUser, Verifier
+from lineage_api.cases import Runner, router
 from lineage_api.logs import configure
 from lineage_api.settings import Settings
 
@@ -27,7 +28,10 @@ class Pool(Protocol):
 
 
 def create_app(
-    settings: Settings | None = None, pool: Pool | None = None, verifier: Verifier | None = None
+    settings: Settings | None = None,
+    pool: Pool | None = None,
+    verifier: Verifier | None = None,
+    runner: Runner | None = None,
 ) -> FastAPI:
     settings = settings or Settings.from_env()
     configure(settings.log_level)
@@ -42,6 +46,11 @@ def create_app(
     app = FastAPI(title="Lineage API", version="0.4.0", lifespan=lifespan)
     app.state.db = db
     app.state.log = log
+    if runner is None:
+        from lineage_api.runner import LiveRunner
+
+        runner = LiveRunner(settings.database_url)
+    app.state.runner = runner
     app.state.verifier = verifier or Verifier.from_jwks(
         settings.oidc_issuer, settings.oidc_audience, settings.jwks_url
     )
@@ -84,4 +93,5 @@ def create_app(
             "packs": sorted(user.packs),
         }
 
+    app.include_router(router)
     return app
