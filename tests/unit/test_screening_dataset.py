@@ -23,7 +23,7 @@ def test_dataset_is_valid(cases: list[screening.ScreeningCase]) -> None:
 def test_meta_describes_the_dataset(cases: list[screening.ScreeningCase]) -> None:
     meta = json.loads((DATASETS / "screening.meta.json").read_text("utf-8"))
     assert meta["cases"] == len(cases)
-    assert meta["jurisdictions"] == {"uk": 70, "uae": 70, "both": 60}
+    assert meta["jurisdictions"] == {"uk": 90, "uae": 90, "both": 60}
     assert meta["version"]
     assert sum(meta["categories"].values()) == len(cases)
 
@@ -31,7 +31,8 @@ def test_meta_describes_the_dataset(cases: list[screening.ScreeningCase]) -> Non
 @pytest.mark.unit
 @pytest.mark.parametrize("pack", screening.JURISDICTIONS)
 def test_each_pack_has_70_positive_cases(cases: list[screening.ScreeningCase], pack: str) -> None:
-    assert sum(c.expected == "match" and c.jurisdiction == pack for c in cases) == 70
+    core = [c for c in cases if c.category != "unlisted_variant"]
+    assert sum(c.expected == "match" and c.jurisdiction == pack for c in core) == 70
 
 
 @pytest.mark.unit
@@ -73,7 +74,7 @@ def test_validation_catches_a_duplicate_query(cases: list[screening.ScreeningCas
 
 @pytest.mark.unit
 def test_validation_catches_a_short_dataset(cases: list[screening.ScreeningCase]) -> None:
-    assert any("expected 200" in p for p in screening.problems(cases[:-1]))
+    assert any("expected 240" in p for p in screening.problems(cases[:-1]))
 
 
 @pytest.mark.unit
@@ -89,3 +90,14 @@ def test_validation_catches_a_short_dataset(cases: list[screening.ScreeningCase]
 )
 def test_normalise(raw: str, folded: str) -> None:
     assert normalise(raw) == folded
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("pack", screening.JURISDICTIONS)
+def test_each_pack_has_20_unlisted_variants_of_listed_people(
+    cases: list[screening.ScreeningCase], pack: str
+) -> None:
+    variants = [c for c in cases if c.category == "unlisted_variant" and c.jurisdiction == pack]
+    assert len(variants) == 20
+    listed = {c.query for c in cases if c.category != "unlisted_variant"}
+    assert not [c.query for c in variants if c.query in listed]
