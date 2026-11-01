@@ -163,11 +163,22 @@ def test_claude_code_runs_headless_with_opus_at_medium_effort(
 
     def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
         seen["command"], seen["input"] = command, kwargs["input"]
-        out = {"is_error": False, "subtype": "success", "structured_output": draft.model_dump()}
+        out = {
+            "is_error": False,
+            "subtype": "success",
+            "structured_output": draft.model_dump(),
+            "duration_ms": 1500,
+            "total_cost_usd": 0.25,
+            "usage": {"input_tokens": 10, "cache_read_input_tokens": 90, "output_tokens": 40},
+        }
         return subprocess.CompletedProcess(command, 0, json.dumps(out), "")
 
     monkeypatch.setattr(subprocess, "run", fake_run)
-    assert ClaudeCode().draft("system", "the prompt") == draft
+    model = ClaudeCode()
+    assert model.draft("system", "the prompt") == draft
+    assert model.usage[0].input_tokens == 100
+    assert model.usage[0].output_tokens == 40
+    assert (model.usage[0].seconds, model.usage[0].cost_usd) == (1.5, 0.25)
     command = seen["command"]
     assert command[command.index("--model") + 1] == "claude-opus-5-5"
     assert command[command.index("--effort") + 1] == "medium"

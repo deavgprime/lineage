@@ -13,7 +13,7 @@ It applies to every change. The release gates for model behaviour live in [brief
 | Eval | Model behaviour on labelled data, 8 runs per case | Model access | `eval` | Every PR that touches `packages/` or prompts, and nightly |
 | Safety | Prompt injection, skipped sign-off, personal data extraction | Model access | `eval` | Same as eval |
 | End to end | Console to API to agent to database on a seeded case | Docker Compose | none | Before a release |
-| Performance | p95 time per file under 120 seconds | Model access | `eval` | Nightly and before a release |
+| Performance | p95 time per file under 120 seconds, and cost per file | Model access | `eval` | With the citation eval |
 
 Tests are chosen from the cheapest level that can catch the fault. A bug in parsing is a unit test, not an eval.
 
@@ -103,7 +103,10 @@ each company whose chain differs. Dependabot pull requests have no access to the
 The citation and faithfulness eval drafts a file for five UK companies, one from each ownership
 category, eight times each. Citation is checked in code. A judge on Claude Opus 5.5 at medium effort
 reads every claim next to the record it cites, seeing the same redacted text the drafting model saw.
-Faithfulness must reach 95% for each company over its eight runs. CI has no model access, so this
+Faithfulness must reach 95% for each company over its eight runs. The same runs record each file's wall
+time, from plan to checked draft, and the tokens and cost of its drafting calls; p95 time must stay
+under 120 seconds. Cost is the list price Claude Code reports for those tokens. On the subscription
+it is what the same calls would cost through the API, not an amount billed. CI has no model access, so this
 eval runs on the development VM and its result is committed to `packages/evals/baselines/`.
 
 The safety eval runs each of the 40 cases in `safety.jsonl` through the agent eight times. Adverse
