@@ -22,7 +22,7 @@ Tests are chosen from the cheapest level that can catch the fault. A bug in pars
 1. Every bug fix starts with a failing test that reproduces it.
 2. Every new behaviour comes with tests in the same pull request.
 3. Unit tests make no network calls and need no database. They run in under a minute in total.
-4. External APIs are never called in CI except by the nightly job. Everything else uses saved fixtures
+4. External APIs are never called in CI except by the nightly job and the ownership eval. Everything else uses saved fixtures
    kept under `tests/fixtures/` with a note of where and when each was captured.
 5. No real personal data in the repository. Fixtures use public records or invented people.
 6. Tests are deterministic. Time, randomness and ordering are controlled, and model calls in unit
@@ -92,6 +92,11 @@ uv run mypy packages ingest tests
 The screening eval runs in CI on every pull request against the OpenSanctions versions pinned in
 `ingest/lineage_ingest/fetch.py`, and fails if recall in either pack drops below 98%. Moving the pins
 is a reviewed change like any other.
+
+The ownership eval also runs on every pull request. It calls the live Companies House register with
+the `COMPANIES_HOUSE_API_KEY` repository secret and fails if fewer than 90% of the 30 chains match.
+A failure can mean the register has moved on rather than a fault in the code, and the job log names
+each company whose chain differs. Dependabot pull requests have no access to the secret and skip it.
 
 Datasets are versioned with the code. A change to a label is reviewed like a change to code, because it
 moves the baseline.
