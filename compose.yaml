@@ -1,5 +1,6 @@
 # Local services for development and integration tests.
 #   docker compose up -d db
+#   docker compose up -d --build api
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17
@@ -14,3 +15,15 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://lineage:lineage-local@db:5432/lineage
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
