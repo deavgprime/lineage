@@ -274,8 +274,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # The API drafts from fixtures here, so the run needs no model or register access.
+      # The API drafts and answers from fixtures here, so the run needs no model or register access.
       - run: docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait db keycloak api
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - name: Load the bank policies for the policy questions page
+        env:
+          DATABASE_URL: postgresql://lineage:lineage-local@127.0.0.1:5432/lineage
+        run: uv run --frozen python -m lineage_ingest.policy --no-legislation --flat-embeddings
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"

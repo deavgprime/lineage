@@ -9,6 +9,7 @@ source, version and licence. A section whose text has not changed keeps its embe
 the same version changes nothing.
 """
 
+import argparse
 import hashlib
 import os
 import re
@@ -260,10 +261,24 @@ def documents(include_legislation: bool = True) -> Iterable[Document]:
         yield fetch_mlr()
 
 
+class FlatEmbedder:
+    """The same vector for every text. Only for end-to-end tests, whose fixture answers use keyword
+    search, so they need neither the model download nor real embeddings."""
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        return [[1.0] + [0.0] * (DIMENSIONS - 1) for _ in texts]
+
+
 def main() -> None:
-    embedder = LocalEmbedder()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-legislation", action="store_true", help="load the bank policies only")
+    ap.add_argument(
+        "--flat-embeddings", action="store_true", help="end-to-end tests only: skip the model"
+    )
+    args = ap.parse_args()
+    embedder: Embedder = FlatEmbedder() if args.flat_embeddings else LocalEmbedder()
     with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
-        for document in documents():
+        for document in documents(include_legislation=not args.no_legislation):
             print(document.id, load(conn, document, embedder))
 
 

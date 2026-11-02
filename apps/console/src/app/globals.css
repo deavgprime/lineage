@@ -78,3 +78,10 @@ ol.trace { list-style: none; padding: 0; background: var(--panel); border: 1px s
 ol.trace li { display: grid; grid-template-columns: 80px 120px 1fr 130px; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
 ol.trace li.broken { background: #fbeaea; }
 ol.trace .actor { color: var(--muted); }
+nav.main { display: flex; gap: 16px; align-items: center; }
+nav.main a { color: var(--muted); text-decoration: none; }
+nav.main a.brand { color: var(--accent); }
+.ask { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.ask label { display: flex; flex-direction: column; gap: 4px; }
+.ask .row { display: flex; gap: 16px; align-items: end; }
+.history ul { margin: 0; padding-left: 18px; }
