@@ -85,6 +85,7 @@ uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data lo
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
 uv run python -m lineage_evals.run_citations   # drafts and judges 40 files on Opus 5.5
 uv run python -m lineage_evals.run_safety      # 40 safety cases, 8 runs each
+uv run python -m lineage_evals.run_redaction   # the Presidio pass on 46 passages, no model needed
 uv run ruff check . && uv run ruff format --check .
 uv run mypy packages ingest apps tests
 cd apps/console && npm ci && npm run lint && npm run typecheck && npm test && npm run build

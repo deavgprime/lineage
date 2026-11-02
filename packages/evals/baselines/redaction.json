@@ -1,0 +1,26 @@
+{
+  "planted": 36,
+  "recall_by_type": {
+    "EMAIL_ADDRESS": 1.0,
+    "EMIRATES_ID": 1.0,
+    "IBAN_CODE": 1.0,
+    "PERSON": 0.8,
+    "PHONE_NUMBER": 1.0,
+    "STREET_ADDRESS": 1.0,
+    "UAE_PASSPORT": 1.0,
+    "UK_NINO": 1.0,
+    "UK_PASSPORT": 1.0,
+    "UK_POSTCODE": 1.0
+  },
+  "identifier_recall": 1.0,
+  "person_recall": 0.8,
+  "recall_without_presidio": 0.0,
+  "clean_passages": 12,
+  "false_positives": 0,
+  "passed": true,
+  "misses": [
+    "red-028 en: PERSON 'Celia Marsh'",
+    "red-030 en: PERSON 'Amelia Okonkwo'"
+  ],
+  "false_positive_findings": []
+}
