@@ -1,0 +1,41 @@
+# A throwaway Postgres with pgvector for installing the chart on a local kind cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:0.8.1-pg17
+          env:
+            - { name: POSTGRES_USER, value: lineage }
+            - { name: POSTGRES_PASSWORD, value: lineage-kind }
+            - { name: POSTGRES_DB, value: lineage }
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", "lineage"] }
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector: { app: postgres }
+  ports:
+    - port: 5432
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lineage
+stringData:
+  DATABASE_URL: postgresql://lineage:lineage-kind@postgres:5432/lineage
+  SESSION_SECRET: kind-only-session-secret-0123456789abcdef

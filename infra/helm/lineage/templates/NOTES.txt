@@ -1,0 +1,8 @@
+Lineage {{ include "lineage.tag" . }} is installed as "{{ .Release.Name }}".
+
+Console: {{ .Values.consoleUrl }}
+Drafting: {{ .Values.drafting }}
+
+Migrations ran before this release. The ingestion job runs on "{{ .Values.ingest.schedule }}" (UTC);
+start it now with:
+  kubectl create job --from=cronjob/{{ .Release.Name }}-ingest {{ .Release.Name }}-ingest-now

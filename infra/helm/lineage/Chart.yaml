@@ -1,0 +1,8 @@
+apiVersion: v2
+name: lineage
+description: Cited due-diligence drafting for a bank's corporate onboarding, on the bank's own cluster.
+type: application
+version: 0.1.0
+appVersion: "0.6.0"
+kubeVersion: ">=1.29.0-0"
+home: https://github.com/deavgprime/lineage

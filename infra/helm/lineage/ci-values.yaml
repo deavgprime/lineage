@@ -1,0 +1,13 @@
+# Values for the chart's own tests in CI and on a local kind cluster. Not for a bank.
+oidc:
+  issuer: http://localhost:8080/realms/lineage
+  jwksUrl: http://keycloak:8080/realms/lineage/protocol/openid-connect/certs
+consoleUrl: http://localhost:3000
+existingSecret: lineage
+drafting: fixture
+image:
+  registry: lineage
+  tag: ci
+  pullPolicy: Never
+api: { replicas: 1 }
+console: { replicas: 1 }
