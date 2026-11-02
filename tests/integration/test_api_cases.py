@@ -144,3 +144,38 @@ def test_an_edited_audit_row_fails_verification(client: TestClient, case_id: str
         conn.rollback()
     assert results[0] == (False, True)
     assert all(r == (True, True) for r in results[1:])
+
+
+def test_the_whole_chain_verifies() -> None:
+    import psycopg
+    from lineage_db.audit import verify
+
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        report = verify(conn)
+    assert report.ok, report
+
+
+def test_an_export_verifies_on_its_own(client: TestClient, case_id: str, tmp_path: Any) -> None:
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    assert client.get(f"/cases/{case_id}/audit/export", headers=ANALYST_1).status_code == 403
+    response = client.get(f"/cases/{case_id}/audit/export", headers=AUDITOR)
+    assert response.status_code == 200, response.text
+    export = response.json()
+    assert export["exported_by"] == "auditor-1" and export["rows"]
+    path = tmp_path / "export.json"
+    path.write_text(json.dumps(export))
+    script = Path(__file__).resolve().parents[2] / "scripts" / "verify_audit_export.py"
+    ok = subprocess.run([sys.executable, str(script), str(path)], capture_output=True, text=True)
+    assert ok.returncode == 0, ok.stdout
+    # Change one recorded action and the check fails.
+    export["rows"][0]["hashed_text"] = export["rows"][0]["hashed_text"].replace("case_opened", "x")
+    path.write_text(json.dumps(export))
+    bad = subprocess.run([sys.executable, str(script), str(path)], capture_output=True, text=True)
+    assert bad.returncode == 1
+    # The export itself is recorded in the trail.
+    actions = [r["action"] for r in client.get(f"/cases/{case_id}/audit", headers=AUDITOR).json()]
+    assert actions[-1] == "audit_export"

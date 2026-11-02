@@ -104,6 +104,8 @@ jobs:
       - run: uv sync --frozen
       - run: docker compose up -d --wait keycloak
       - run: uv run --frozen pytest -m integration
+      # Every row the tests wrote, across all cases, must still verify against the chain.
+      - run: uv run --frozen python -m lineage_db.audit
 
   screening-eval:
     name: Screening eval

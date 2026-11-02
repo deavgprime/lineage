@@ -1,6 +1,50 @@
 {
   "components": {
     "schemas": {
+      "AuditExport": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "exported_at": {
+            "format": "date-time",
+            "title": "Exported At",
+            "type": "string"
+          },
+          "exported_by": {
+            "title": "Exported By",
+            "type": "string"
+          },
+          "format": {
+            "const": "lineage-audit-export/1",
+            "default": "lineage-audit-export/1",
+            "title": "Format",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "subject",
+          "exported_at",
+          "exported_by",
+          "rows"
+        ],
+        "title": "AuditExport",
+        "type": "object"
+      },
       "AuditRow": {
         "properties": {
           "action": {
@@ -275,6 +319,44 @@
           "updated_at"
         ],
         "title": "CaseSummary",
+        "type": "object"
+      },
+      "ExportRow": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "hashed_text": {
+            "title": "Hashed Text",
+            "type": "string"
+          },
+          "prev_hash": {
+            "title": "Prev Hash",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "actor",
+          "action",
+          "prev_hash",
+          "row_hash",
+          "hashed_text"
+        ],
+        "title": "ExportRow",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -716,6 +798,55 @@
           }
         ],
         "summary": "Audit Trail",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/cases/{case_id}/audit/export": {
+      "get": {
+        "description": "A case's audit trail with everything needed to check each row's hash outside Lineage.",
+        "operationId": "export_audit_cases__case_id__audit_export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditExport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Audit",
         "tags": [
           "cases"
         ]

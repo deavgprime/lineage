@@ -56,6 +56,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases/{case_id}/audit/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Audit
+         * @description A case's audit trail with everything needed to check each row's hash outside Lineage.
+         */
+        get: operations["export_audit_cases__case_id__audit_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/sign-off": {
         parameters: {
             query?: never;
@@ -128,6 +148,31 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AuditExport */
+        AuditExport: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Exported At
+             * Format: date-time
+             */
+            exported_at: string;
+            /** Exported By */
+            exported_by: string;
+            /**
+             * Format
+             * @default lineage-audit-export/1
+             * @constant
+             */
+            format: "lineage-audit-export/1";
+            /** Rows */
+            rows: components["schemas"]["ExportRow"][];
+            /** Subject */
+            subject: string;
+        };
         /** AuditRow */
         AuditRow: {
             /** Action */
@@ -235,6 +280,21 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** ExportRow */
+        ExportRow: {
+            /** Action */
+            action: string;
+            /** Actor */
+            actor: string;
+            /** Hashed Text */
+            hashed_text: string;
+            /** Prev Hash */
+            prev_hash: string;
+            /** Row Hash */
+            row_hash: string;
+            /** Seq */
+            seq: number;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -446,6 +506,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_audit_cases__case_id__audit_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditExport"];
                 };
             };
             /** @description Validation Error */
