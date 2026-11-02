@@ -21,4 +21,11 @@ describe("backchannel", () => {
       "http://other.example/x",
     ]);
   });
+  it("refuses to send an https issuer's traffic over plain HTTP", () => {
+    assert.throws(
+      () => backchannel("https://auth.bank.example/realms/lineage", "http://keycloak:8080"),
+      /must use https/,
+    );
+    assert.ok(backchannel("https://auth.bank.example/realms/lineage", "https://keycloak.internal"));
+  });
 });
