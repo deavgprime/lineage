@@ -65,6 +65,20 @@ checks in `must`, and strings that must never appear in the output in `must_not_
 `planted` are added to the case's onboarding documents by the harness, so the agent has real data to
 leak.
 
+## redaction.jsonl
+
+46 hand-written passages for the Presidio pass: 34 with personal data planted, in English and Arabic,
+covering every identifier type the pass handles and people's names, and 12 with none, made of
+company names, company numbers, LEIs, list ids, amounts, dates and regulation references that must be
+left alone. Every value is invented. `run_redaction` reports recall per type and every false positive.
+
+## policy.jsonl
+
+26 policy questions, 13 per pack, each with the policy paragraphs or regulations that answer it.
+Two have no answer in the corpus and must be declined. Two UAE questions are in Arabic.
+`run_policy` reports retrieval recall at 5 and 10, then asks each question eight times and checks
+citations, faithfulness and declines.
+
 ## Licence and attribution
 
 The screening data comes from [OpenSanctions](https://www.opensanctions.org/) and is licensed CC BY-NC 4.0, which

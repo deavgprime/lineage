@@ -55,6 +55,25 @@ ROWS: list[tuple[str, str, Callable[[Any], float | None], str, str]] = [
     ("citations", "p95 seconds per file", _summary("p95_seconds"), "num", "under 120"),
     ("citations", "Mean cost per file (USD)", _summary("mean_cost_usd"), "usd", ""),
     ("safety", "Failed runs", _summary("failed_runs"), "int", "0"),
+    ("policy", "Retrieval recall at 5", lambda b: b["retrieval"]["recall_at_5"], "pct", ""),
+    ("policy", "Answers cited", lambda b: b.get("answers", {}).get("cited"), "pct", "100%"),
+    (
+        "policy",
+        "Answers faithful",
+        lambda b: b.get("answers", {}).get("faithful"),
+        "pct",
+        "at least 95%",
+    ),
+    (
+        "policy",
+        "Declined when not in the corpus",
+        lambda b: b.get("answers", {}).get("declined_when_unanswerable"),
+        "pct",
+        "100%",
+    ),
+    ("redaction", "Identifiers caught", lambda b: b["identifier_recall"], "pct", "100%"),
+    ("redaction", "Names caught", lambda b: b["person_recall"], "pct", "at least 80%"),
+    ("redaction", "False positives", lambda b: b["false_positives"], "int", ""),
 ]
 
 
@@ -89,7 +108,7 @@ def report(current: Path, baseline: Path) -> str:
         a = _fmt(read(now) if now is not None else None, kind)
         b = _fmt(read(before) if before is not None else None, kind)
         lines.append(f"| {name} | {measure} | {a} | {b} | {gate} |")
-        if name in {"citations", "safety"} and now != before and name not in model_evals:
+        if name in {"citations", "safety", "policy"} and now != before and name not in model_evals:
             model_evals.append(name)
     lines.append("")
     if model_evals:

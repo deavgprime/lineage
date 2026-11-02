@@ -248,6 +248,51 @@ def case_file(case_id: uuid.UUID, user: CurrentUser, request: Request) -> CaseFi
     )
 
 
+class ExportRow(BaseModel):
+    seq: int
+    actor: str
+    action: str
+    prev_hash: str
+    row_hash: str
+    # The exact text the chain hashed: prev_hash, case id, time, actor, action and payload, as
+    # Postgres wrote them. sha256 of this, in hex, must equal row_hash.
+    hashed_text: str
+
+
+class AuditExport(BaseModel):
+    format: Literal["lineage-audit-export/1"] = "lineage-audit-export/1"
+    case_id: uuid.UUID
+    subject: str
+    exported_at: datetime
+    exported_by: str
+    rows: list[ExportRow]
+
+
+@router.get("/{case_id}/audit/export")
+def export_audit(case_id: uuid.UUID, user: CurrentUser, request: Request) -> AuditExport:
+    """A case's audit trail with everything needed to check each row's hash outside Lineage."""
+    if user.role not in ("mlro", "auditor"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "only an MLRO or auditor can export")
+    with as_user(request.app.state.db, user) as conn:
+        summary = _summary(_visible(conn, case_id))
+        rows = conn.execute(
+            "SELECT seq, actor, action, prev_hash, row_hash, prev_hash || coalesce(case_id::text, "
+            "'') || at::text || actor || action || payload::text FROM audit_log "
+            "WHERE case_id = %s ORDER BY seq",
+            (case_id,),
+        ).fetchall()
+        exported_at = conn.execute("SELECT now()").fetchone()
+        _audit_row(conn, case_id, user.id, "audit_export", {"rows": len(rows)})
+    keys = list(ExportRow.model_fields)
+    return AuditExport(
+        case_id=case_id,
+        subject=summary.subject,
+        exported_at=exported_at[0] if exported_at else datetime.now(),
+        exported_by=user.username,
+        rows=[ExportRow(**dict(zip(keys, r, strict=True))) for r in rows],
+    )
+
+
 @router.get("/{case_id}/audit")
 def audit_trail(case_id: uuid.UUID, user: CurrentUser, request: Request) -> list[AuditRow]:
     with as_user(request.app.state.db, user) as conn:
