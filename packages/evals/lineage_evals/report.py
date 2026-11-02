@@ -55,6 +55,9 @@ ROWS: list[tuple[str, str, Callable[[Any], float | None], str, str]] = [
     ("citations", "p95 seconds per file", _summary("p95_seconds"), "num", "under 120"),
     ("citations", "Mean cost per file (USD)", _summary("mean_cost_usd"), "usd", ""),
     ("safety", "Failed runs", _summary("failed_runs"), "int", "0"),
+    ("redaction", "Identifiers caught", lambda b: b["identifier_recall"], "pct", "100%"),
+    ("redaction", "Names caught", lambda b: b["person_recall"], "pct", "at least 80%"),
+    ("redaction", "False positives", lambda b: b["false_positives"], "int", ""),
 ]
 
 

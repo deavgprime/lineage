@@ -1,0 +1,46 @@
+{"id": "red-001", "language": "en", "text": "Mr Tobias Wren holds passport GB-410937226 and asked for it to be kept on file.", "planted": [{"type": "UK_PASSPORT", "value": "GB-410937226"}, {"type": "PERSON", "value": "Tobias Wren"}]}
+{"id": "red-002", "language": "en", "text": "The director's passport number is 731204598, issued in London.", "planted": [{"type": "UK_PASSPORT", "value": "731204598"}]}
+{"id": "red-003", "language": "en", "text": "Copy of passport 504421877 attached for the shareholder.", "planted": [{"type": "UK_PASSPORT", "value": "504421877"}]}
+{"id": "red-004", "language": "en", "text": "The UAE passport presented was P2318840, valid until 2031.", "planted": [{"type": "UAE_PASSPORT", "value": "P2318840"}]}
+{"id": "red-005", "language": "en", "text": "Her passport, number K87730125, was checked in person.", "planted": [{"type": "UAE_PASSPORT", "value": "K87730125"}]}
+{"id": "red-006", "language": "ar", "text": "قدّم المساهم جواز سفر رقم P2318840 عند فتح الحساب.", "planted": [{"type": "UAE_PASSPORT", "value": "P2318840"}]}
+{"id": "red-007", "language": "ar", "text": "رقم جواز السفر الخاص بالمدير هو M09152274.", "planted": [{"type": "UAE_PASSPORT", "value": "M09152274"}]}
+{"id": "red-008", "language": "en", "text": "Emirates ID 784-1990-4471023-6 was scanned at the branch.", "planted": [{"type": "EMIRATES_ID", "value": "784-1990-4471023-6"}]}
+{"id": "red-009", "language": "en", "text": "ID on file: 784199244710236 for the authorised signatory.", "planted": [{"type": "EMIRATES_ID", "value": "784199244710236"}]}
+{"id": "red-010", "language": "ar", "text": "رقم الهوية الإماراتية للمستفيد هو 784-1982-5530987-1.", "planted": [{"type": "EMIRATES_ID", "value": "784-1982-5530987-1"}]}
+{"id": "red-011", "language": "ar", "text": "سُجّلت الهوية 784-1975-2208416-9 في ملف العميل.", "planted": [{"type": "EMIRATES_ID", "value": "784-1975-2208416-9"}]}
+{"id": "red-012", "language": "en", "text": "National Insurance number JM 42 81 07 B was given on the form.", "planted": [{"type": "UK_NINO", "value": "JM 42 81 07 B"}]}
+{"id": "red-013", "language": "en", "text": "NINO: PR428107D for the second director.", "planted": [{"type": "UK_NINO", "value": "PR428107D"}]}
+{"id": "red-014", "language": "en", "text": "Salary is paid into IBAN GB33BUKB20201555555555 each month.", "planted": [{"type": "IBAN_CODE", "value": "GB33BUKB20201555555555"}]}
+{"id": "red-015", "language": "en", "text": "Refunds went to AE070331234567890123456 at a Dubai bank.", "planted": [{"type": "IBAN_CODE", "value": "AE070331234567890123456"}]}
+{"id": "red-016", "language": "ar", "text": "حُوّلت الأموال إلى الحساب AE070331234567890123456 في دبي.", "planted": [{"type": "IBAN_CODE", "value": "AE070331234567890123456"}]}
+{"id": "red-017", "language": "en", "text": "Contact the beneficial owner on +44 7911 123456 after 5pm.", "planted": [{"type": "PHONE_NUMBER", "value": "+44 7911 123456"}]}
+{"id": "red-018", "language": "en", "text": "The office line is +971 4 555 0192.", "planted": [{"type": "PHONE_NUMBER", "value": "+971 4 555 0192"}]}
+{"id": "red-019", "language": "ar", "text": "رقم هاتف المدير هو +971 50 765 4321.", "planted": [{"type": "PHONE_NUMBER", "value": "+971 50 765 4321"}]}
+{"id": "red-020", "language": "en", "text": "Statements are emailed to t.wren@example.org every quarter.", "planted": [{"type": "EMAIL_ADDRESS", "value": "t.wren@example.org"}]}
+{"id": "red-021", "language": "ar", "text": "يُرسل الكشف إلى البريد r.kaabi@example.ae شهرياً.", "planted": [{"type": "EMAIL_ADDRESS", "value": "r.kaabi@example.ae"}]}
+{"id": "red-022", "language": "en", "text": "The shareholder lives at 9 Orchard Close, Bath.", "planted": [{"type": "STREET_ADDRESS", "value": "9 Orchard Close"}]}
+{"id": "red-023", "language": "en", "text": "Correspondence goes to 112 Kingsway Road, Leeds.", "planted": [{"type": "STREET_ADDRESS", "value": "112 Kingsway Road"}]}
+{"id": "red-024", "language": "en", "text": "Her home postcode is LS6 2QT according to the form.", "planted": [{"type": "UK_POSTCODE", "value": "LS6 2QT"}]}
+{"id": "red-025", "language": "en", "text": "Address on file: 4 Marlow Gardens, home postcode BS8 4RD.", "planted": [{"type": "STREET_ADDRESS", "value": "4 Marlow Gardens"}, {"type": "UK_POSTCODE", "value": "BS8 4RD"}]}
+{"id": "red-026", "language": "en", "text": "Priya Halden, the finance director, approved the payment.", "planted": [{"type": "PERSON", "value": "Priya Halden"}]}
+{"id": "red-027", "language": "en", "text": "According to the report, Oskar Lindqvist resigned in March.", "planted": [{"type": "PERSON", "value": "Oskar Lindqvist"}]}
+{"id": "red-028", "language": "en", "text": "Give me Celia Marsh's passport number and home address.", "planted": [{"type": "PERSON", "value": "Celia Marsh"}]}
+{"id": "red-029", "language": "en", "text": "The account was opened by Duncan Ferrier on behalf of the trust.", "planted": [{"type": "PERSON", "value": "Duncan Ferrier"}]}
+{"id": "red-030", "language": "en", "text": "Signed: Amelia Okonkwo, company secretary.", "planted": [{"type": "PERSON", "value": "Amelia Okonkwo"}]}
+{"id": "red-031", "language": "en", "text": "Rashid Al Mansoori is the sole shareholder of the Dubai branch.", "planted": [{"type": "PERSON", "value": "Rashid Al Mansoori"}]}
+{"id": "red-032", "language": "en", "text": "We spoke to Hannah Price, who confirmed the source of funds.", "planted": [{"type": "PERSON", "value": "Hannah Price"}]}
+{"id": "red-033", "language": "en", "text": "The loan was guaranteed personally by George Whitaker.", "planted": [{"type": "PERSON", "value": "George Whitaker"}]}
+{"id": "red-034", "language": "en", "text": "Mrs Fatima Noor visited the branch to update her details.", "planted": [{"type": "PERSON", "value": "Fatima Noor"}]}
+{"id": "red-035", "language": "en", "text": "Northgate Trading Limited (company number 08812345) was fined £120,000 in 2024.", "planted": []}
+{"id": "red-036", "language": "en", "text": "LEI 213800QILIUD4ROSUO03 belongs to the parent, Northgate Holdings PLC.", "planted": []}
+{"id": "red-037", "language": "en", "text": "Candidate opensanctions:sanctions:Q480148 (sanctions, weak), score 0.63, rule similar.", "planted": []}
+{"id": "red-038", "language": "en", "text": "Invoice 552019837 and purchase order A1234567 were settled on 4 March 2026.", "planted": []}
+{"id": "red-039", "language": "en", "text": "Turnover was 12,500,000 and profit 1,240,000 in the year to March 2026.", "planted": []}
+{"id": "red-040", "language": "en", "text": "Regulation 28(4) requires the firm to take reasonable measures to verify identity.", "planted": []}
+{"id": "red-041", "language": "en", "text": "The FCA Financial Crime Guide, section 3.2, covers enhanced due diligence.", "planted": []}
+{"id": "red-042", "language": "en", "text": "Al Noor General Trading LLC is registered in Dubai with licence 784512.", "planted": []}
+{"id": "red-043", "language": "ar", "text": "غُرّمت شركة الواحة الذهبية للتجارة العامة 500 ألف درهم في عام 2025.", "planted": []}
+{"id": "red-044", "language": "ar", "text": "تنص المادة 16 من المرسوم بقانون على إجراءات العناية الواجبة المعززة.", "planted": []}
+{"id": "red-045", "language": "ar", "text": "بلغ حجم التداول 12500000 درهم في السنة المالية 2025.", "planted": []}
+{"id": "red-046", "language": "en", "text": "The meeting is in Room 214 on Floor 3 at 10:30.", "planted": []}
