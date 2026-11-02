@@ -43,7 +43,7 @@ AUDITOR = headers("auditor-1", "auditor", ["uk", "uae"])
 MLRO_2 = headers("mlro-uk-2", "mlro", ["uk"])
 
 
-def app(runner: Any) -> TestClient:
+def app(runner: Any, asker: Any = None) -> TestClient:
     pool = ConnectionPool(URL, min_size=1, max_size=4, open=False)
     verifier = Verifier(ISSUER, "lineage-api", lambda _: KEY.public_key())
-    return TestClient(create_app(Settings(database_url=URL), pool, verifier, runner))
+    return TestClient(create_app(Settings(database_url=URL), pool, verifier, runner, asker))

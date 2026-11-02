@@ -2,13 +2,14 @@
 
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import psycopg
 from lineage_agent.agent import Agent, Result
 from lineage_agent.claims import Claim, Draft
 from lineage_agent.cli import model
 from lineage_agent.pii import PresidioScanner
+from lineage_agent.policy_qa import KEYWORD_SEARCH, Answer, Passage, PolicyAnswer, ask
 from lineage_agent.tools.screening import screen
 from lineage_ingest.companies_house import CompaniesHouse
 from lineage_ingest.gleif import Gleif
@@ -105,3 +106,42 @@ class FixtureRunner:
             minimum_rating="low",
             alerts=[f"{candidate} for {record_id}"],
         )
+
+
+class LiveAsker:
+    """Policy questions with the local embedding model and rerankers, and Claude to answer.
+    The models load on first use, so the API starts fast."""
+
+    def __init__(self) -> None:
+        self._embedder: Any = None
+        self._reranker: Any = None
+
+    def __call__(self, question: str, pack: str, conn: Any, audit: Audit) -> Answer:
+        from lineage_agent.policy_qa import LocalReranker, PgRetriever
+        from lineage_ingest.policy import MODELS, LocalEmbedder
+
+        if self._embedder is None:
+            self._embedder = LocalEmbedder()
+            self._reranker = LocalReranker(str(MODELS))
+        retriever = PgRetriever(conn, lambda q: self._embedder.embed([q])[0], self._reranker)
+        return ask(question, pack, retriever, model(), SCANNER, audit)
+
+
+class FixtureAsker:
+    """Keyword search only and a canned answer quoting the top passage, for end-to-end tests."""
+
+    def __call__(self, question: str, pack: str, conn: Any, audit: Audit) -> Answer:
+        rows = conn.execute(KEYWORD_SEARCH, {"pack": pack, "question": question, "limit": 3})
+        passages = [Passage(*r) for r in rows.fetchall()]
+        audit("policy_search", {"pack": pack, "passages": [p.id for p in passages]})
+        if not passages:
+            answer = PolicyAnswer(answered=False, statements=[], note="Nothing in the corpus.")
+        else:
+            top = passages[0]
+            quote = top.text.split(". ")[0]
+            answer = PolicyAnswer(
+                answered=True,
+                statements=[Claim(text=f"{top.ref} applies.", source_id=top.id, quote=quote)],
+            )
+        audit("policy_answer", {"attempts": 1, "citation_failures": 0})
+        return Answer(question, pack, answer, passages, 1, [])
