@@ -8,6 +8,7 @@ import psycopg
 from lineage_agent.agent import Agent, Result
 from lineage_agent.claims import Claim, Draft
 from lineage_agent.cli import model
+from lineage_agent.pii import PresidioScanner
 from lineage_agent.tools.screening import screen
 from lineage_ingest.companies_house import CompaniesHouse
 from lineage_ingest.gleif import Gleif
@@ -17,6 +18,10 @@ from lineage_api.cases import Audit
 CACHE = (
     Path(os.environ.get("LINEAGE_CACHE", Path.home() / ".cache" / "lineage")) / "companies-house"
 )
+
+
+# One scanner per process: loading its language model takes a second.
+SCANNER = PresidioScanner()
 
 
 class LiveRunner:
@@ -32,6 +37,7 @@ class LiveRunner:
                 screen=lambda name, p: screen(conn, name, p),
                 model=model(),
                 audit=audit,
+                scanner=SCANNER,
             )
             return agent.run(company_number, pack)
 
