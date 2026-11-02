@@ -47,6 +47,8 @@ def client() -> Iterator[TestClient]:
         load(conn, corpus, Flat())
     with app(FixtureRunner(), FixtureAsker()) as c:
         yield c
+    with psycopg.connect(URL, autocommit=True) as conn:
+        conn.execute("DELETE FROM policy_documents WHERE id = %s", (corpus.id,))
 
 
 def ask(client: TestClient, who: dict[str, str], question: str, pack: str = "uk") -> Any:

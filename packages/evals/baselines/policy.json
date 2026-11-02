@@ -1,0 +1,247 @@
+{
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "retrieval": {
+    "questions": 24,
+    "recall_at_5": 1.0,
+    "recall_at_10": 1.0,
+    "by_question": [
+      {
+        "id": "pol-001",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 10.1",
+          "Regulation 40(3)",
+          "UK KYC policy 2.3"
+        ]
+      },
+      {
+        "id": "pol-002",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 4.1",
+          "Regulation 5(3)",
+          "Regulation 5(1)"
+        ]
+      },
+      {
+        "id": "pol-003",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 9.3",
+          "UK KYC policy 9.1",
+          "UK KYC policy 9.2"
+        ]
+      },
+      {
+        "id": "pol-004",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 4.5",
+          "Regulation 30A(2)",
+          "Regulation 30A(2B)"
+        ]
+      },
+      {
+        "id": "pol-005",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 7.1",
+          "Regulation 33(2)",
+          "Regulation 33(4A)"
+        ]
+      },
+      {
+        "id": "pol-006",
+        "first_relevant_rank": 2,
+        "top3": [
+          "UK KYC policy 6.1",
+          "UK KYC policy 6.2",
+          "Regulation 35(1)"
+        ]
+      },
+      {
+        "id": "pol-007",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 2.3",
+          "Regulation 27(8)",
+          "Regulation 28(11)"
+        ]
+      },
+      {
+        "id": "pol-008",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 5.3",
+          "UK KYC policy 5.2",
+          "UK KYC policy 6.3"
+        ]
+      },
+      {
+        "id": "pol-009",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 3.2",
+          "Regulation 39(2)",
+          "UK KYC policy 3.3"
+        ]
+      },
+      {
+        "id": "pol-010",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 4.4",
+          "UK KYC policy 4.2",
+          "Regulation 28(7)"
+        ]
+      },
+      {
+        "id": "pol-011",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 8.2",
+          "Regulation 30A(2B)",
+          "Regulation 30A(2)"
+        ]
+      },
+      {
+        "id": "pol-012",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UK KYC policy 11.2",
+          "UK KYC policy 11.1",
+          "UK KYC policy 8.1"
+        ]
+      },
+      {
+        "id": "pol-014",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 5.1",
+          "UAE KYC policy 5.2",
+          "UAE KYC policy 5.4"
+        ]
+      },
+      {
+        "id": "pol-015",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 5.2",
+          "UAE KYC policy 5.3",
+          "UAE KYC policy 5.1"
+        ]
+      },
+      {
+        "id": "pol-016",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 4.3",
+          "UAE KYC policy 4.2",
+          "UAE KYC policy 4.4"
+        ]
+      },
+      {
+        "id": "pol-017",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 4.1",
+          "UAE KYC policy 4.4",
+          "UAE KYC policy 4.3"
+        ]
+      },
+      {
+        "id": "pol-018",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 4.2",
+          "UAE KYC policy 4.4",
+          "UAE KYC policy 4.3"
+        ]
+      },
+      {
+        "id": "pol-019",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 10.1",
+          "UAE KYC policy 2.3",
+          "UAE KYC policy 2.2"
+        ]
+      },
+      {
+        "id": "pol-020",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 11.2",
+          "UAE KYC policy 11.1",
+          "UAE KYC policy 7.1"
+        ]
+      },
+      {
+        "id": "pol-021",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 5.4",
+          "UAE KYC policy 5.2",
+          "UAE KYC policy 5.3"
+        ]
+      },
+      {
+        "id": "pol-022",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 10.1",
+          "UAE KYC policy 2.3",
+          "UAE KYC policy 10.2"
+        ]
+      },
+      {
+        "id": "pol-023",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 4.1",
+          "UAE KYC policy 4.4",
+          "UAE KYC policy 4.2"
+        ]
+      },
+      {
+        "id": "pol-024",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 6.2",
+          "UAE KYC policy 6.1",
+          "UAE KYC policy 6.3"
+        ]
+      },
+      {
+        "id": "pol-025",
+        "first_relevant_rank": 1,
+        "top3": [
+          "UAE KYC policy 2.1",
+          "UAE KYC policy 1.1",
+          "UAE KYC policy 10.1"
+        ]
+      }
+    ]
+  },
+  "answers": {
+    "runs": 208,
+    "runs_per_question": 8,
+    "answered": 1.0,
+    "cited": 1.0,
+    "claims": 573,
+    "faithful": 0.9895,
+    "declined_when_unanswerable": 1.0,
+    "p95_seconds": 23.4,
+    "unsupported": [
+      "Under Regulation 30A(2B), the duty to report material discrepancies also applies to information collected under paragraph (2A), which covers the period after the relationship is established. (The cited 30A(2B) record does not say what period paragraph (2A) covers; that description comes from a different record (30A(2A)).)",
+      "The company's details are verified against the Companies House register. (Section 3.2 only refers to \"these details\" and never says they are the company's, so the claim supplies a referent the record does not.)",
+      "The details in question are the company's full name, registered number, registered office address, principal place of business if different, and the names of its directors and senior managers, which the analyst must record. (Section 3.1 gives the list the analyst must record, but nothing in it says these are the details 3.2 refers to, so that link comes from outside the record.)",
+      "Before reaching that point, the analyst must trace ownership through every intermediate company until each beneficial owner is identified, or until the chain ends in a listed company, a government body or a company outside the United Kingdom whose ownership cannot be traced through public registers. (The tracing requirement is quoted correctly, but 'Before reaching that point' says the 4.2 tracing comes before the 4.4 no-beneficial-owner fallback, and policy 4.2 doesn't state that order.)",
+      "Before reaching that point, the analyst must trace ownership through every intermediate company until each beneficial owner is identified, or until the chain ends in a listed company, a government body or a company outside the United Kingdom whose ownership cannot be traced through public registers. (Policy 4.2 states the tracing duty but does not link it to policy 4.4 or say it must happen 'before reaching that point'; that order of steps is added by the claim.)",
+      "Before reaching that point, the analyst must trace ownership through every intermediate company until each beneficial owner is identified, or until the chain ends in a listed company, a government body, or a company outside the United Kingdom whose ownership cannot be traced through public registers. (The tracing requirement matches policy 4.2, but 'Before reaching that point' says it comes before the 4.4 no-beneficial-owner step, and policy 4.2 does not state that.)"
+    ],
+    "unanswered": []
+  },
+  "passed": true
+}
