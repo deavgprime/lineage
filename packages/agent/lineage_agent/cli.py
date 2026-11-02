@@ -21,13 +21,14 @@ from lineage_ingest.companies_house import CompaniesHouse
 from lineage_ingest.gleif import Gleif
 
 from lineage_agent.agent import Agent
-from lineage_agent.model import Claude, ClaudeCode, Model
+from lineage_agent.model import Claude, ClaudeCode
+from lineage_agent.pii import PresidioScanner
 from lineage_agent.tools.screening import screen
 
 CACHE = Path.home() / ".cache" / "lineage" / "companies-house"
 
 
-def model() -> Model:
+def model() -> Claude | ClaudeCode:
     return Claude() if os.environ.get("LINEAGE_MODEL") == "api" else ClaudeCode()
 
 
@@ -55,6 +56,7 @@ def draft(company_number: str, pack: str) -> dict[str, Any]:
             screen=lambda name, p: screen(conn, name, p),
             model=model(),
             audit=audit,
+            scanner=PresidioScanner(),
         )
         result = agent.run(company_number, pack)
         out = asdict(result)

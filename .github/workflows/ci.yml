@@ -104,6 +104,8 @@ jobs:
       - run: uv sync --frozen
       - run: docker compose up -d --wait keycloak
       - run: uv run --frozen pytest -m integration
+      # Every row the tests wrote, across all cases, must still verify against the chain.
+      - run: uv run --frozen python -m lineage_db.audit
 
   screening-eval:
     name: Screening eval
@@ -188,6 +190,28 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  redaction-eval:
+    name: Redaction eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen python -m lineage_evals.run_redaction --out "$RUNNER_TEMP/redaction.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-redaction
+          path: ${{ runner.temp }}/redaction.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   api-image:
     name: API image
     runs-on: ubuntu-latest
@@ -250,8 +274,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # The API drafts from fixtures here, so the run needs no model or register access.
+      # The API drafts and answers from fixtures here, so the run needs no model or register access.
       - run: docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait db keycloak api
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - name: Load the bank policies for the policy questions page
+        env:
+          DATABASE_URL: postgresql://lineage:lineage-local@127.0.0.1:5432/lineage
+        run: uv run --frozen python -m lineage_ingest.policy --no-legislation --flat-embeddings
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
@@ -288,7 +320,7 @@ jobs:
   eval-report:
     name: Eval report
     if: always() && github.event_name == 'pull_request'
-    needs: [screening-eval, ownership-eval]
+    needs: [screening-eval, ownership-eval, redaction-eval]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -314,7 +346,7 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen
       - run: |
-          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json current/ 2>/dev/null || true
+          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json packages/evals/baselines/policy.json current/ 2>/dev/null || true
           uv run --frozen python -m lineage_evals.report \
             --current current --baseline base/packages/evals/baselines > report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"
@@ -336,7 +368,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, api-image, security, console, e2e]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, redaction-eval, api-image, security, console, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -242,3 +242,27 @@ def test_an_evidence_id_cannot_be_reused() -> None:
 def test_screening_summary_counts_the_whole_file(run: tuple[Any, Model, list[str]]) -> None:
     _, model, _ = run
     assert "Strong candidates: 1. Weak candidates: 0." in model.prompts[0]
+
+
+@pytest.mark.unit
+def test_the_presidio_pass_keeps_identifiers_and_unknown_names_from_the_model() -> None:
+    from lineage_agent.pii import PresidioScanner
+
+    model = Model()
+    actions: list[tuple[str, dict[str, Any]]] = []
+    agent = Agent(
+        Register(),
+        Gleif(),
+        screen,
+        model,
+        lambda a, p: actions.append((a, p)),
+        scanner=PresidioScanner(),
+    )
+    media = "Harlan Voss, a director, holds passport GB-881204563 and lives at 27 Mill Lane."
+    agent.run("00000001", "uk", media=[media])
+    sent = model.prompts[0]
+    for value in ["Harlan Voss", "GB-881204563", "27 Mill Lane", "Jane Quill"]:
+        assert value not in sent
+    assert "EXAMPLE TRADING LTD" in sent
+    (counts,) = [p for a, p in actions if a == "redaction"]
+    assert counts == {"people": 1, "identifiers": 2}

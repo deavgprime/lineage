@@ -22,6 +22,7 @@ from typing import Any
 import psycopg
 from lineage_agent.agent import Agent
 from lineage_agent.model import EFFORT, MODEL, ClaudeCode
+from lineage_agent.pii import PresidioScanner
 from lineage_agent.tools.screening import screen
 from lineage_ingest.companies_house import CompaniesHouse
 from lineage_ingest.gleif import Gleif
@@ -34,6 +35,7 @@ DATASET = ROOT / "datasets" / "ownership.jsonl"
 BASELINE = ROOT / "baselines" / "citations.json"
 CACHE = Path.home() / ".cache" / "lineage" / "companies-house"
 WORKERS = 4
+SCANNER = PresidioScanner()
 SECONDS_GATE = 120
 
 
@@ -58,6 +60,7 @@ def one(case_id: str, number: str, run: int) -> dict[str, Any]:
             lei=Gleif(),
             screen=lambda name, pack: screen(conn, name, pack),
             model=model,
+            scanner=SCANNER,
         )
         result = agent.run(number, "uk")
     seconds = time.monotonic() - started

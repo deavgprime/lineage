@@ -47,7 +47,12 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
       # Everything in the lock file, runtime and development, against the PyPI advisory database.
-      - run: uv export --frozen --no-hashes --no-emit-project > requirements.txt
+      # The spaCy English model is a data package from GitHub, not PyPI, so pip-audit cannot look
+      # it up; it is pinned by URL and hash in the lock file instead.
+      - run: >-
+          uv export --frozen --no-hashes --no-emit-project
+          | grep -v "^en-core-web-sm @ https://github.com/explosion/spacy-models/"
+          > requirements.txt
       - run: uvx --from "pip-audit==${PIP_AUDIT_VERSION}" pip-audit --strict -r requirements.txt
 
   image:

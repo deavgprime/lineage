@@ -56,6 +56,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases/{case_id}/audit/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Audit
+         * @description A case's audit trail with everything needed to check each row's hash outside Lineage.
+         */
+        get: operations["export_audit_cases__case_id__audit_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/sign-off": {
         parameters: {
             query?: never;
@@ -124,10 +144,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/policy/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_policy_questions_get"];
+        put?: never;
+        /** Ask Question */
+        post: operations["ask_question_policy_questions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy/questions/{question_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One */
+        get: operations["one_policy_questions__question_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Ask */
+        Ask: {
+            /**
+             * Pack
+             * @enum {string}
+             */
+            pack: "uk" | "uae";
+            /** Question */
+            question: string;
+        };
+        /** AuditExport */
+        AuditExport: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Exported At
+             * Format: date-time
+             */
+            exported_at: string;
+            /** Exported By */
+            exported_by: string;
+            /**
+             * Format
+             * @default lineage-audit-export/1
+             * @constant
+             */
+            format: "lineage-audit-export/1";
+            /** Rows */
+            rows: components["schemas"]["ExportRow"][];
+            /** Subject */
+            subject: string;
+        };
         /** AuditRow */
         AuditRow: {
             /** Action */
@@ -236,6 +326,21 @@ export interface components {
              */
             updated_at: string;
         };
+        /** ExportRow */
+        ExportRow: {
+            /** Action */
+            action: string;
+            /** Actor */
+            actor: string;
+            /** Hashed Text */
+            hashed_text: string;
+            /** Prev Hash */
+            prev_hash: string;
+            /** Row Hash */
+            row_hash: string;
+            /** Seq */
+            seq: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -264,6 +369,48 @@ export interface components {
              * @enum {string}
              */
             jurisdiction: "uk" | "uae";
+        };
+        /** PassageOut */
+        PassageOut: {
+            /** Document */
+            document: string;
+            /** Heading */
+            heading: string;
+            /** Id */
+            id: string;
+            /** Ref */
+            ref: string;
+            /** Text */
+            text: string;
+        };
+        /** PolicyReply */
+        PolicyReply: {
+            /** Answered */
+            answered: boolean;
+            /** Asked By Name */
+            asked_by_name: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Citation Failures */
+            citation_failures: string[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string;
+            /** Pack */
+            pack: string;
+            /** Passages */
+            passages: components["schemas"]["PassageOut"][];
+            /** Question */
+            question: string;
+            /** Statements */
+            statements: components["schemas"]["Statement"][];
         };
         /** SignOff */
         SignOff: {
@@ -310,6 +457,15 @@ export interface components {
              * @enum {string}
              */
             stage: "first" | "second";
+        };
+        /** Statement */
+        Statement: {
+            /** Quote */
+            quote: string;
+            /** Source Id */
+            source_id: string;
+            /** Text */
+            text: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -459,6 +615,37 @@ export interface operations {
             };
         };
     };
+    export_audit_cases__case_id__audit_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditExport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sign_off_cases__case_id__sign_off_post: {
         parameters: {
             query?: never;
@@ -552,6 +739,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    history_policy_questions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReply"][];
+                };
+            };
+        };
+    };
+    ask_question_policy_questions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Ask"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReply"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    one_policy_questions__question_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                question_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReply"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

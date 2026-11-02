@@ -1,6 +1,74 @@
 {
   "components": {
     "schemas": {
+      "Ask": {
+        "properties": {
+          "pack": {
+            "enum": [
+              "uk",
+              "uae"
+            ],
+            "title": "Pack",
+            "type": "string"
+          },
+          "question": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "pack"
+        ],
+        "title": "Ask",
+        "type": "object"
+      },
+      "AuditExport": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "exported_at": {
+            "format": "date-time",
+            "title": "Exported At",
+            "type": "string"
+          },
+          "exported_by": {
+            "title": "Exported By",
+            "type": "string"
+          },
+          "format": {
+            "const": "lineage-audit-export/1",
+            "default": "lineage-audit-export/1",
+            "title": "Format",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ExportRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "subject",
+          "exported_at",
+          "exported_by",
+          "rows"
+        ],
+        "title": "AuditExport",
+        "type": "object"
+      },
       "AuditRow": {
         "properties": {
           "action": {
@@ -277,6 +345,44 @@
         "title": "CaseSummary",
         "type": "object"
       },
+      "ExportRow": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "hashed_text": {
+            "title": "Hashed Text",
+            "type": "string"
+          },
+          "prev_hash": {
+            "title": "Prev Hash",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "actor",
+          "action",
+          "prev_hash",
+          "row_hash",
+          "hashed_text"
+        ],
+        "title": "ExportRow",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -347,6 +453,108 @@
           "jurisdiction"
         ],
         "title": "OpenCase",
+        "type": "object"
+      },
+      "PassageOut": {
+        "properties": {
+          "document": {
+            "title": "Document",
+            "type": "string"
+          },
+          "heading": {
+            "title": "Heading",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ref",
+          "heading",
+          "text",
+          "document"
+        ],
+        "title": "PassageOut",
+        "type": "object"
+      },
+      "PolicyReply": {
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "boolean"
+          },
+          "asked_by_name": {
+            "title": "Asked By Name",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "citation_failures": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Citation Failures",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "pack": {
+            "title": "Pack",
+            "type": "string"
+          },
+          "passages": {
+            "items": {
+              "$ref": "#/components/schemas/PassageOut"
+            },
+            "title": "Passages",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "statements": {
+            "items": {
+              "$ref": "#/components/schemas/Statement"
+            },
+            "title": "Statements",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "asked_by_name",
+          "pack",
+          "question",
+          "answered",
+          "statements",
+          "note",
+          "passages",
+          "citation_failures"
+        ],
+        "title": "PolicyReply",
         "type": "object"
       },
       "SignOff": {
@@ -456,6 +664,29 @@
           "alert_notes"
         ],
         "title": "SignOffRecord",
+        "type": "object"
+      },
+      "Statement": {
+        "properties": {
+          "quote": {
+            "title": "Quote",
+            "type": "string"
+          },
+          "source_id": {
+            "title": "Source Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "source_id",
+          "quote"
+        ],
+        "title": "Statement",
         "type": "object"
       },
       "ValidationError": {
@@ -721,6 +952,55 @@
         ]
       }
     },
+    "/cases/{case_id}/audit/export": {
+      "get": {
+        "description": "A case's audit trail with everything needed to check each row's hash outside Lineage.",
+        "operationId": "export_audit_cases__case_id__audit_export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditExport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Audit",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
     "/cases/{case_id}/sign-off": {
       "post": {
         "operationId": "sign_off_cases__case_id__sign_off_post",
@@ -838,6 +1118,128 @@
           }
         ],
         "summary": "Me"
+      }
+    },
+    "/policy/questions": {
+      "get": {
+        "operationId": "history_policy_questions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PolicyReply"
+                  },
+                  "title": "Response History Policy Questions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "History",
+        "tags": [
+          "policy"
+        ]
+      },
+      "post": {
+        "operationId": "ask_question_policy_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ask"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyReply"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ask Question",
+        "tags": [
+          "policy"
+        ]
+      }
+    },
+    "/policy/questions/{question_id}": {
+      "get": {
+        "operationId": "one_policy_questions__question_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Question Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyReply"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "One",
+        "tags": [
+          "policy"
+        ]
       }
     }
   }

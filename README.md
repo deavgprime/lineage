@@ -38,7 +38,7 @@ cites.
 | --- | --- | --- |
 | Sanctions | UK Sanctions List, with the UN, EU and US lists | UAE Local Terrorist List, with the UN list |
 | Ownership data | Companies House register of people with significant control | No open registry. GLEIF parent links, and documents the analyst supplies |
-| Policy corpus | Money Laundering Regulations 2017, JMLSG and FCA guidance | CBUAE guidance and Decree Law No. 10 of 2025 |
+| Policy corpus | The bank's UK KYC policy and the Money Laundering Regulations 2017, with FCA and JMLSG guidance cited by reference | The bank's UAE KYC policy, with CBUAE guidance and the AML/CFT Decree-Law cited by reference |
 | Languages in names | Latin, plus Cyrillic and other scripts on UK-listed people | Latin and Arabic |
 
 ### Terms used in this repository
