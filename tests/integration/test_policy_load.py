@@ -51,6 +51,7 @@ def conn() -> Iterator[psycopg.Connection[Any]]:
     migrate(URL)
     with psycopg.connect(URL, autocommit=True) as c:
         yield c
+        c.execute("DELETE FROM policy_documents WHERE id LIKE %s", (f"test-%-{RUN}",))
 
 
 def test_reloading_changes_nothing_and_an_edit_reembeds_one_section(

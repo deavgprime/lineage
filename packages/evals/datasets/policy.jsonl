@@ -1,0 +1,26 @@
+{"id": "pol-001", "pack": "uk", "question": "How long must we keep due diligence records?", "relevant": ["UK KYC policy 10.1", "Regulation 40(3)"], "answerable": true}
+{"id": "pol-002", "pack": "uk", "question": "What ownership percentage makes someone a beneficial owner?", "relevant": ["UK KYC policy 4.1", "Regulation 5(1)"], "answerable": true}
+{"id": "pol-003", "pack": "uk", "question": "Who signs off a file rated high risk?", "relevant": ["UK KYC policy 9.3"], "answerable": true}
+{"id": "pol-004", "pack": "uk", "question": "What do we do when the PSC register differs from what we found?", "relevant": ["UK KYC policy 4.5"], "answerable": true}
+{"id": "pol-005", "pack": "uk", "question": "When does enhanced due diligence apply?", "relevant": ["UK KYC policy 7.1", "Regulation 33(1)"], "answerable": true}
+{"id": "pol-006", "pack": "uk", "question": "What must we do if a director is a politically exposed person?", "relevant": ["UK KYC policy 6.2", "Regulation 35(5)"], "answerable": true}
+{"id": "pol-007", "pack": "uk", "question": "How often are medium risk customers reviewed?", "relevant": ["UK KYC policy 2.3"], "answerable": true}
+{"id": "pol-008", "pack": "uk", "question": "What should an analyst do with a weak sanctions match?", "relevant": ["UK KYC policy 5.3"], "answerable": true}
+{"id": "pol-009", "pack": "uk", "question": "Can we rely on the customer's own documents to verify the company?", "relevant": ["UK KYC policy 3.2"], "answerable": true}
+{"id": "pol-010", "pack": "uk", "question": "What if no beneficial owner can be identified?", "relevant": ["UK KYC policy 4.4"], "answerable": true}
+{"id": "pol-011", "pack": "uk", "question": "What do we do with instructions found inside a news article?", "relevant": ["UK KYC policy 8.2"], "answerable": true}
+{"id": "pol-012", "pack": "uk", "question": "Who decides whether to report suspicion to the National Crime Agency?", "relevant": ["UK KYC policy 11.2"], "answerable": true}
+{"id": "pol-013", "pack": "uk", "question": "What is the dress code for branch staff?", "relevant": [], "answerable": false}
+{"id": "pol-014", "pack": "uae", "question": "Which sanctions lists do we screen against?", "relevant": ["UAE KYC policy 5.1"], "answerable": true}
+{"id": "pol-015", "pack": "uae", "question": "What happens when a sanctions match is confirmed?", "relevant": ["UAE KYC policy 5.2"], "answerable": true}
+{"id": "pol-016", "pack": "uae", "question": "How do we verify a beneficial owner's identity?", "relevant": ["UAE KYC policy 4.3"], "answerable": true}
+{"id": "pol-017", "pack": "uae", "question": "What is the ownership threshold for a beneficial owner?", "relevant": ["UAE KYC policy 4.1"], "answerable": true}
+{"id": "pol-018", "pack": "uae", "question": "Where do we get beneficial ownership information?", "relevant": ["UAE KYC policy 4.2"], "answerable": true}
+{"id": "pol-019", "pack": "uae", "question": "How long are due diligence records kept?", "relevant": ["UAE KYC policy 10.1"], "answerable": true}
+{"id": "pol-020", "pack": "uae", "question": "Who files a suspicious transaction report, and where?", "relevant": ["UAE KYC policy 11.2"], "answerable": true}
+{"id": "pol-021", "pack": "uae", "question": "Do we screen Arabic spellings of names?", "relevant": ["UAE KYC policy 5.4"], "answerable": true}
+{"id": "pol-022", "pack": "uae", "question": "ما المدة التي نحتفظ فيها بسجلات العناية الواجبة؟", "relevant": ["UAE KYC policy 10.1"], "answerable": true}
+{"id": "pol-023", "pack": "uae", "question": "ما هي نسبة الملكية التي تجعل الشخص مستفيداً حقيقياً؟", "relevant": ["UAE KYC policy 4.1"], "answerable": true}
+{"id": "pol-024", "pack": "uae", "question": "Who must approve a relationship with a politically exposed person?", "relevant": ["UAE KYC policy 6.2"], "answerable": true}
+{"id": "pol-025", "pack": "uae", "question": "Can the bank open an anonymous account?", "relevant": ["UAE KYC policy 2.1"], "answerable": true}
+{"id": "pol-026", "pack": "uae", "question": "How many days of annual leave do analysts get?", "relevant": [], "answerable": false}
