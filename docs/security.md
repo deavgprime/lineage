@@ -77,6 +77,10 @@ legal or compliance team.
   - the Python code with ruff's security rules. Each reviewed exception carries its reason next to
     it, and no code relies on `assert` for checks.
 - Scanner images are pinned by digest, like the actions.
+- The audit log is a hash chain. `python -m lineage_db.audit` checks every row and link in the
+  whole log, and CI runs it after the integration tests. An MLRO or auditor can export a case's trail
+  as JSON from `GET /cases/{id}/audit/export`, and `scripts/verify_audit_export.py` checks it with
+  nothing but Python. Each export is itself recorded in the trail.
 - Tests fail the build if a workflow uses an action that is not pinned to a commit SHA, lacks a
   permissions block or a timeout, or interpolates pull request text into a script.
 - Dependabot proposes updates weekly with a cooldown.
