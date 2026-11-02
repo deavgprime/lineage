@@ -43,6 +43,7 @@ jobs:
             infra
             docs
             deps
+            deps-dev
             ci
             release
           requireScope: false
