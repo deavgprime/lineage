@@ -6,9 +6,13 @@ export async function Header() {
   const { data: me } = await (await api()).GET("/me");
   return (
     <header className="top">
-      <Link className="brand" href="/">
-        Lineage
-      </Link>
+      <nav className="main">
+        <Link className="brand" href="/">
+          Lineage
+        </Link>
+        <Link href="/">Cases</Link>
+        <Link href="/policy">Policy questions</Link>
+      </nav>
       {me && (
         <div className="who">
           <span>
