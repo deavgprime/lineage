@@ -2,6 +2,7 @@
 #   docker compose up -d db
 #   docker compose up -d --build api
 #   docker compose up -d keycloak
+#   docker compose up -d --build console
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17
@@ -50,3 +51,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  console:
+    build:
+      context: apps/console
+    environment:
+      OIDC_ISSUER: http://localhost:8080/realms/lineage
+      OIDC_BACKCHANNEL_URL: http://keycloak:8080
+      OIDC_CLIENT_ID: lineage-console
+      APP_URL: http://localhost:3000
+      LINEAGE_API_URL: http://api:8000
+      # Local only. Set a real secret of at least 32 characters anywhere else.
+      SESSION_SECRET: local-only-session-secret-change-me-0123456789
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+      - keycloak

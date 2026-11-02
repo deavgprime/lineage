@@ -67,8 +67,10 @@ jobs:
           docker run --rm -v "$PWD:/repo" "$TRIVY_IMAGE" config --quiet
           --severity HIGH,CRITICAL --exit-code 1 /repo
       - run: docker build -f apps/api/Dockerfile -t lineage-api:scan .
-      # Fixable high and critical advisories in the OS packages and Python packages of the image.
-      - run: >-
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" image
-          --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
-          lineage-api:scan
+      - run: docker build -t lineage-console:scan apps/console
+      # Fixable high and critical advisories in the OS packages and libraries of each image.
+      - run: |
+          for image in lineage-api:scan lineage-console:scan; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" image \
+              --quiet --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image"
+          done
