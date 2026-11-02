@@ -20,8 +20,9 @@ resource "random_password" "demo_user" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  for_each  = toset(["database-url", "keycloak-db-password", "keycloak-admin-password", "session-secret", "realm", "anthropic-api-key"])
-  secret_id = "${var.name}-${each.key}"
+  for_each   = toset(["database-url", "keycloak-db-password", "keycloak-admin-password", "session-secret", "realm", "anthropic-api-key"])
+  secret_id  = "${var.name}-${each.key}"
+  depends_on = [google_project_service.required]
 
   replication {
     user_managed {

@@ -1,5 +1,7 @@
 # One service account per service, each with only what it needs.
 resource "google_service_account" "service" {
+  depends_on = [google_project_service.required]
+
   for_each     = toset(["api", "console", "keycloak", "ingest", "scheduler"])
   account_id   = "${var.name}-${each.key}"
   display_name = "Lineage ${each.key}"

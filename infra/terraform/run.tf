@@ -89,7 +89,7 @@ resource "google_cloud_run_v2_service" "api" {
     }
   }
 
-  depends_on = [google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
+  depends_on = [google_project_service.required, google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
 }
 
 resource "google_cloud_run_v2_service" "console" {
@@ -141,7 +141,7 @@ resource "google_cloud_run_v2_service" "console" {
     }
   }
 
-  depends_on = [google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
+  depends_on = [google_project_service.required, google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
 }
 
 resource "google_cloud_run_v2_service" "keycloak" {
@@ -244,7 +244,7 @@ resource "google_cloud_run_v2_service" "keycloak" {
     }
   }
 
-  depends_on = [google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
+  depends_on = [google_project_service.required, google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
 }
 
 # The console and the sign-in page are public. The API is reachable from anywhere but answers

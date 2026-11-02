@@ -4,7 +4,7 @@ resource "google_sql_database_instance" "main" {
   database_version    = "POSTGRES_17"
   region              = var.region
   deletion_protection = var.deletion_protection
-  depends_on          = [google_service_networking_connection.sql]
+  depends_on          = [google_service_networking_connection.sql, google_project_service.required]
 
   settings {
     tier              = var.database_tier

@@ -1,4 +1,6 @@
 resource "google_artifact_registry_repository" "images" {
+  depends_on = [google_project_service.required]
+
   repository_id = var.name
   location      = var.region
   format        = "DOCKER"

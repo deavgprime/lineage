@@ -50,10 +50,12 @@ resource "google_cloud_run_v2_job" "ingest" {
     }
   }
 
-  depends_on = [google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
+  depends_on = [google_project_service.required, google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
 }
 
 resource "google_cloud_scheduler_job" "ingest" {
+  depends_on = [google_project_service.required]
+
   name      = "${var.name}-ingest"
   region    = var.region
   schedule  = var.ingest_schedule

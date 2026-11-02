@@ -1,6 +1,8 @@
 # A private network for Cloud SQL. Cloud Run reaches it through direct VPC egress, so the database
 # has no public address.
 resource "google_compute_network" "main" {
+  depends_on = [google_project_service.required]
+
   name                    = var.name
   auto_create_subnetworks = false
 }
