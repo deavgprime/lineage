@@ -12,7 +12,7 @@ Source: Plan and architecture, 31 Oct 2026 (PDF). Project renamed from Sentinel 
 | 4 | Bank install: same images, Helm chart on Kubernetes | Constraint: runs on the customer's own cluster |
 | 5 | Retrieval: pgvector with Postgres full-text search, reranked by a local open model (was Cohere Rerank, changed by 0004) | One database to secure and audit, and no extra supplier. See [0004](decisions/0004-policy-corpus.md) |
 | 6 | Access and privacy: Keycloak OIDC, Postgres row-level security, Presidio | Analysts see only assigned cases |
-| 7 | Tracing: OpenTelemetry, Langfuse, Grafana | |
+| 7 | Tracing: OpenTelemetry, exported over OTLP to Langfuse or the bank's collector; Jaeger for local viewing | One open standard, so the bank picks the backend. Spans carry no personal data |
 | 8 | CI/CD: GitHub Actions (test, eval gate, build, deploy) | |
 | 9 | Not adding: Temporal, LangChain, LlamaIndex, a separate vector database | Weight without payoff at about 12 hours a week |
 | 10 | Customer: a bank operating in the UK and the UAE. Jurisdiction is configuration (lists, registry source, policy corpus) with a UK pack and a UAE pack | One agent core serves both teams, and a new jurisdiction is a new pack |

@@ -11,6 +11,10 @@ dependencies = [
   "en-core-web-sm",
   "fastapi>=0.115",
   "fastembed==0.9.1",
+  "opentelemetry-api==1.45.1",
+  "opentelemetry-exporter-otlp-proto-http==1.45.1",
+  "opentelemetry-instrumentation-fastapi==0.66b1",
+  "opentelemetry-sdk==1.45.1",
   "pillow>=13.0.0",
   "presidio-analyzer>=2.2.364",
   "psycopg-pool>=3.2",
@@ -60,7 +64,7 @@ select = ["B", "E", "F", "I", "RUF", "S", "SIM", "UP"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = "packages/agent:packages/evals:packages/db:ingest:apps/api:tests/integration"
+mypy_path = "packages/agent:packages/evals:packages/db:ingest:apps/api:tests/integration:tests/unit"
 explicit_package_bases = true
 
 [tool.pytest.ini_options]

@@ -77,6 +77,10 @@ legal or compliance team.
   - the Python code with ruff's security rules. Each reviewed exception carries its reason next to
     it, and no code relies on `assert` for checks.
 - Scanner images are pinned by digest, like the actions.
+- Traces leave the bank's audit boundary for a tracing tool, so they carry steps, counts, timings
+  and case ids only. Agent spans pass through an allowlist of attributes. Request spans drop query
+  strings, headers and client IP addresses, and health checks are not traced. Tests run a file with
+  a name, a passport and an address in its inputs and check none of them reaches a span.
 - The audit log is a hash chain. `python -m lineage_db.audit` checks every row and link in the
   whole log, and CI runs it after the integration tests. An MLRO or auditor can export a case's trail
   as JSON from `GET /cases/{id}/audit/export`, and `scripts/verify_audit_export.py` checks it with
