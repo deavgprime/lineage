@@ -20,6 +20,7 @@ from lineage_agent.pii import Finding
 from lineage_agent.redaction import Redactor
 from lineage_agent.tools.registry import resolve
 from lineage_agent.tools.screening import Candidate
+from lineage_agent.tracing import event, step
 
 MAX_ATTEMPTS = 3
 
@@ -132,7 +133,12 @@ class Agent:
         self._screen = screen
         self._model = model
         self._scanner = scanner
-        self._audit = audit
+
+        def audit_and_trace(action: str, payload: dict[str, Any]) -> None:
+            event(action, payload)
+            audit(action, payload)
+
+        self._audit: Audit = audit_and_trace
 
     def plan(self, pack: str) -> list[str]:
         steps = ["registry_chain", "lei_parents", "screen_chain", "draft", "check_citations"]
@@ -149,6 +155,20 @@ class Agent:
         """Draft a file. `media` is adverse media text, `documents` are onboarding documents with
         the identifiers they contain, and `request` is a note from the analyst. All three are
         treated as data, never as instructions."""
+        with step("agent.run", pack=pack, steps=len(self.plan(pack))) as span:
+            result = self._run(company_number, pack, media, documents, request)
+            span.set_attribute("lineage.attempts", result.attempts)
+            span.set_attribute("lineage.citation_failures", len(result.citation_failures))
+            return result
+
+    def _run(
+        self,
+        company_number: str,
+        pack: str,
+        media: Sequence[str] = (),
+        documents: Sequence[Document] = (),
+        request: str | None = None,
+    ) -> Result:
         plan = self.plan(pack)
         self._audit("plan", {"company_number": company_number, "pack": pack, "steps": plan})
         evidence, redactor = EvidenceStore(), Redactor()
@@ -163,11 +183,13 @@ class Agent:
         names: list[tuple[str, str]] = []  # (name, evidence id) to screen
 
         if "registry_chain" in plan:
-            chain = resolve(self._register, company_number)  # type: ignore[arg-type]
+            with step("agent.tool", tool="registry"):
+                chain = resolve(self._register, company_number)  # type: ignore[arg-type]
             self._audit("tool_call", {"tool": "registry", "result": _digest(chain)})
             self._add_chain(chain, evidence, redactor, names)
 
-        records = self._lei.by_registration(company_number)
+        with step("agent.tool", tool="lei"):
+            records = self._lei.by_registration(company_number)
         self._audit("tool_call", {"tool": "lei", "found": len(records)})
         for record in records[:1]:
             evidence.add(
@@ -192,7 +214,9 @@ class Agent:
         screened: Counter[str] = Counter()
         strong = 0
         for name, origin in names:
-            hits = self._screen(name, pack)
+            with step("agent.tool", tool="screening") as span:
+                hits = self._screen(name, pack)
+                span.set_attribute("lineage.hits", len(hits))
             self._audit(
                 "tool_call", {"tool": "screening", "query": _digest(name), "hits": len(hits)}
             )
@@ -339,10 +363,13 @@ class Agent:
                     f"- {redactor.redact(p)}" for p in problems
                 )
             self._audit("model_call", {"attempt": attempt, "prompt": _digest(request)})
-            raw = self._model.draft(SYSTEM, request)
+            with step("agent.model_call", attempt=attempt):
+                raw = self._model.draft(SYSTEM, request)
             redacted = raw.model_dump_json()
             draft = Draft.model_validate(json.loads(redactor.restore(redacted)))
-            problems = failures(draft.claims(), evidence)
+            with step("agent.citation_check", attempt=attempt) as span:
+                problems = failures(draft.claims(), evidence)
+                span.set_attribute("lineage.citation_failures", len(problems))
             if RATINGS.index(draft.risk_rating) < RATINGS.index(floor):
                 problems.append(
                     f"risk rating {draft.risk_rating} is below the minimum {floor} set by a "
