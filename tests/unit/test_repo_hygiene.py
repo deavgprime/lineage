@@ -41,7 +41,13 @@ def tracked_text_files() -> list[Path]:
         ["git", "ls-files"], cwd=ROOT, check=True, capture_output=True, text=True
     ).stdout.splitlines()
     skip = {".png", ".pdf", ".lock"}
-    return [ROOT / f for f in out if Path(f).suffix not in skip and (ROOT / f).is_file()]
+    # Third-party text kept verbatim, such as legislation fixtures, is not ours to restyle.
+    verbatim = ("tests/fixtures/legislation/",)
+    return [
+        ROOT / f
+        for f in out
+        if Path(f).suffix not in skip and not f.startswith(verbatim) and (ROOT / f).is_file()
+    ]
 
 
 @pytest.mark.unit

@@ -7,8 +7,11 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
 dependencies = [
   "anthropic>=1.0",
+  "defusedxml>=0.7.1",
   "en-core-web-sm",
   "fastapi>=0.115",
+  "fastembed==0.9.1",
+  "pillow>=13.0.0",
   "presidio-analyzer>=2.2.364",
   "psycopg-pool>=3.2",
   "psycopg[binary]>=3.2",
@@ -24,6 +27,7 @@ dev = [
   "mypy>=1.13",
   "pytest>=8.3",
   "ruff>=0.8",
+  "types-defusedxml>=0.7.0.20260504",
 ]
 
 [project.scripts]

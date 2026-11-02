@@ -11,10 +11,12 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: ^tests/fixtures/legislation/
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
+        exclude: ^tests/fixtures/legislation/
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.5.0
     hooks:
@@ -36,7 +38,8 @@ repos:
         entry: scripts/check_text_style.sh
         language: script
         types: [text]
-        exclude: ^LICENSE$
+        # Third-party text kept verbatim: the licence and legislation fixtures.
+        exclude: ^(LICENSE|tests/fixtures/legislation/.*)$
       - id: ruff
         name: ruff
         entry: uv run --frozen ruff check --fix
