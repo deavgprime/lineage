@@ -10,9 +10,25 @@ spec:
     metadata:
       labels: { app: postgres }
     spec:
+      # Hardened like the chart's own pods, so the test database passes the same config scan.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: postgres
           image: pgvector/pgvector:0.8.1-pg17
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: run, mountPath: /var/run/postgresql }
+            - { name: tmp, mountPath: /tmp }
           env:
             - { name: POSTGRES_USER, value: lineage }
             - { name: POSTGRES_PASSWORD, value: lineage-kind }
@@ -22,6 +38,12 @@ spec:
           readinessProbe:
             exec: { command: ["pg_isready", "-U", "lineage"] }
             periodSeconds: 2
+          resources:
+            limits: { cpu: "1", memory: 1Gi }
+      volumes:
+        - { name: data, emptyDir: {} }
+        - { name: run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }
 ---
 apiVersion: v1
 kind: Service
