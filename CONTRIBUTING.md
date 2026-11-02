@@ -45,7 +45,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
 | `revert` | Undoing an earlier commit |
 | `style` | Formatting only |
 
-Scopes: `api`, `console`, `agent`, `evals`, `mcp`, `ingest`, `infra`, `docs`, `deps`, `ci`, `release`.
+Scopes: `api`, `console`, `agent`, `evals`, `mcp`, `ingest`, `infra`, `docs`, `deps`, `deps-dev`, `ci`, `release`.
 
 The pull request title is the line that appears in the changelog, so write it as the outcome for a
 user or maintainer: `fix(ingest): registry lookups no longer fail on company numbers with leading zeros`,
