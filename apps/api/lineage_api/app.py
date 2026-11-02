@@ -18,6 +18,8 @@ from pydantic import BaseModel
 from lineage_api.auth import CurrentUser, Role, Verifier
 from lineage_api.cases import Runner, router
 from lineage_api.logs import configure
+from lineage_api.policy import Asker
+from lineage_api.policy import router as policy_router
 from lineage_api.settings import Settings
 from lineage_api.sign_off import router as sign_off_router
 
@@ -42,6 +44,7 @@ def create_app(
     pool: Pool | None = None,
     verifier: Verifier | None = None,
     runner: Runner | None = None,
+    asker: Asker | None = None,
 ) -> FastAPI:
     settings = settings or Settings.from_env()
     configure(settings.log_level)
@@ -67,6 +70,12 @@ def create_app(
         if isinstance(runner, FixtureRunner):
             log.warning("drafting with fixtures: LINEAGE_RUNNER=fixture is for end-to-end tests")
     app.state.runner = runner
+    if asker is None:
+        from lineage_api.runner import FixtureAsker, LiveAsker
+
+        fixture = os.environ.get("LINEAGE_RUNNER") == "fixture"
+        asker = FixtureAsker() if fixture else LiveAsker()
+    app.state.asker = asker
     app.state.verifier = verifier or Verifier.from_jwks(
         settings.oidc_issuer, settings.oidc_audience, settings.jwks_url
     )
@@ -106,4 +115,5 @@ def create_app(
 
     app.include_router(router)
     app.include_router(sign_off_router)
+    app.include_router(policy_router)
     return app
