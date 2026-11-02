@@ -64,3 +64,16 @@ def test_a_drafted_file_is_traced_without_personal_data() -> None:
     ]
     assert not [v for v in values for p in PERSONAL if p.casefold() in v.casefold()]
     assert all(len(v) <= 40 for v in values)
+
+
+@pytest.mark.unit
+def test_a_failing_step_records_only_the_error_type() -> None:
+    from lineage_agent.tracing import step
+
+    EXPORTER.clear()
+    with pytest.raises(RuntimeError), step("agent.model_call", attempt=1):
+        raise RuntimeError("claude exited with 1: prompt mentions Harlan Voss")
+    (span,) = EXPORTER.get_finished_spans()
+    assert span.attributes is not None and span.attributes["lineage.error"] == "RuntimeError"
+    assert span.status.status_code.name == "ERROR" and not span.status.description
+    assert not span.events

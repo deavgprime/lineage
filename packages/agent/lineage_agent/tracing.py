@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from typing import Any
 
 from opentelemetry import trace
-from opentelemetry.trace import Span
+from opentelemetry.trace import Span, Status, StatusCode
 
 tracer = trace.get_tracer("lineage.agent")
 
@@ -51,8 +51,20 @@ def safe_attributes(payload: dict[str, Any], prefix: str = "lineage.") -> dict[s
 
 @contextmanager
 def step(name: str, **attributes: Any) -> Iterator[Span]:
-    with tracer.start_as_current_span(name, attributes=safe_attributes(attributes)) as span:
-        yield span
+    """A span for one step. A failure records only the exception's type: messages and stack
+    traces can quote prompts or model output, so they are not recorded."""
+    with tracer.start_as_current_span(
+        name,
+        attributes=safe_attributes(attributes),
+        record_exception=False,
+        set_status_on_exception=False,
+    ) as span:
+        try:
+            yield span
+        except Exception as error:
+            span.set_attribute("lineage.error", type(error).__name__)
+            span.set_status(Status(StatusCode.ERROR))
+            raise
 
 
 def event(action: str, payload: dict[str, Any]) -> None:
