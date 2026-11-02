@@ -82,6 +82,7 @@ DATABASE_URL=postgresql://lineage:lineage-local@127.0.0.1:5432/lineage KEYCLOAK_
   uv run pytest -m integration
 uv run python -m lineage_ingest.fetch .opensanctions   # pinned OpenSanctions files, checksum verified
 uv run python -m lineage_evals.run_screening   # needs the OpenSanctions data loaded
+uv run python -m lineage_ingest.policy         # policy corpus; downloads the embedding model once
 uv run python -m lineage_evals.run_ownership   # needs COMPANIES_HOUSE_API_KEY
 uv run python -m lineage_evals.run_citations   # drafts and judges 40 files on Opus 5.5
 uv run python -m lineage_evals.run_safety      # 40 safety cases, 8 runs each
