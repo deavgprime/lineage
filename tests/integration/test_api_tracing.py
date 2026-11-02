@@ -32,6 +32,7 @@ def test_a_case_is_traced_from_request_to_draft() -> None:
         client.get("/health/live")
     telemetry.flush()
     spans = exporter.get_finished_spans()
+    assert {"case.draft", "POST /cases"} <= {s.name for s in spans}, [s.name for s in spans]
     draft = next(s for s in spans if s.name == "case.draft")
     request = next(s for s in spans if s.name == "POST /cases")
     assert draft.context.trace_id == request.context.trace_id

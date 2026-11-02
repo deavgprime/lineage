@@ -9,9 +9,19 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from test_agent import Gleif, Model, Register, screen
 
 EXPORTER = InMemorySpanExporter()
-_provider = TracerProvider()
-_provider.add_span_processor(SimpleSpanProcessor(EXPORTER))
-trace.set_tracer_provider(_provider)
+
+
+@pytest.fixture(autouse=True)
+def provider() -> None:
+    """Set a global SDK provider once, when these tests run rather than when pytest collects."""
+    current = trace.get_tracer_provider()
+    if not isinstance(current, TracerProvider):
+        current = TracerProvider()
+        trace.set_tracer_provider(current)
+    if not getattr(current, "_lineage_test_exporter", False):
+        current.add_span_processor(SimpleSpanProcessor(EXPORTER))
+        current._lineage_test_exporter = True  # type: ignore[attr-defined]
+
 
 PERSONAL = ["Jane Quill", "Harlan Voss", "GB-881204563", "27 Mill Lane", "EXAMPLE TRADING LTD"]
 

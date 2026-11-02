@@ -40,9 +40,15 @@ def configure(app: FastAPI, exporter: SpanExporter | None = None) -> bool:
     if exporter is None and not os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
         return False
     if _provider is None:
-        name = os.environ.get("OTEL_SERVICE_NAME", "lineage-api")
-        _provider = TracerProvider(resource=Resource.create({"service.name": name}))
-        trace.set_tracer_provider(_provider)
+        current = trace.get_tracer_provider()
+        if isinstance(current, TracerProvider):
+            # Something set an SDK provider first, such as the bank's own instrumentation. The
+            # global can only be set once, so add to it rather than lose the exporter.
+            _provider = current
+        else:
+            name = os.environ.get("OTEL_SERVICE_NAME", "lineage-api")
+            _provider = TracerProvider(resource=Resource.create({"service.name": name}))
+            trace.set_tracer_provider(_provider)
     _provider.add_span_processor(BatchSpanProcessor(exporter or OTLPSpanExporter()))
     FastAPIInstrumentor.instrument_app(
         app,
