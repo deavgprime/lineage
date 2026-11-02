@@ -346,7 +346,7 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen
       - run: |
-          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json current/ 2>/dev/null || true
+          cp packages/evals/baselines/citations.json packages/evals/baselines/safety.json packages/evals/baselines/policy.json current/ 2>/dev/null || true
           uv run --frozen python -m lineage_evals.report \
             --current current --baseline base/packages/evals/baselines > report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"
