@@ -124,9 +124,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Helm 4 fails pushing to GitHub's registry ("failed to perform Tag ... not found"), so the
+      # chart is published with Helm 3.
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v4.3.1
+          version: v3.22.1
       # The chart's version and default image tag are the release version, so a chart always
       # installs the images published with it.
       - env:
