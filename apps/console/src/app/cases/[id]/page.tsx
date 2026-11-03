@@ -133,6 +133,7 @@ export default async function CasePage({ params, searchParams }: Props) {
                   caseId={id}
                   stage={stage}
                   basis={stage === "first" ? draft.risk_rating : (first?.rating ?? draft.risk_rating)}
+                  minimum={file.minimum_rating}
                   alerts={file.alerts}
                 />
               )}

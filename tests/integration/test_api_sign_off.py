@@ -151,3 +151,32 @@ def test_a_final_file_never_changes(client: TestClient) -> None:
     sign(client, case, ANALYST_1, rating="low")
     with pytest.raises(psycopg.errors.RaiseException, match="is final"):
         owner_update(case, "UPDATE cases SET subject = 'changed' WHERE id = %s")
+
+
+def test_lowering_a_high_file_still_needs_a_different_mlro(client: TestClient) -> None:
+    case = open_case(client, "H0000020")
+    lowered = sign(client, case, ANALYST_1, rating="low", reason="Analyst disagrees.")
+    assert lowered.status_code == 200, lowered.text
+    assert lowered.json()["status"] == "awaiting_mlro"
+    done = sign(client, case, MLRO, rating="low", reason="Agreed after review.")
+    assert done.json()["status"] == "final"
+
+
+def test_the_database_refuses_a_lowered_high_file_with_one_signer(client: TestClient) -> None:
+    case = open_case(client, "H0000021")
+    with psycopg.connect(URL) as conn:
+        draft_id = conn.execute(
+            "SELECT id FROM drafts WHERE case_id = %s", (uuid.UUID(case),)
+        ).fetchone()
+        assert draft_id is not None
+        conn.execute(
+            "INSERT INTO sign_offs (case_id, draft_id, signer, signer_role, stage, "
+            "drafted_rating, rating, reason) "
+            "VALUES (%s, %s, %s, 'analyst', 'first', 'high', 'low', 'lowered')",
+            (uuid.UUID(case), draft_id[0], f"a1-{RUN}"),
+        )
+        with pytest.raises(psycopg.errors.RaiseException, match="different MLRO"):
+            conn.execute(
+                "UPDATE cases SET status = 'final', rating = 'low' WHERE id = %s",
+                (uuid.UUID(case),),
+            )
