@@ -368,6 +368,11 @@ export interface components {
         };
         /** Me */
         Me: {
+            /**
+             * Fixture
+             * @default false
+             */
+            fixture: boolean;
             /** Id */
             id: string;
             /** Packs */
