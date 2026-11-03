@@ -29,9 +29,10 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen pytest -m "not eval"
 
+  # The release page comes last, so it never announces packages that failed to publish.
   publish:
     name: Publish release
-    needs: verify
+    needs: chart
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
