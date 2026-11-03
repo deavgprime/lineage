@@ -15,6 +15,8 @@ class Settings:
     # an internal address, as it is inside compose.
     oidc_jwks_url: str = ""
     log_level: str = "INFO"
+    # The interactive docs and schema map every endpoint, so they are off unless asked for.
+    api_docs: bool = False
     limits: Limits = field(default_factory=Limits)
 
     @property
@@ -29,6 +31,7 @@ class Settings:
             oidc_audience=os.environ.get("OIDC_AUDIENCE", cls.oidc_audience),
             oidc_jwks_url=os.environ.get("OIDC_JWKS_URL", ""),
             log_level=os.environ.get("LOG_LEVEL", "INFO"),
+            api_docs=os.environ.get("API_DOCS", "").lower() in ("1", "true", "yes"),
             limits=Limits(
                 cases_per_hour=int(os.environ.get("LIMIT_CASES_PER_HOUR", "20")),
                 drafting_per_user=int(os.environ.get("LIMIT_DRAFTING_PER_USER", "3")),
