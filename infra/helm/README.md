@@ -14,8 +14,11 @@ Pods run as numeric non-root users on a read-only root filesystem, with no capab
 runtime's default seccomp profile and no service account token. Network policy denies all ingress
 except to the console from `networkPolicy.ingressFrom`, and to the API from the console.
 
+Each release publishes the chart, and the `api` and `console` images it installs, to GitHub Packages.
+The images carry an SBOM and build provenance, and are scanned before they are pushed.
+
 ```bash
-helm install lineage infra/helm/lineage \
+helm install lineage oci://ghcr.io/deavgprime/lineage/charts/lineage --version 0.7.0 \
   --set oidc.issuer=https://sso.bank.example/realms/lineage \
   --set consoleUrl=https://lineage.bank.example \
   --set existingSecret=lineage
