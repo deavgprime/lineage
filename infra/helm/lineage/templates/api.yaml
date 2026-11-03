@@ -30,6 +30,7 @@ spec:
             - { name: OIDC_JWKS_URL, value: {{ . | quote }} }
             {{- end }}
             - { name: LINEAGE_RUNNER, value: {{ ternary "fixture" "live" (eq .Values.drafting "fixture") | quote }} }
+            - { name: LINEAGE_ENV, value: {{ ternary "demo" "production" (eq .Values.drafting "fixture") | quote }} }
             - { name: LINEAGE_MODEL, value: "api" }
             {{- if eq .Values.drafting "api" }}
             - name: ANTHROPIC_API_KEY

@@ -66,6 +66,10 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.drafting == "fixture" ? "fixture" : "live"
       }
       env {
+        name  = "LINEAGE_ENV"
+        value = var.drafting == "fixture" ? "demo" : "production"
+      }
+      env {
         name  = "LINEAGE_MODEL"
         value = "api"
       }
