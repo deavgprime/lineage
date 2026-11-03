@@ -174,7 +174,9 @@ Data: OpenSanctions, UK Companies House and GLEIF.
 ## Documents
 
 Read next: [brief](docs/brief.md), [scope](docs/scoping.md), [decisions](docs/decisions.md),
-[testing plan](docs/testing.md), [security and compliance](docs/security.md).
+[testing plan](docs/testing.md), [security and compliance](docs/security.md),
+[deployment guide](docs/deployment.md), and the [playbook](docs/playbook.md) for taking Lineage
+into a bank, from discovery to a signed-off pilot and handover.
 
 ## Contributing
 
