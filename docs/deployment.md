@@ -37,6 +37,10 @@ provider, a few secrets, and a way to reach a model.
 | `LINEAGE_MODELS` | API, jobs | A writable directory for the local embedding and reranking models |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | API | Where to send traces. Empty turns tracing off |
 | `OTEL_EXPORTER_OTLP_HEADERS` | API | Headers for that endpoint, such as Langfuse's keys |
+| `LIMIT_CASES_PER_HOUR` | API | Cases one user may open in an hour (default 20) |
+| `LIMIT_DRAFTING_PER_USER` | API | Cases one user may have drafting at once (default 3) |
+| `LIMIT_DRAFTING_TOTAL` | API | Cases drafting at once across all users (default 10) |
+| `LIMIT_QUESTIONS_PER_HOUR` | API | Policy questions one user may ask in an hour (default 30) |
 
 ## Model access
 
