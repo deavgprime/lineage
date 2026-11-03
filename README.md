@@ -13,6 +13,9 @@ analyst reviews the file, approves or changes it, and every step is logged.
 Status: pre-alpha. The design is settled and the code is being built. Progress is tracked in the
 repository milestones.
 
+A 50-second [recorded walkthrough](docs/demo/README.md) shows a case from opening to the MLRO's
+second sign-off, the audit trace, and a cited policy answer.
+
 ## What it is for
 
 Before a bank opens an account for a company, it must find out who really owns that company and whether
