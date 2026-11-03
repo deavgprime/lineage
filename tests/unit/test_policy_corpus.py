@@ -28,3 +28,12 @@ def test_a_regulation_splits_into_paragraphs_with_amended_numbers() -> None:
     assert len(refs) == len(set(refs))
     assert all(s.heading for s in sections)
     assert not any("( " in s.text or " )" in s.text for s in sections)
+
+
+@pytest.mark.unit
+def test_an_empty_corpus_fails_loudly(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    import lineage_ingest.policy as policy
+
+    monkeypatch.setattr(policy, "POLICIES", tmp_path)
+    with pytest.raises(SystemExit, match="no policy documents"):
+        list(policy.documents(include_legislation=False))

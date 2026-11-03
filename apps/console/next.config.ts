@@ -17,7 +17,9 @@ const securityHeaders = [
     ].join("; "),
   },
   { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "Referrer-Policy", value: "no-referrer" },
+  // Not "no-referrer": that makes browsers send Origin: null on form posts, and Next.js then refuses
+  // server actions behind a proxy. "same-origin" still sends nothing to other sites.
+  { key: "Referrer-Policy", value: "same-origin" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
