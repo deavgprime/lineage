@@ -1,0 +1,67 @@
+# Migrations run before every install and upgrade, and must finish before the new pods start.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-migrate-{{ .Release.Revision }}
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+    app.kubernetes.io/name: migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels: {{- include "lineage.labels" . | nindent 8 }}
+        app.kubernetes.io/name: migrate
+    spec:
+      {{- include "lineage.podSecurity" . | nindent 6 }}
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.registry }}/api:{{ include "lineage.tag" . }}"
+          command: ["python", "-m", "lineage_db.migrate"]
+          {{- include "lineage.containerSecurity" . | nindent 10 }}
+          env: {{- include "lineage.apiEnv" . | nindent 12 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+# The pinned sanctions and PEP lists and the policy corpus, reloaded on a schedule.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-ingest
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+    app.kubernetes.io/name: ingest
+spec:
+  schedule: {{ .Values.ingest.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels: {{- include "lineage.labels" . | nindent 12 }}
+            app.kubernetes.io/name: ingest
+        spec:
+          {{- include "lineage.podSecurity" . | nindent 10 }}
+          restartPolicy: Never
+          containers:
+            - name: ingest
+              image: "{{ .Values.image.registry }}/api:{{ include "lineage.tag" . }}"
+              command: ["sh", "-c"]
+              args:
+                - >-
+                  python -m lineage_ingest.fetch /tmp/opensanctions &&
+                  python -m lineage_ingest.opensanctions --sanctions /tmp/opensanctions/sanctions.csv
+                  --peps /tmp/opensanctions/peps.csv --version "$(cat /tmp/opensanctions/version.txt)" &&
+                  python -m lineage_ingest.policy {{ if eq .Values.drafting "fixture" }}--no-legislation --flat-embeddings{{ end }}
+              {{- include "lineage.containerSecurity" . | nindent 14 }}
+              env: {{- include "lineage.apiEnv" . | nindent 16 }}
+              resources: {{- toYaml .Values.ingest.resources | nindent 16 }}
+              volumeMounts:
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - { name: tmp, emptyDir: {} }

@@ -238,6 +238,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
+      - run: helm lint infra/helm/lineage -f infra/helm/lineage/ci-values.yaml
+      # Rendered manifests against the Kubernetes schemas.
+      - run: |
+          curl -sSLo /tmp/kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
+          echo "$KUBECONFORM_SHA256  /tmp/kubeconform.tar.gz" | sha256sum -c -
+          tar xzf /tmp/kubeconform.tar.gz -C /tmp kubeconform
+          helm template ci infra/helm/lineage -f infra/helm/lineage/ci-values.yaml \
+            | /tmp/kubeconform -strict -summary -kubernetes-version 1.33.0
+        env:
+          KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
+      - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
+        with:
+          version: v0.33.0
+          install_only: true
+      # Install on a real cluster: migrations, readiness, and the network policy.
+      - run: tests/helm/kind-test.sh
+
   api-image:
     name: API image
     runs-on: ubuntu-latest
@@ -394,7 +422,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, redaction-eval, terraform, api-image, security, console, e2e]
+    needs: [pre-commit, lint, test, integration, screening-eval, ownership-eval, redaction-eval, terraform, helm, api-image, security, console, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

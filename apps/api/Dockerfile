@@ -14,7 +14,8 @@ COPY apps/api apps/api
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
 
 RUN useradd --system --uid 10001 lineage
-USER lineage
+# A numeric user, so Kubernetes can check runAsNonRoot.
+USER 10001
 ENV PATH=/app/.venv/bin:$PATH
 EXPOSE 8000
 CMD ["sh", "-c", "python -m lineage_db.migrate && uvicorn --factory lineage_api.app:create_app --host 0.0.0.0 --port 8000 --no-access-log"]
