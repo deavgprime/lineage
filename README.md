@@ -10,11 +10,14 @@ owns it, whether any of those owners is sanctioned or politically exposed, what 
 them, and how risky the customer looks. Every statement links to the record it came from. A compliance
 analyst reviews the file, approves or changes it, and every step is logged.
 
-Status: pre-alpha. The design is settled and the code is being built. Progress is tracked in the
-repository milestones.
+Status: v0.8.0. The agent, the evals, the API and console, redaction, the audit log, policy
+questions, the GCP Terraform and the Helm chart are built and tested. Lineage has been deployed once
+to GCP and run end to end there. It has not been used with a bank's real customers.
 
-A 50-second [recorded walkthrough](docs/demo/README.md) shows a case from opening to the MLRO's
-second sign-off, the audit trace, and a cited policy answer.
+![A case from opening to the MLRO's second sign-off, the audit trace, and a cited policy answer](docs/demo/lineage-walkthrough.gif)
+
+The walkthrough above plays at one and a half times speed. What each step shows, and the full
+recording, are in [docs/demo](docs/demo/README.md).
 
 ## What it is for
 
