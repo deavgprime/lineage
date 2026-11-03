@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
   });
   s.accessToken = tokens.access_token;
   s.refreshToken = tokens.refresh_token;
-  s.idToken = tokens.id_token;
   s.expiresAt = Math.floor(Date.now() / 1000) + (tokens.expires_in ?? 60);
   delete s.verifier;
   delete s.state;
