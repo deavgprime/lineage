@@ -9,5 +9,14 @@ image:
   registry: lineage
   tag: ci
   pullPolicy: Never
-api: { replicas: 1 }
-console: { replicas: 1 }
+# Small requests so everything fits on a two-CPU CI runner next to the test database.
+api:
+  replicas: 1
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits: { cpu: "1", memory: 2Gi }
+console:
+  replicas: 1
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }

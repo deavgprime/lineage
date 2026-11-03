@@ -40,7 +40,9 @@ spec:
           readinessProbe:
             exec: { command: ["pg_isready", "-U", "lineage"] }
             periodSeconds: 2
+          # Small requests: CI runners have two CPUs, and a limit with no request reserves all of it.
           resources:
+            requests: { cpu: 100m, memory: 256Mi }
             limits: { cpu: "1", memory: 1Gi }
       volumes:
         - { name: data, emptyDir: {} }
