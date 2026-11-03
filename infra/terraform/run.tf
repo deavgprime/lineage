@@ -40,6 +40,10 @@ resource "google_cloud_run_v2_service" "api" {
     containers {
       image = "${local.registry}/api:${var.image_tag}"
 
+      ports {
+        container_port = 8000
+      }
+
       resources {
         limits = { cpu = "1", memory = "2Gi" }
       }
@@ -109,6 +113,10 @@ resource "google_cloud_run_v2_service" "console" {
     containers {
       image = "${local.registry}/console:${var.image_tag}"
 
+      ports {
+        container_port = 3000
+      }
+
       resources {
         limits = { cpu = "1", memory = "512Mi" }
       }
@@ -153,8 +161,10 @@ resource "google_cloud_run_v2_service" "keycloak" {
   template {
     service_account = google_service_account.service["keycloak"].email
 
+    # Keycloak takes about 30 seconds to start, so one instance stays warm rather than every
+    # sign-in after a quiet spell waiting for it.
     scaling {
-      min_instance_count = 0
+      min_instance_count = 1
       max_instance_count = 1
     }
 
@@ -179,7 +189,7 @@ resource "google_cloud_run_v2_service" "keycloak" {
 
     containers {
       image = "${local.registry}/keycloak:${var.image_tag}"
-      args  = ["start", "--import-realm", "--http-enabled=true", "--proxy-headers=xforwarded", "--health-enabled=true"]
+      args  = ["start", "--import-realm", "--http-enabled=true", "--proxy-headers=xforwarded", "--health-enabled=true", "--cache=local"]
 
       resources {
         limits = { cpu = "1", memory = "1Gi" }
@@ -233,9 +243,12 @@ resource "google_cloud_run_v2_service" "keycloak" {
         container_port = 8080
       }
 
+      # Ready only once Keycloak says so on its management port. The HTTP port opens earlier and
+      # answers 503 while Keycloak is still starting.
       startup_probe {
-        tcp_socket {
-          port = 8080
+        http_get {
+          path = "/health/ready"
+          port = 9000
         }
         initial_delay_seconds = 10
         period_seconds        = 10
