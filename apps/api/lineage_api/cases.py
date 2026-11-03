@@ -215,6 +215,41 @@ def open_case(
     return summary
 
 
+@router.post("/{case_id}/retry", status_code=status.HTTP_202_ACCEPTED)
+def retry_case(
+    case_id: uuid.UUID, user: CurrentUser, request: Request, background: BackgroundTasks
+) -> CaseSummary:
+    """Draft a failed case again. The assigned analyst, or an MLRO in the pack, may retry."""
+    pool = request.app.state.db
+    with as_user(pool, user) as conn:
+        current = _summary(_visible(conn, case_id))
+        if user.role not in ("analyst", "mlro") or (
+            user.role == "analyst" and current.assigned_to != user.id
+        ):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "only the assigned analyst can retry")
+        if current.status != "failed":
+            raise HTTPException(
+                status.HTTP_409_CONFLICT, f"a {current.status} case cannot be retried"
+            )
+        check_open_case(conn, request.app.state.limits, counting_new_case=False)
+        conn.execute(
+            "UPDATE cases SET status = 'drafting', updated_at = now() WHERE id = %s", (case_id,)
+        )
+        _audit_row(conn, case_id, user.id, "retry", {})
+        summary = _summary(_visible(conn, case_id))
+    background.add_task(
+        run_case,
+        otel_context.get_current(),
+        pool,
+        request.app.state.runner,
+        user,
+        case_id,
+        summary.company_number or "",
+        summary.jurisdiction,
+    )
+    return summary
+
+
 @router.get("")
 def queue(
     user: CurrentUser,

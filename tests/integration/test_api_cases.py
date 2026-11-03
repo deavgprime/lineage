@@ -179,3 +179,32 @@ def test_an_export_verifies_on_its_own(client: TestClient, case_id: str, tmp_pat
     # The export itself is recorded in the trail.
     actions = [r["action"] for r in client.get(f"/cases/{case_id}/audit", headers=AUDITOR).json()]
     assert actions[-1] == "audit_export"
+
+
+def test_a_stale_drafting_case_is_failed_and_can_be_retried(client: TestClient) -> None:
+    import psycopg
+
+    opened = client.post(
+        "/cases", json={"company_number": "00000051", "jurisdiction": "uk"}, headers=ANALYST_1
+    ).json()
+    case = uuid.UUID(opened["id"])
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        conn.execute(
+            "UPDATE cases SET status = 'drafting', updated_at = now() - interval '1 hour' "
+            "WHERE id = %s",
+            (case,),
+        )
+        conn.commit()
+        failed = conn.execute("SELECT lineage_fail_stale_drafts(900)").fetchone()
+        assert failed is not None and failed[0] >= 1
+        conn.commit()
+    body = client.get(f"/cases/{case}", headers=ANALYST_1).json()
+    assert body["status"] == "failed"
+    actions = [r["action"] for r in client.get(f"/cases/{case}/audit", headers=ANALYST_1).json()]
+    assert "drafting_timed_out" in actions
+
+    assert client.post(f"/cases/{case}/retry", headers=ANALYST_2).status_code == 404
+    retried = client.post(f"/cases/{case}/retry", headers=ANALYST_1)
+    assert retried.status_code == 202
+    assert client.get(f"/cases/{case}", headers=ANALYST_1).json()["status"] == "draft"
+    assert client.post(f"/cases/{case}/retry", headers=ANALYST_1).status_code == 409
