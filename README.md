@@ -119,6 +119,9 @@ where the bank supplies its own sign-in, database and model choice.
 
 ![Cloud demo on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
 
+How to deploy either way, what to configure, and how to run it day to day is in the
+[deployment guide](docs/deployment.md).
+
 #### AWS equivalent
 
 Kept for reference, since a customer may run on AWS. The mapping is one to one: Cloud Run becomes ECS
