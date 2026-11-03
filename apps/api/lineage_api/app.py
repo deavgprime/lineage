@@ -26,6 +26,7 @@ from lineage_api.settings import Settings
 from lineage_api.sign_off import router as sign_off_router
 
 log = logging.getLogger("lineage_api")
+VERSION = "0.8.1"
 
 
 class Me(BaseModel):
@@ -64,7 +65,15 @@ def create_app(
         yield
         db.close()
 
-    app = FastAPI(title="Lineage API", version="0.4.0", lifespan=lifespan)
+    docs = settings.api_docs
+    app = FastAPI(
+        title="Lineage API",
+        version=VERSION,
+        lifespan=lifespan,
+        docs_url="/docs" if docs else None,
+        redoc_url=None,
+        openapi_url="/openapi.json" if docs else None,
+    )
     app.state.db = db
     app.state.limits = settings.limits
     app.state.log = log

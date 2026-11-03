@@ -138,6 +138,10 @@ resource "google_cloud_run_v2_service" "console" {
         value = local.urls.api
       }
       env {
+        name  = "LINEAGE_API_AUDIENCE"
+        value = local.urls.api
+      }
+      env {
         name = "SESSION_SECRET"
         value_source {
           secret_key_ref {
@@ -189,7 +193,7 @@ resource "google_cloud_run_v2_service" "keycloak" {
 
     containers {
       image = "${local.registry}/keycloak:${var.image_tag}"
-      args  = ["start", "--import-realm", "--http-enabled=true", "--proxy-headers=xforwarded", "--health-enabled=true", "--cache=local"]
+      args  = ["start", "--import-realm", "--http-enabled=true", "--proxy-headers=xforwarded", "--health-enabled=true", "--cache=local", "--features-disabled=admin"]
 
       resources {
         limits = { cpu = "1", memory = "1Gi" }
@@ -260,11 +264,10 @@ resource "google_cloud_run_v2_service" "keycloak" {
   depends_on = [google_project_service.required, google_secret_manager_secret_iam_member.access, google_secret_manager_secret_version.value]
 }
 
-# The console and the sign-in page are public. The API is reachable from anywhere but answers
-# only requests carrying a valid token from the realm.
+# The console and the sign-in page are public. The admin console is switched off in Keycloak, so
+# the public service serves sign-in only.
 resource "google_cloud_run_v2_service_iam_member" "public" {
   for_each = {
-    api      = google_cloud_run_v2_service.api.name
     console  = google_cloud_run_v2_service.console.name
     keycloak = google_cloud_run_v2_service.keycloak.name
   }
@@ -272,4 +275,13 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
   location = var.region
   role     = "roles/run.invoker"
   member   = "allUsers"
+}
+
+# The API is not public. Cloud Run admits only the console's service account, which proves itself
+# with a Google ID token in X-Serverless-Authorization, leaving Authorization for the user's token.
+resource "google_cloud_run_v2_service_iam_member" "console_calls_api" {
+  name     = google_cloud_run_v2_service.api.name
+  location = var.region
+  role     = "roles/run.invoker"
+  member   = google_service_account.service["console"].member
 }

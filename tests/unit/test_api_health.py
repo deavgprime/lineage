@@ -66,3 +66,17 @@ def test_settings_come_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> 
     settings = Settings.from_env()
     assert settings.database_url == "postgresql://x"
     assert settings.jwks_url.endswith("/realms/lineage/protocol/openid-connect/certs")
+
+
+@pytest.mark.unit
+def test_interactive_docs_are_off_unless_asked_for() -> None:
+    verifier = Verifier("issuer", "lineage-api", lambda _: None)
+    with TestClient(
+        create_app(Settings(database_url="postgresql://unused"), Pool(), verifier)
+    ) as c:
+        assert c.get("/docs").status_code == 404
+        assert c.get("/openapi.json").status_code == 404
+    on = Settings(database_url="postgresql://unused", api_docs=True)
+    with TestClient(create_app(on, Pool(), verifier)) as c:
+        assert c.get("/docs").status_code == 200
+        assert c.get("/openapi.json").status_code == 200
