@@ -59,6 +59,7 @@ def create_app(
 
     app = FastAPI(title="Lineage API", version="0.4.0", lifespan=lifespan)
     app.state.db = db
+    app.state.limits = settings.limits
     app.state.log = log
     if runner is None:
         from lineage_api.runner import FixtureRunner, LiveRunner
