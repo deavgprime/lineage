@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field
 
 from lineage_api.auth import CurrentUser, User
 from lineage_api.db import as_user
+from lineage_api.limits import check_open_case
 
 log = logging.getLogger("lineage_api")
 tracer = trace.get_tracer("lineage.api")
@@ -190,6 +191,7 @@ def open_case(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not your pack")
     pool = request.app.state.db
     with as_user(pool, user) as conn:
+        check_open_case(conn, request.app.state.limits)
         row = conn.execute(
             "INSERT INTO cases (jurisdiction, subject, company_number, status, assigned_to, "
             "opened_by) VALUES (%s, %s, %s, 'drafting', %s, %s) RETURNING id",
