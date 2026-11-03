@@ -398,6 +398,11 @@
       },
       "Me": {
         "properties": {
+          "fixture": {
+            "default": false,
+            "title": "Fixture",
+            "type": "boolean"
+          },
           "id": {
             "title": "Id",
             "type": "string"
