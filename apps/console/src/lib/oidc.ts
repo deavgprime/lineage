@@ -26,7 +26,14 @@ export function oidc(): Promise<client.Configuration> {
     ...(issuer.startsWith("http://localhost") ? { execute: [client.allowInsecureRequests] } : {}),
     ...(fetch ? { [client.customFetch]: fetch as client.CustomFetch } : {}),
   };
-  config ??= client.discovery(new URL(issuer), env("OIDC_CLIENT_ID"), undefined, client.None(), options);
+  // A failed discovery is forgotten, so the next request retries it. Otherwise one failure while the
+  // provider is starting would leave sign-in broken until the console restarts.
+  config ??= client
+    .discovery(new URL(issuer), env("OIDC_CLIENT_ID"), undefined, client.None(), options)
+    .catch((error: unknown) => {
+      config = undefined;
+      throw error;
+    });
   return config;
 }
 
