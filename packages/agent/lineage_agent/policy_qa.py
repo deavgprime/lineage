@@ -19,6 +19,7 @@ from lineage_agent.evidence import EvidenceStore
 from lineage_agent.names import script_of
 from lineage_agent.pii import Finding
 from lineage_agent.redaction import Redactor
+from lineage_agent.tracing import step
 
 MAX_ATTEMPTS = 3
 CANDIDATES = 15
@@ -96,7 +97,9 @@ def ask(
     scanner: Scanner | None = None,
     audit: Audit = lambda action, payload: None,
 ) -> Answer:
-    passages = retriever.search(question, pack)
+    with step("policy.search", pack=pack) as span:
+        passages = retriever.search(question, pack)
+        span.set_attribute("lineage.passages", len(passages))
     audit("policy_search", {"pack": pack, "passages": [p.id for p in passages]})
     redactor = Redactor()
     if scanner is not None:
@@ -125,7 +128,8 @@ def ask(
                 f"- {p}" for p in problems
             )
         audit("model_call", {"attempt": attempt})
-        raw = model.structured(SYSTEM, request, PolicyAnswer)
+        with step("policy.model_call", attempt=attempt):
+            raw = model.structured(SYSTEM, request, PolicyAnswer)
         answer = PolicyAnswer.model_validate(json.loads(redactor.restore(raw.model_dump_json())))
         problems = failures(answer.statements, evidence)
         if answer.answered and not answer.statements:

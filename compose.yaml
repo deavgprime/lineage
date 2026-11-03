@@ -2,6 +2,8 @@
 #   docker compose up -d db
 #   docker compose up -d --build api
 #   docker compose up -d keycloak
+#   docker compose up -d --build console
+#   docker compose --profile tracing up -d jaeger   (traces at http://localhost:16686)
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17
@@ -25,6 +27,8 @@ services:
       DATABASE_URL: postgresql://lineage:lineage-local@db:5432/lineage
       OIDC_ISSUER: http://localhost:8080/realms/lineage
       OIDC_JWKS_URL: http://keycloak:8080/realms/lineage/protocol/openid-connect/certs
+      # Picked up only when the tracing profile runs Jaeger; otherwise spans go nowhere.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -50,3 +54,29 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  console:
+    build:
+      context: apps/console
+    environment:
+      OIDC_ISSUER: http://localhost:8080/realms/lineage
+      OIDC_BACKCHANNEL_URL: http://keycloak:8080
+      OIDC_CLIENT_ID: lineage-console
+      APP_URL: http://localhost:3000
+      LINEAGE_API_URL: http://api:8000
+      # Local only. Set a real secret of at least 32 characters anywhere else.
+      SESSION_SECRET: local-only-session-secret-change-me-0123456789
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+      - keycloak
+
+  # A local trace viewer. In a deployment, point OTEL_EXPORTER_OTLP_ENDPOINT at Langfuse or the
+  # bank's own collector instead.
+  jaeger:
+    image: jaegertracing/jaeger:2.21.0
+    profiles: [tracing]
+    ports:
+      - "127.0.0.1:16686:16686"
+      - "127.0.0.1:4318:4318"

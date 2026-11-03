@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-console
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+    app.kubernetes.io/name: console
+spec:
+  replicas: {{ .Values.console.replicas }}
+  selector:
+    matchLabels: { app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/name: console }
+  template:
+    metadata:
+      labels: {{- include "lineage.labels" . | nindent 8 }}
+        app.kubernetes.io/name: console
+    spec:
+      {{- include "lineage.podSecurity" . | nindent 6 }}
+      containers:
+        - name: console
+          image: "{{ .Values.image.registry }}/console:{{ include "lineage.tag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- include "lineage.containerSecurity" . | nindent 10 }}
+          ports:
+            - { name: http, containerPort: 3000 }
+          env:
+            - { name: OIDC_ISSUER, value: {{ .Values.oidc.issuer | quote }} }
+            - { name: OIDC_CLIENT_ID, value: {{ .Values.oidc.clientId | quote }} }
+            {{- with .Values.oidc.backchannelUrl }}
+            - { name: OIDC_BACKCHANNEL_URL, value: {{ . | quote }} }
+            {{- end }}
+            - { name: APP_URL, value: {{ .Values.consoleUrl | quote }} }
+            - { name: LINEAGE_API_URL, value: "http://{{ .Release.Name }}-api:8000" }
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef: { name: {{ .Values.existingSecret }}, key: SESSION_SECRET }
+          readinessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 10
+          resources: {{- toYaml .Values.console.resources | nindent 12 }}
+          volumeMounts:
+            - { name: cache, mountPath: /app/.next/cache }
+      volumes:
+        - { name: cache, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-console
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+spec:
+  selector: { app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/name: console }
+  ports:
+    - { name: http, port: 3000, targetPort: http }

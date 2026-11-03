@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+    app.kubernetes.io/name: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels: { app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/name: api }
+  template:
+    metadata:
+      labels: {{- include "lineage.labels" . | nindent 8 }}
+        app.kubernetes.io/name: api
+    spec:
+      {{- include "lineage.podSecurity" . | nindent 6 }}
+      containers:
+        - name: api
+          image: "{{ .Values.image.registry }}/api:{{ include "lineage.tag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Migrations run in their own job before each install and upgrade.
+          command: ["uvicorn", "--factory", "lineage_api.app:create_app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+          {{- include "lineage.containerSecurity" . | nindent 10 }}
+          ports:
+            - { name: http, containerPort: 8000 }
+          env:
+            {{- include "lineage.apiEnv" . | nindent 12 }}
+            - { name: OIDC_ISSUER, value: {{ .Values.oidc.issuer | quote }} }
+            {{- with .Values.oidc.jwksUrl }}
+            - { name: OIDC_JWKS_URL, value: {{ . | quote }} }
+            {{- end }}
+            - { name: LINEAGE_RUNNER, value: {{ ternary "fixture" "live" (eq .Values.drafting "fixture") | quote }} }
+            - { name: LINEAGE_MODEL, value: "api" }
+            {{- if eq .Values.drafting "api" }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef: { name: {{ .Values.existingSecret }}, key: ANTHROPIC_API_KEY }
+            {{- end }}
+            {{- with .Values.tracing.endpoint }}
+            - { name: OTEL_EXPORTER_OTLP_ENDPOINT, value: {{ . | quote }} }
+            {{- end }}
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            periodSeconds: 20
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+  labels: {{- include "lineage.labels" . | nindent 4 }}
+spec:
+  selector: { app.kubernetes.io/instance: {{ .Release.Name }}, app.kubernetes.io/name: api }
+  ports:
+    - { name: http, port: 8000, targetPort: http }

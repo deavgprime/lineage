@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from psycopg_pool import ConnectionPool
 from pydantic import BaseModel
 
+from lineage_api import telemetry
 from lineage_api.auth import CurrentUser, Role, Verifier
 from lineage_api.cases import Runner, router
 from lineage_api.logs import configure
@@ -116,4 +117,5 @@ def create_app(
     app.include_router(router)
     app.include_router(sign_off_router)
     app.include_router(policy_router)
+    telemetry.configure(app)
     return app

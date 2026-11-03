@@ -20,6 +20,15 @@ draft cases, run the API on a machine signed in to Claude Code
 (`uv run uvicorn --factory lineage_api.app:create_app`), or set `LINEAGE_MODEL=api` and
 `ANTHROPIC_API_KEY` for the container.
 
+As a container, next to the API and Keycloak:
+
+```bash
+docker compose up -d --build --wait console   # from the repository root
+```
+
+Inside a container, `localhost` is not Keycloak, so `OIDC_BACKCHANNEL_URL` gives the address the
+server uses to reach it, while tokens keep the issuer the browser sees.
+
 After an API change, regenerate the typed client:
 
 ```bash

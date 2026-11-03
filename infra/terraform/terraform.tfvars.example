@@ -1,0 +1,5 @@
+project_id          = "your-project"
+region              = "europe-west2"
+image_tag           = "0.7.0"
+drafting            = "fixture"
+deletion_protection = true

@@ -1,0 +1,55 @@
+# Images, pushed to the bank's own registry.
+image:
+  registry: ghcr.io/deavgprime/lineage
+  tag: ""          # defaults to the chart's appVersion
+  pullPolicy: IfNotPresent
+
+# Addresses the bank provides. Lineage does not run its own database or identity provider here.
+oidc:
+  # The issuer browsers and tokens use, such as https://sso.bank.example/realms/lineage.
+  issuer: ""
+  # Where the API fetches signing keys, if not under the issuer.
+  jwksUrl: ""
+  # Where the console reaches the identity provider from inside the cluster, if not the issuer.
+  backchannelUrl: ""
+  clientId: lineage-console
+
+# Public address of the console, used for sign-in redirects.
+consoleUrl: ""
+
+# A Secret the bank creates, holding DATABASE_URL, SESSION_SECRET and, when drafting is "api",
+# ANTHROPIC_API_KEY. Lineage never writes it.
+existingSecret: lineage
+
+# "api" drafts with Claude through ANTHROPIC_API_KEY. "fixture" drafts canned files and is only for
+# demonstrations and tests.
+drafting: api
+
+api:
+  replicas: 2
+  resources:
+    requests: { cpu: 250m, memory: 1Gi }
+    limits: { cpu: "1", memory: 2Gi }
+
+console:
+  replicas: 2
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+ingest:
+  # Reload the pinned lists and the policy corpus. Kubernetes cron times are in UTC.
+  schedule: "0 5 * * *"
+  resources:
+    requests: { cpu: 500m, memory: 2Gi }
+    limits: { cpu: "2", memory: 4Gi }
+
+tracing:
+  # An OTLP endpoint, such as the bank's collector or Langfuse. Empty turns tracing off.
+  endpoint: ""
+
+networkPolicy:
+  enabled: true
+  # Pods allowed to reach the console, such as the bank's ingress controller.
+  ingressFrom:
+    - namespaceSelector: {}

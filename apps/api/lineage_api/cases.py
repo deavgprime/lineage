@@ -14,12 +14,15 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request, status
 from lineage_agent.agent import Result
+from opentelemetry import context as otel_context
+from opentelemetry import trace
 from pydantic import BaseModel, Field
 
 from lineage_api.auth import CurrentUser, User
 from lineage_api.db import as_user
 
 log = logging.getLogger("lineage_api")
+tracer = trace.get_tracer("lineage.api")
 router = APIRouter(prefix="/cases", tags=["cases"])
 
 Status = Literal["drafting", "draft", "awaiting_mlro", "final", "failed"]
@@ -120,6 +123,22 @@ def subject_of(result: Result, number: str) -> str:
 
 
 def run_case(
+    parent: otel_context.Context,
+    pool: Any,
+    runner: Runner,
+    user: User,
+    case_id: uuid.UUID,
+    number: str,
+    pack: str,
+) -> None:
+    """Run the agent for a case after the response is sent, in the opening request's trace."""
+    with tracer.start_as_current_span(
+        "case.draft", context=parent, attributes={"lineage.case_id": str(case_id)}
+    ):
+        _run_case(pool, runner, user, case_id, number, pack)
+
+
+def _run_case(
     pool: Any, runner: Runner, user: User, case_id: uuid.UUID, number: str, pack: str
 ) -> None:
     """Run the agent for a case and store the draft. Each audit row commits on its own, so the
@@ -183,6 +202,7 @@ def open_case(
         summary = _summary(_visible(conn, case_id))
     background.add_task(
         run_case,
+        otel_context.get_current(),
         pool,
         request.app.state.runner,
         user,
