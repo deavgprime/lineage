@@ -40,7 +40,7 @@ def tracked_text_files() -> list[Path]:
     out = subprocess.run(
         ["git", "ls-files"], cwd=ROOT, check=True, capture_output=True, text=True
     ).stdout.splitlines()
-    skip = {".png", ".pdf", ".lock"}
+    skip = {".png", ".pdf", ".lock", ".webm"}
     # Third-party text kept verbatim, such as legislation fixtures, is not ours to restyle.
     verbatim = ("tests/fixtures/legislation/",)
     return [
