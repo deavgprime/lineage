@@ -13,6 +13,9 @@ analyst reviews the file, approves or changes it, and every step is logged.
 Status: pre-alpha. The design is settled and the code is being built. Progress is tracked in the
 repository milestones.
 
+A 50-second [recorded walkthrough](docs/demo/README.md) shows a case from opening to the MLRO's
+second sign-off, the audit trace, and a cited policy answer.
+
 ## What it is for
 
 Before a bank opens an account for a company, it must find out who really owns that company and whether
@@ -67,6 +70,35 @@ Lineage is a drafting tool for the analyst. It is not a decision system, and it 
 7. The analyst approves the file or edits it and records why.
 
 ![Agent run: request to approved file](docs/images/2-agent-run.png)
+
+## Results
+
+Measured on the committed datasets with Claude Opus 5.5 at medium effort. Model-based results run
+eight times per case and are committed with the change that produced them; the rest run in CI on
+every pull request. This table is generated from `packages/evals/baselines/`, and a test fails if it
+differs. How each measure is defined is in the [testing plan](docs/testing.md).
+
+<!-- results:start -->
+| Measure | Result | Gate | Runs |
+| --- | --- | --- | --- |
+| Sanctions and PEP recall, listed names | UK 70 of 70, UAE 70 of 70 | At least 98% per pack | Every pull request |
+| Recall, spellings on no list | UK 19 of 20, UAE 18 of 20 | Reported | Every pull request |
+| Screening false positives | UK 3, UAE 1 of 60 negatives | Reported | Every pull request |
+| Ownership chains, live register | 30 of 30 | At least 90% | Every pull request |
+| Claims citing a source | 100% of 497 claims in 40 files | 100% | Committed with the change |
+| Claims judged faithful | 98.7%, lowest company 96.2% | At least 95% per company | Committed with the change |
+| Safety runs failed | 0 of 320 | 0 | Committed with the change |
+| Identifiers redacted | 100%, no false positives on 12 clean passages | 100% | Every pull request |
+| Names redacted (English) | 80% | At least 80% | Every pull request |
+| Policy retrieval recall at 5 | 100% | Reported | Committed with the change |
+| Policy answers cited and faithful | 100% cited, 98.9% faithful | 100% and at least 95% | Committed with the change |
+| Unanswerable policy questions declined | 100% | 100% | Committed with the change |
+| Time per file | p50 16 s, p95 20 s | p95 under 120 s | Committed with the change |
+| Model cost per file, at list price | $0.038 mean | Reported | Committed with the change |
+<!-- results:end -->
+
+The deployment was also run once on GCP against live services, then torn down. The record, with
+screenshots and the faults the live run found, is in [docs/deployment](docs/deployment/README.md).
 
 ## Architecture
 
@@ -145,7 +177,9 @@ Data: OpenSanctions, UK Companies House and GLEIF.
 ## Documents
 
 Read next: [brief](docs/brief.md), [scope](docs/scoping.md), [decisions](docs/decisions.md),
-[testing plan](docs/testing.md), [security and compliance](docs/security.md).
+[testing plan](docs/testing.md), [security and compliance](docs/security.md),
+[deployment guide](docs/deployment.md), and the [playbook](docs/playbook.md) for taking Lineage
+into a bank, from discovery to a signed-off pilot and handover.
 
 ## Contributing
 

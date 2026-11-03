@@ -6,6 +6,8 @@ repos:
     hooks:
       - id: check-added-large-files
         args: [--maxkb=1024]
+        # The recorded demo is the one large file kept on purpose.
+        exclude: ^docs/demo/.*\.webm$
       - id: check-json
       - id: check-merge-conflict
       - id: check-yaml
