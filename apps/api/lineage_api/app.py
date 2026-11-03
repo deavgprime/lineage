@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from lineage_api import telemetry
 from lineage_api.auth import CurrentUser, Role, Verifier
 from lineage_api.cases import Runner, router
+from lineage_api.limits import fail_stale_drafts
 from lineage_api.logs import configure
 from lineage_api.policy import Asker
 from lineage_api.policy import router as policy_router
@@ -54,6 +55,12 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.open()
+        # Cases a previous process left drafting are failed now, so they can be retried.
+        try:
+            with db.connection(timeout=10) as conn:
+                fail_stale_drafts(conn)
+        except Exception:
+            log.exception("could not check for stale drafting cases")
         yield
         db.close()
 

@@ -6,6 +6,7 @@ import { statusLabel } from "@/lib/format";
 import { locate } from "@/lib/quote";
 
 import { Header } from "../../header";
+import { retryCase } from "./actions";
 import { SignOffForm } from "./sign-off-form";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,16 @@ export default async function CasePage({ params, searchParams }: Props) {
           {file.company_number} · {file.jurisdiction.toUpperCase()} · {statusLabel(file.status)}
           {file.attempts ? ` · drafted in ${file.attempts} attempt${file.attempts > 1 ? "s" : ""}` : ""}
         </p>
+
+        {file.status === "failed" &&
+          (me.role === "mlro" || (me.role === "analyst" && file.assigned_to === me.id)) && (
+            <form action={retryCase.bind(null, id)} className="panel">
+              <p>Drafting did not finish. You can draft this case again.</p>
+              <button className="primary" type="submit">
+                Draft again
+              </button>
+            </form>
+          )}
 
         {!draft && <p className="panel">{file.status === "drafting" ? "The agent is still drafting this file. Refresh in a moment." : "There is no draft for this case."}</p>}
 

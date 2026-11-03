@@ -1001,6 +1001,55 @@
         ]
       }
     },
+    "/cases/{case_id}/retry": {
+      "post": {
+        "description": "Draft a failed case again. The assigned analyst, or an MLRO in the pack, may retry.",
+        "operationId": "retry_case_cases__case_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry Case",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
     "/cases/{case_id}/sign-off": {
       "post": {
         "operationId": "sign_off_cases__case_id__sign_off_post",
