@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 # Build from the repository root:
 #   docker build -f apps/api/Dockerfile -t lineage-api .
-FROM python:3.12-slim AS base
-COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /usr/local/bin/uv
+# Base images are pinned by digest; Dependabot proposes updates.
+FROM python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS base
+COPY --from=ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/app/.venv
 WORKDIR /app
 

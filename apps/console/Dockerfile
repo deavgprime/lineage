@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 # Build from apps/console:
 #   docker build -t lineage-console apps/console
-FROM node:22-slim AS build
+# Base images are pinned by digest; Dependabot proposes updates.
+FROM node:22-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
@@ -9,7 +10,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22-slim
+FROM node:22-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 # The server needs only node. npm and corepack ship with the base image and carry their own

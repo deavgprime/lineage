@@ -46,3 +46,14 @@ def test_pull_request_text_is_not_interpolated_into_scripts(path: Path) -> None:
     for block in re.findall(r"run:\s*[|>]?-?\n?((?:\s{10,}.*\n?)+)", text):
         assert "github.head_ref" not in block, f"{path.name}: pass head_ref through env"
         assert "github.event.pull_request.title" not in block
+
+
+DOCKERFILES = sorted((Path(__file__).resolve().parents[2] / "apps").glob("*/Dockerfile"))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("path", DOCKERFILES, ids=lambda p: p.parent.name)
+def test_base_images_are_pinned_by_digest(path: Path) -> None:
+    images = re.findall(r"^(?:FROM|COPY --from=)\s*(\S+)", path.read_text("utf-8"), flags=re.M)
+    external = [i for i in images if "/" in i or ":" in i]
+    assert external and all("@sha256:" in i for i in external), external

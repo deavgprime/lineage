@@ -49,3 +49,17 @@ updates:
     groups:
       console:
         patterns: ["*"]
+  - package-ecosystem: docker
+    directories: [/apps/api, /apps/console]
+    target-branch: develop
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build"
+      include: scope
+    labels: [dependencies]
+    groups:
+      base-images:
+        patterns: ["*"]
