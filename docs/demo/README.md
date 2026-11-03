@@ -1,7 +1,13 @@
 # Demo walkthrough
 
 [lineage-walkthrough.webm](lineage-walkthrough.webm) is a 50-second recording of the full flow in the
-console:
+console. GitHub does not play videos kept in a repository, so the README shows
+[lineage-walkthrough.gif](lineage-walkthrough.gif), made from the same recording at one and a half
+times speed.
+
+![The walkthrough](lineage-walkthrough.gif)
+
+The steps:
 
 1. An analyst signs in through Keycloak and opens a case for a UK company.
 2. The drafted file opens. A claim's source is opened, with the quoted passage highlighted in the
@@ -23,6 +29,8 @@ docker compose -f compose.yaml -f compose.e2e.yaml up -d --build --wait db keycl
 uv run python -m lineage_ingest.policy --no-legislation --flat-embeddings
 cd apps/console && npx playwright test -c demo
 cp demo/output/*/video.webm ../../docs/demo/lineage-walkthrough.webm
+mkdir -p /tmp/frames && ffmpeg -i ../../docs/demo/lineage-walkthrough.webm -r 4 /tmp/frames/%04d.png
+cd ../.. && uv run python scripts/demo_gif.py /tmp/frames docs/demo/lineage-walkthrough.gif
 ```
 
 The script is `apps/console/demo/walkthrough.spec.ts`.
