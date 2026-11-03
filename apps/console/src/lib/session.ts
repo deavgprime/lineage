@@ -3,11 +3,12 @@ import "server-only";
 import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
 
-// Tokens live only in this encrypted, httpOnly cookie. Browser scripts never see them.
+// Tokens live only in this encrypted, httpOnly cookie. Browser scripts never see them. The ID token is
+// not kept: browsers refuse cookies over 4 KB, and with real issuer addresses the three tokens
+// together pass that limit.
 export type Session = {
   accessToken?: string;
   refreshToken?: string;
-  idToken?: string;
   expiresAt?: number;
   // Held between the redirect to Keycloak and the callback.
   verifier?: string;

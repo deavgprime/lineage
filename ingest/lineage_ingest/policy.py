@@ -255,7 +255,11 @@ def load(conn: psycopg.Connection[Any], document: Document, embedder: Embedder) 
 
 
 def documents(include_legislation: bool = True) -> Iterable[Document]:
-    for path in sorted(POLICIES.glob("*.md")):
+    paths = sorted(POLICIES.glob("*.md"))
+    if not paths:
+        # An empty corpus answers every question with "not found", so fail loudly instead.
+        raise SystemExit(f"no policy documents in {POLICIES}")
+    for path in paths:
         yield read_policy(path)
     if include_legislation:
         yield fetch_mlr()
