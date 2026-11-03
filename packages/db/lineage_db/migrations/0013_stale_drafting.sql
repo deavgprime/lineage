@@ -11,7 +11,9 @@ BEGIN
     FOR stale IN
         SELECT id FROM cases
         WHERE status = 'drafting'
-          AND updated_at < now() - make_interval(secs => older_than_seconds)
+          -- Never less than ten minutes, whatever the caller asks, so this cannot be used to fail
+          -- cases that are still drafting.
+          AND updated_at < now() - make_interval(secs => greatest(older_than_seconds, 600))
         FOR UPDATE SKIP LOCKED
     LOOP
         UPDATE cases SET status = 'failed', updated_at = now() WHERE id = stale;
