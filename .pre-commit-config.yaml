@@ -9,6 +9,9 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: check-yaml
+        args: [--allow-multiple-documents]
+        # Helm templates are YAML only after rendering; CI lints and schema-checks the output.
+        exclude: ^infra/helm/.*/templates/
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: ^tests/fixtures/legislation/

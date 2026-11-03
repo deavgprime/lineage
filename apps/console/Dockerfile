@@ -17,6 +17,7 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
     /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 COPY --from=build --chown=node:node /app/.next/standalone ./
-USER node
+# A numeric user (node), so Kubernetes can check runAsNonRoot.
+USER 1000
 EXPOSE 3000
 CMD ["node", "server.js"]

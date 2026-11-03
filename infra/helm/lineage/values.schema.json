@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["oidc", "consoleUrl", "existingSecret", "drafting"],
+  "properties": {
+    "oidc": {
+      "type": "object",
+      "required": ["issuer"],
+      "properties": {
+        "issuer": { "type": "string", "pattern": "^https?://.+" },
+        "jwksUrl": { "type": "string" },
+        "backchannelUrl": { "type": "string" },
+        "clientId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "consoleUrl": { "type": "string", "pattern": "^https?://.+" },
+    "existingSecret": { "type": "string", "minLength": 1 },
+    "drafting": { "enum": ["api", "fixture"] },
+    "api": { "type": "object", "properties": { "replicas": { "type": "integer", "minimum": 1 } } },
+    "console": { "type": "object", "properties": { "replicas": { "type": "integer", "minimum": 1 } } }
+  }
+}
