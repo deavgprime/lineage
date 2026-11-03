@@ -108,4 +108,5 @@ def test_me_needs_a_valid_token() -> None:
             "username": "analyst-uk-1",
             "role": "analyst",
             "packs": ["uae", "uk"],
+            "fixture": False,
         }
