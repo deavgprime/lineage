@@ -5,7 +5,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 CLUSTER=lineage-chart
-trap 'kind delete cluster --name "$CLUSTER" >/dev/null 2>&1 || true' EXIT
+diagnose() {
+  echo "--- pods"; kubectl get pods -o wide || true
+  echo "--- events"; kubectl get events --sort-by=.lastTimestamp | tail -30 || true
+  for d in t-api t-console postgres; do
+    echo "--- logs $d"; kubectl logs "deploy/$d" --tail=40 --all-containers || true
+  done
+  echo "--- describe api"; kubectl describe pods -l app.kubernetes.io/name=api | tail -40 || true
+}
+trap 'status=$?; [ "$status" -ne 0 ] && diagnose; kind delete cluster --name "$CLUSTER" >/dev/null 2>&1 || true' EXIT
 
 docker build -q -f apps/api/Dockerfile -t lineage/api:ci . >/dev/null
 docker build -q -t lineage/console:ci apps/console >/dev/null
