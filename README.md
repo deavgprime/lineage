@@ -186,8 +186,19 @@ into a bank, from discovery to a signed-off pilot and handover.
 
 ## Contributing
 
-Work happens on short topic branches into `develop`, and `main` holds released code. Commits and pull
-request titles follow Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions of any size are welcome: a bug fix, a clearer page of documentation, a faster query or
+a new capability.
+
+1. Fork the repository and branch from `develop`, naming the branch for the change, for example
+   `fix/audit-hash-order` or `feat/screening-tool`.
+2. Make the change with tests. A bug fix starts with a test that fails without it.
+3. Commit with a [Conventional Commits](https://www.conventionalcommits.org/) message that says why
+   the change is needed.
+4. Open a pull request into `develop`, link the issue, and say what changed and why.
+
+For anything beyond a small fix, open an issue first, so the approach is agreed before you write the
+code. [CONTRIBUTING.md](CONTRIBUTING.md) covers local setup, the checks a pull request must pass and
+how releases work. Report security problems privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## Licence
 
