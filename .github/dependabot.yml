@@ -52,6 +52,10 @@ updates:
   - package-ecosystem: docker
     directories: [/apps/api, /apps/console]
     target-branch: develop
+    # Patch and minor updates only: a new Node or Python major, or a non-LTS Node, is moved by hand.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     schedule:
       interval: weekly
     cooldown:
