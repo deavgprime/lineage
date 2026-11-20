@@ -4,6 +4,8 @@ All notable changes to Lineage are listed here, newest first. Each release links
 
 ## [Unreleased]
 
+## [v0.8.2] - 2026-11-20
+
 - docs: describe only what the code does in the readme and contributor docs (#178)
 - fix(deps): bump opentelemetry to 1.45.2 for GHSA-mf5v-w3w3-f6cg (#177)
 - docs: add a changelog, code of conduct and python version pin (#179)
@@ -173,7 +175,8 @@ All notable changes to Lineage are listed here, newest first. Each release links
 - docs: explain what Lineage is for and how its architecture works (#8)
 - ci: harden workflows and add secret and workflow scanning (#9)
 
-[Unreleased]: https://github.com/deavgprime/lineage/compare/v0.8.1...develop
+[Unreleased]: https://github.com/deavgprime/lineage/compare/v0.8.2...develop
+[v0.8.2]: https://github.com/deavgprime/lineage/releases/tag/v0.8.2
 [v0.8.1]: https://github.com/deavgprime/lineage/releases/tag/v0.8.1
 [v0.8.0]: https://github.com/deavgprime/lineage/releases/tag/v0.8.0
 [v0.7.2]: https://github.com/deavgprime/lineage/releases/tag/v0.7.2

@@ -10,7 +10,7 @@ owns it, whether any of those owners is sanctioned or politically exposed, what 
 them, and how risky the customer looks. Every statement links to the record it came from. A compliance
 analyst reviews the file, approves or changes it, and every step is logged.
 
-Status: v0.8.1. The agent, the evals, the API and console, redaction, the audit log, policy
+Status: v0.8.2. The agent, the evals, the API and console, redaction, the audit log, policy
 questions, the GCP Terraform and the Helm chart are built and tested. Lineage has been deployed once
 to GCP and run end to end there. It has not been used with a bank's real customers.
 
