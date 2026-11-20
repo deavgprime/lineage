@@ -162,11 +162,11 @@ publishes the images and the Helm chart to GitHub packages, and nothing deploys 
 
 ### Deployment
 
-The demo runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
+The hosted deployment runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
 Terraform. The same container images install into a bank's own Kubernetes cluster with a Helm chart,
 where the bank supplies its own sign-in, database and Anthropic API key.
 
-![Cloud demo on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
+![Hosted deployment on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
 
 How to deploy either way, what to configure, and how to run it day to day is in the
 [deployment guide](docs/deployment.md).
