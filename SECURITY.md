@@ -25,5 +25,5 @@ Out of scope: findings that need a compromised host, and the third-party service
 
 ## Handling of data
 
-The project uses only public records and invented people in tests and demos. No real customer data
+The project uses only public records and invented people in tests and examples. No real customer data
 belongs in this repository. If you find some, report it as a vulnerability.

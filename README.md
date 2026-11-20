@@ -132,8 +132,8 @@ and Grafana views. The planned items are listed after the components.
   includes Jaeger as a local trace viewer.
 
 Planned, not built yet: an MCP server that exposes the same tools to other agents, which is in the
-[scope](docs/scoping.md), and adapters for model providers other than Claude, which are proposed in
-the [decisions](docs/decisions.md).
+[scope](docs/scoping.md); adapters for model providers other than Claude, which are proposed in
+the [decisions](docs/decisions.md); and Langfuse and Grafana views over the exported traces.
 
 ### Security and audit
 
@@ -157,16 +157,18 @@ them. The targets are in the [brief](docs/brief.md), and the way the tests are o
 
 ![Pull request to production](docs/images/4-ci-cd.png)
 
-The diagram shows the intended pipeline. Today CI runs the three evals above, a release tag on `main`
+The diagram shows the intended pipeline. Today every pull request runs lint and type checks, unit and
+integration tests, the three evals above, Terraform and Helm chart checks, an end-to-end test of the
+console, and scans for secrets, dependency advisories and image issues. A release tag on `main`
 publishes the images and the Helm chart to GitHub packages, and nothing deploys automatically.
 
 ### Deployment
 
-The hosted deployment runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
+The GCP deployment uses Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
 Terraform. The same container images install into a bank's own Kubernetes cluster with a Helm chart,
 where the bank supplies its own sign-in, database and Anthropic API key.
 
-![Hosted deployment on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
+![GCP deployment and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
 
 How to deploy either way, what to configure, and how to run it day to day is in the
 [deployment guide](docs/deployment.md).
