@@ -4,6 +4,9 @@ All notable changes to Lineage are listed here, newest first. Each release links
 
 ## [Unreleased]
 
+- docs: describe only what the code does in the readme and contributor docs (#178)
+- fix(deps): bump opentelemetry to 1.45.2 for GHSA-mf5v-w3w3-f6cg (#177)
+- docs: add a changelog, code of conduct and python version pin (#179)
 - build(deps-dev): update hatchling requirement from >=1.32.4 to >=1.33.0 in the python-dev-tools group (#164)
 - build: move both base images to digests with the fixed apt (#166)
 - ci(deps): bump docker/login-action from 4.6.0 to 4.7.0 in the github-actions group across 1 directory (#162)
