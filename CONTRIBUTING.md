@@ -145,3 +145,7 @@ These apply to code comments, documentation, commit messages and pull request te
 ## Security
 
 Do not report vulnerabilities in public issues. See [SECURITY.md](SECURITY.md).
+
+## Conduct
+
+Everyone taking part in this project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
