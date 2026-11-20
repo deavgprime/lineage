@@ -128,7 +128,7 @@ Requires Python 3.12 or newer and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
-uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+uvx pre-commit install --hook-type pre-commit --hook-type commit-msg
 uv run pytest -m "not eval"
 ```
 
