@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from lineage_api.auth import CurrentUser, User
 from lineage_api.db import as_user
+from lineage_api.limits import check_question
 
 router = APIRouter(prefix="/policy", tags=["policy"])
 
@@ -97,6 +98,7 @@ def ask_question(body: Ask, user: CurrentUser, request: Request) -> PolicyReply:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not your pack")
     asker: Asker = request.app.state.asker
     with as_user(request.app.state.db, user) as conn:
+        check_question(conn, request.app.state.limits)
         audit = _audit(conn, user)
         audit("policy_question", {"pack": body.pack, "length": len(body.question)})
         result = asker(body.question, body.pack, conn, audit)

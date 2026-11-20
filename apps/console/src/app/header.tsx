@@ -5,6 +5,12 @@ import { api } from "@/lib/api";
 export async function Header() {
   const { data: me } = await (await api()).GET("/me");
   return (
+    <>
+      {me?.fixture && (
+        <p className="fixture-banner" role="status">
+          Demonstration: files are drafted from fixtures, not from live data or a model.
+        </p>
+      )}
     <header className="top">
       <nav className="main">
         <Link className="brand" href="/">
@@ -24,5 +30,6 @@ export async function Header() {
         </div>
       )}
     </header>
+    </>
   );
 }

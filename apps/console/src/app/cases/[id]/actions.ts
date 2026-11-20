@@ -28,3 +28,10 @@ export async function signOff(caseId: string, _: SignOffState, form: FormData): 
   revalidatePath(`/cases/${caseId}`);
   return { done: true };
 }
+
+export async function retryCase(caseId: string): Promise<void> {
+  await (await api(`/cases/${caseId}`)).POST("/cases/{case_id}/retry", {
+    params: { path: { case_id: caseId } },
+  });
+  revalidatePath(`/cases/${caseId}`);
+}

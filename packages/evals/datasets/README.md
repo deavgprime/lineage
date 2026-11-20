@@ -4,7 +4,7 @@
 
 240 labelled names for the sanctions and PEP screening eval, split into a UK pack and a UAE pack. The
 release gate is recall of at least 98% on the cases that should match, reported for each pack, with
-precision reported over all 200.
+precision also reported for each pack.
 
 | Category | UK | UAE | Expected | What it checks |
 | --- | --- | --- | --- | --- |

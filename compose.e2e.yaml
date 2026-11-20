@@ -4,3 +4,4 @@ services:
   api:
     environment:
       LINEAGE_RUNNER: fixture
+      LINEAGE_ENV: test

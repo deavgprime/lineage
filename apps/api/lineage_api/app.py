@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from lineage_api import telemetry
 from lineage_api.auth import CurrentUser, Role, Verifier
 from lineage_api.cases import Runner, router
+from lineage_api.limits import fail_stale_drafts
 from lineage_api.logs import configure
 from lineage_api.policy import Asker
 from lineage_api.policy import router as policy_router
@@ -25,6 +26,7 @@ from lineage_api.settings import Settings
 from lineage_api.sign_off import router as sign_off_router
 
 log = logging.getLogger("lineage_api")
+VERSION = "0.8.1"
 
 
 class Me(BaseModel):
@@ -32,12 +34,33 @@ class Me(BaseModel):
     username: str
     role: Role
     packs: list[str]
+    # True when files are drafted from fixtures, so the console can say so on every page.
+    fixture: bool = False
 
 
 class Pool(Protocol):
     def connection(self, timeout: float | None = None) -> Any: ...
     def open(self, wait: bool = False, timeout: float = 30.0) -> None: ...
     def close(self, timeout: float = 5.0) -> None: ...
+
+
+FIXTURE_ENVIRONMENTS = ("test", "demo")
+
+
+def fixture_mode() -> bool:
+    """Whether the API drafts canned files. That needs both LINEAGE_RUNNER=fixture and an
+    environment declared as test or demonstration, so one stray setting cannot turn a real
+    deployment into one that produces convincing but fake due-diligence files."""
+    if os.environ.get("LINEAGE_RUNNER") != "fixture":
+        return False
+    environment = os.environ.get("LINEAGE_ENV", "")
+    if environment not in FIXTURE_ENVIRONMENTS:
+        raise RuntimeError(
+            "LINEAGE_RUNNER=fixture drafts canned files and needs LINEAGE_ENV set to "
+            f"{' or '.join(FIXTURE_ENVIRONMENTS)}; refusing to start"
+        )
+    log.warning("drafting with fixtures in a %s environment", environment)
+    return True
 
 
 def create_app(
@@ -54,27 +77,37 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.open()
+        # Cases a previous process left drafting are failed now, so they can be retried.
+        try:
+            with db.connection(timeout=10) as conn:
+                fail_stale_drafts(conn)
+        except Exception:
+            log.exception("could not check for stale drafting cases")
         yield
         db.close()
 
-    app = FastAPI(title="Lineage API", version="0.4.0", lifespan=lifespan)
+    docs = settings.api_docs
+    app = FastAPI(
+        title="Lineage API",
+        version=VERSION,
+        lifespan=lifespan,
+        docs_url="/docs" if docs else None,
+        redoc_url=None,
+        openapi_url="/openapi.json" if docs else None,
+    )
     app.state.db = db
+    app.state.limits = settings.limits
     app.state.log = log
+    fixture = fixture_mode()
+    app.state.fixture = fixture
     if runner is None:
         from lineage_api.runner import FixtureRunner, LiveRunner
 
-        runner = (
-            FixtureRunner()
-            if os.environ.get("LINEAGE_RUNNER") == "fixture"
-            else LiveRunner(settings.database_url)
-        )
-        if isinstance(runner, FixtureRunner):
-            log.warning("drafting with fixtures: LINEAGE_RUNNER=fixture is for end-to-end tests")
+        runner = FixtureRunner() if fixture else LiveRunner(settings.database_url)
     app.state.runner = runner
     if asker is None:
         from lineage_api.runner import FixtureAsker, LiveAsker
 
-        fixture = os.environ.get("LINEAGE_RUNNER") == "fixture"
         asker = FixtureAsker() if fixture else LiveAsker()
     app.state.asker = asker
     app.state.verifier = verifier or Verifier.from_jwks(
@@ -112,7 +145,13 @@ def create_app(
 
     @app.get("/me")
     def me(user: CurrentUser) -> Me:
-        return Me(id=user.id, username=user.username, role=user.role, packs=sorted(user.packs))
+        return Me(
+            id=user.id,
+            username=user.username,
+            role=user.role,
+            packs=sorted(user.packs),
+            fixture=app.state.fixture,
+        )
 
     app.include_router(router)
     app.include_router(sign_off_router)

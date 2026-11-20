@@ -7,11 +7,14 @@ import { signOff, type SignOffState } from "./actions";
 type Props = {
   caseId: string;
   basis: string;
+  minimum?: string | null;
   alerts: string[];
   stage: "first" | "second";
 };
 
-export function SignOffForm({ caseId, basis, alerts, stage }: Props) {
+const RANK: Record<string, number> = { low: 1, medium: 2, high: 3 };
+
+export function SignOffForm({ caseId, basis, minimum, alerts, stage }: Props) {
   const [state, action, pending] = useActionState<SignOffState, FormData>(signOff.bind(null, caseId), {});
   const [rating, setRating] = useState(basis);
   const changed = rating !== basis;
@@ -41,9 +44,13 @@ export function SignOffForm({ caseId, basis, alerts, stage }: Props) {
         {changed ? `Reason for changing the rating from ${basis}` : "Note (optional)"}
         <textarea name="reason" rows={3} required={changed} maxLength={4000} />
       </label>
-      {stage === "first" && rating === "high" && (
-        <p className="muted">A high rating goes to an MLRO for a second sign-off before the file is final.</p>
-      )}
+      {stage === "first" &&
+        (rating === "high" || basis === "high" || minimum === "high" || (RANK[rating] ?? 0) < (RANK[basis] ?? 0)) && (
+          <p className="muted">
+            This file goes to a different MLRO for a second sign-off before it is final, because it was drafted or
+            rated high, or its rating is being lowered.
+          </p>
+        )}
       <button className="primary" type="submit" disabled={pending}>
         {pending ? "Signing" : changed ? "Override and sign off" : "Sign off"}
       </button>

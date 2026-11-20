@@ -27,6 +27,16 @@ class SignOff(BaseModel):
     alert_notes: dict[str, str] = Field(default_factory=dict)
 
 
+RANK = {"low": 1, "medium": 2, "high": 3}
+
+
+def needs_mlro(drafted: str, floor: str | None, rating: str) -> bool:
+    """Whether a first sign-off must wait for an MLRO (decision 0003): the file was drafted high,
+    a strong screening match set its minimum to high, it is signed off as high, or the rating was
+    lowered. Lowering a rating is the riskier direction, so it is never one person's decision."""
+    return "high" in (drafted, floor, rating) or RANK[rating] < RANK[drafted]
+
+
 def _refuse(reason: str, code: int = status.HTTP_409_CONFLICT) -> HTTPException:
     return HTTPException(code, reason)
 
@@ -39,14 +49,15 @@ def sign_off(case_id: uuid.UUID, body: SignOff, user: CurrentUser, request: Requ
     with as_user(pool, user) as conn:
         _visible(conn, case_id)
         row = conn.execute(
-            "SELECT c.status, c.assigned_to, d.id, d.draft ->> 'risk_rating', d.alerts "
+            "SELECT c.status, c.assigned_to, d.id, d.draft ->> 'risk_rating', d.alerts, "
+            "d.minimum_rating "
             "FROM cases c JOIN LATERAL (SELECT * FROM drafts WHERE case_id = c.id "
             "ORDER BY id DESC LIMIT 1) d ON true WHERE c.id = %s FOR UPDATE OF c",
             (case_id,),
         ).fetchone()
         if row is None:
             raise _refuse("the case has no draft to sign off")
-        case_status, assigned_to, draft_id, drafted, alerts = row
+        case_status, assigned_to, draft_id, drafted, alerts, floor = row
         reason = (body.reason or "").strip() or None
 
         if case_status == "draft":
@@ -94,7 +105,11 @@ def sign_off(case_id: uuid.UUID, body: SignOff, user: CurrentUser, request: Requ
                 json.dumps(body.alert_notes),
             ),
         )
-        outcome = "awaiting_mlro" if stage == "first" and body.rating == "high" else "final"
+        outcome = (
+            "awaiting_mlro"
+            if stage == "first" and needs_mlro(drafted, floor, body.rating)
+            else "final"
+        )
         conn.execute(
             "UPDATE cases SET status = %s, rating = %s, updated_at = now() WHERE id = %s",
             (outcome, body.rating, case_id),

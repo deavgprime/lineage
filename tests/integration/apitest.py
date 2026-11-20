@@ -10,10 +10,18 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from lineage_api.app import create_app
 from lineage_api.auth import Verifier
+from lineage_api.limits import Limits
 from lineage_api.settings import Settings
 from psycopg_pool import ConnectionPool
 
 URL = os.environ.get("DATABASE_URL", "")
+# Other tests open many cases as one user; the limits have their own test.
+GENEROUS = Limits(
+    cases_per_hour=10_000,
+    drafting_per_user=10_000,
+    drafting_total=10_000,
+    questions_per_hour=10_000,
+)
 ISSUER = "http://localhost:8080/realms/lineage"
 KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 RUN = uuid.uuid4().hex[:8]
@@ -43,7 +51,11 @@ AUDITOR = headers("auditor-1", "auditor", ["uk", "uae"])
 MLRO_2 = headers("mlro-uk-2", "mlro", ["uk"])
 
 
-def app(runner: Any, asker: Any = None) -> TestClient:
+def app(runner: Any, asker: Any = None, limits: Limits | None = None) -> TestClient:
     pool = ConnectionPool(URL, min_size=1, max_size=4, open=False)
     verifier = Verifier(ISSUER, "lineage-api", lambda _: KEY.public_key())
-    return TestClient(create_app(Settings(database_url=URL), pool, verifier, runner, asker))
+    return TestClient(
+        create_app(
+            Settings(database_url=URL, limits=limits or GENEROUS), pool, verifier, runner, asker
+        )
+    )

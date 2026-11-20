@@ -30,6 +30,8 @@ provider, a few secrets, and a way to reach a model.
 | `OIDC_CLIENT_ID` | Console | `lineage-console` |
 | `APP_URL` | Console | The console's public address, for sign-in redirects |
 | `LINEAGE_API_URL` | Console | Where the console server reaches the API |
+| `LINEAGE_API_AUDIENCE` | Console | When the API sits behind Cloud Run's access control, its address. The console then sends a Google ID token for its service account |
+| `API_DOCS` | API | `true` serves the interactive docs and schema. Off by default, since they map every endpoint |
 | `SESSION_SECRET` | Console | At least 32 random characters. Encrypts the session cookie |
 | `LINEAGE_RUNNER` | API | `fixture` drafts canned files for demonstrations and tests. Anything else drafts live |
 | `LINEAGE_MODEL` | API | `api` uses the Anthropic API. Unset uses Claude Code on a signed-in machine |
@@ -37,6 +39,10 @@ provider, a few secrets, and a way to reach a model.
 | `LINEAGE_MODELS` | API, jobs | A writable directory for the local embedding and reranking models |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | API | Where to send traces. Empty turns tracing off |
 | `OTEL_EXPORTER_OTLP_HEADERS` | API | Headers for that endpoint, such as Langfuse's keys |
+| `LIMIT_CASES_PER_HOUR` | API | Cases one user may open in an hour (default 20) |
+| `LIMIT_DRAFTING_PER_USER` | API | Cases one user may have drafting at once (default 3) |
+| `LIMIT_DRAFTING_TOTAL` | API | Cases drafting at once across all users (default 10) |
+| `LIMIT_QUESTIONS_PER_HOUR` | API | Policy questions one user may ask in an hour (default 30) |
 
 ## Model access
 

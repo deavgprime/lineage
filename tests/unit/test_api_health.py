@@ -66,3 +66,35 @@ def test_settings_come_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> 
     settings = Settings.from_env()
     assert settings.database_url == "postgresql://x"
     assert settings.jwks_url.endswith("/realms/lineage/protocol/openid-connect/certs")
+
+
+@pytest.mark.unit
+def test_interactive_docs_are_off_unless_asked_for() -> None:
+    verifier = Verifier("issuer", "lineage-api", lambda _: None)
+    with TestClient(
+        create_app(Settings(database_url="postgresql://unused"), Pool(), verifier)
+    ) as c:
+        assert c.get("/docs").status_code == 404
+        assert c.get("/openapi.json").status_code == 404
+    on = Settings(database_url="postgresql://unused", api_docs=True)
+    with TestClient(create_app(on, Pool(), verifier)) as c:
+        assert c.get("/docs").status_code == 200
+        assert c.get("/openapi.json").status_code == 200
+
+
+@pytest.mark.unit
+def test_fixture_drafting_needs_a_declared_test_or_demo_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from lineage_api.app import fixture_mode
+
+    monkeypatch.delenv("LINEAGE_RUNNER", raising=False)
+    assert fixture_mode() is False
+    monkeypatch.setenv("LINEAGE_RUNNER", "fixture")
+    for environment in ("", "production", "staging"):
+        monkeypatch.setenv("LINEAGE_ENV", environment)
+        with pytest.raises(RuntimeError, match="refusing to start"):
+            fixture_mode()
+    for environment in ("test", "demo"):
+        monkeypatch.setenv("LINEAGE_ENV", environment)
+        assert fixture_mode() is True

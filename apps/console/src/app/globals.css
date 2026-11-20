@@ -85,3 +85,4 @@ nav.main a.brand { color: var(--accent); }
 .ask label { display: flex; flex-direction: column; gap: 4px; }
 .ask .row { display: flex; gap: 16px; align-items: end; }
 .history ul { margin: 0; padding-left: 18px; }
+.fixture-banner { margin: 0; padding: 6px 24px; background: #fff1b8; color: #5c4400; font-weight: 600; text-align: center; }

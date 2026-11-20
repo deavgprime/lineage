@@ -398,6 +398,11 @@
       },
       "Me": {
         "properties": {
+          "fixture": {
+            "default": false,
+            "title": "Fixture",
+            "type": "boolean"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -739,7 +744,7 @@
   },
   "info": {
     "title": "Lineage API",
-    "version": "0.4.0"
+    "version": "0.8.1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -996,6 +1001,55 @@
           }
         ],
         "summary": "Export Audit",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/cases/{case_id}/retry": {
+      "post": {
+        "description": "Draft a failed case again. The assigned analyst, or an MLRO in the pack, may retry.",
+        "operationId": "retry_case_cases__case_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry Case",
         "tags": [
           "cases"
         ]

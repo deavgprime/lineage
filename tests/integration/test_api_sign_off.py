@@ -137,7 +137,7 @@ def test_the_database_refuses_a_high_file_with_one_signer(client: TestClient) ->
         conn.execute(
             "INSERT INTO sign_offs (case_id, draft_id, signer, signer_role, stage, "
             "drafted_rating, rating) VALUES (%s, %s, %s, 'analyst', 'first', 'high', 'high')",
-            (uuid.UUID(case), draft_id[0], f"a1-{RUN}"),
+            (uuid.UUID(case), draft_id[0], f"analyst-uk-1-{RUN}"),
         )
         with pytest.raises(psycopg.errors.RaiseException, match="different MLRO"):
             conn.execute(
@@ -151,3 +151,67 @@ def test_a_final_file_never_changes(client: TestClient) -> None:
     sign(client, case, ANALYST_1, rating="low")
     with pytest.raises(psycopg.errors.RaiseException, match="is final"):
         owner_update(case, "UPDATE cases SET subject = 'changed' WHERE id = %s")
+
+
+def test_lowering_a_high_file_still_needs_a_different_mlro(client: TestClient) -> None:
+    case = open_case(client, "H0000020")
+    lowered = sign(client, case, ANALYST_1, rating="low", reason="Analyst disagrees.")
+    assert lowered.status_code == 200, lowered.text
+    assert lowered.json()["status"] == "awaiting_mlro"
+    done = sign(client, case, MLRO, rating="low", reason="Agreed after review.")
+    assert done.json()["status"] == "final"
+
+
+def test_the_database_refuses_a_lowered_high_file_with_one_signer(client: TestClient) -> None:
+    case = open_case(client, "H0000021")
+    with psycopg.connect(URL) as conn:
+        draft_id = conn.execute(
+            "SELECT id FROM drafts WHERE case_id = %s", (uuid.UUID(case),)
+        ).fetchone()
+        assert draft_id is not None
+        conn.execute(
+            "INSERT INTO sign_offs (case_id, draft_id, signer, signer_role, stage, "
+            "drafted_rating, rating, reason) "
+            "VALUES (%s, %s, %s, 'analyst', 'first', 'high', 'low', 'lowered')",
+            (uuid.UUID(case), draft_id[0], f"analyst-uk-1-{RUN}"),
+        )
+        with pytest.raises(psycopg.errors.RaiseException, match="different MLRO"):
+            conn.execute(
+                "UPDATE cases SET status = 'final', rating = 'low' WHERE id = %s",
+                (uuid.UUID(case),),
+            )
+
+
+def direct_sign_off(case: str, signer: str, role: str, stage: str, status_to: str) -> None:
+    """Sign off straight in the database as the owner, skipping the API and row-level security,
+    so only the trigger stands in the way."""
+    with psycopg.connect(URL) as conn, conn.transaction():
+        draft = conn.execute(
+            "SELECT id FROM drafts WHERE case_id = %s ORDER BY id DESC LIMIT 1", (uuid.UUID(case),)
+        ).fetchone()
+        assert draft is not None
+        conn.execute(
+            "INSERT INTO sign_offs (case_id, draft_id, signer, signer_role, stage, "
+            "drafted_rating, rating) VALUES (%s, %s, %s, %s, %s, 'low', 'low')",
+            (uuid.UUID(case), draft[0], signer, role, stage),
+        )
+        conn.execute(
+            "UPDATE cases SET status = %s, rating = 'low' WHERE id = %s",
+            (status_to, uuid.UUID(case)),
+        )
+
+
+def test_the_database_refuses_to_finish_a_failed_case() -> None:
+    with app(runner) as c:
+        case = open_case(c, "00000022")
+    with psycopg.connect(URL) as conn:
+        conn.execute("UPDATE cases SET status = 'failed' WHERE id = %s", (uuid.UUID(case),))
+    with pytest.raises(psycopg.errors.RaiseException, match="failed case cannot be signed off"):
+        direct_sign_off(case, f"analyst-uk-1-{RUN}", "analyst", "first", "final")
+
+
+def test_the_database_refuses_a_first_sign_off_by_another_analyst() -> None:
+    with app(runner) as c:
+        case = open_case(c, "00000023")
+    with pytest.raises(psycopg.errors.RaiseException, match="assigned analyst or an MLRO"):
+        direct_sign_off(case, f"analyst-uk-2-{RUN}", "analyst", "first", "final")

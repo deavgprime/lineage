@@ -23,8 +23,11 @@ Sign-off rules:
 1. Only the assigned analyst, or an MLRO in the same pack, can sign off a file.
 2. Every weak screening alert must be cleared with a note before sign-off (decision 0002).
 3. Changing the drafted rating is an override and needs a written reason.
-4. A file rated high, after any override, needs a second sign-off by an MLRO who is not the first
-   signer. Until then it stays in review.
+4. A file needs a second sign-off by an MLRO who is not the first signer when it was drafted high,
+   a strong screening match set its minimum rating to high, it is signed off as high, or the first
+   signer lowered the rating. Until then it stays in review. Lowering a rating is the riskier
+   direction, so it is never one person's decision (changed 3 November 2026, #140: before, only the
+   final rating counted, so one analyst could take a high file down to low alone).
 5. Only the sign-off path can set a case to final. The agent cannot, and the database rejects any
    other change to final.
 

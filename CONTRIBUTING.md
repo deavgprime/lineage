@@ -128,7 +128,7 @@ Requires Python 3.12 or newer and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
-uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+uvx pre-commit install --hook-type pre-commit --hook-type commit-msg
 uv run pytest -m "not eval"
 ```
 
@@ -145,3 +145,7 @@ These apply to code comments, documentation, commit messages and pull request te
 ## Security
 
 Do not report vulnerabilities in public issues. See [SECURITY.md](SECURITY.md).
+
+## Conduct
+
+Everyone taking part in this project follows the [Code of Conduct](CODE_OF_CONDUCT.md).

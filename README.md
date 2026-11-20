@@ -10,7 +10,7 @@ owns it, whether any of those owners is sanctioned or politically exposed, what 
 them, and how risky the customer looks. Every statement links to the record it came from. A compliance
 analyst reviews the file, approves or changes it, and every step is logged.
 
-Status: v0.8.0. The agent, the evals, the API and console, redaction, the audit log, policy
+Status: v0.8.2. The agent, the evals, the API and console, redaction, the audit log, policy
 questions, the GCP Terraform and the Helm chart are built and tested. Lineage has been deployed once
 to GCP and run end to end there. It has not been used with a bank's real customers.
 
@@ -105,54 +105,70 @@ screenshots and the faults the live run found, is in [docs/deployment](docs/depl
 
 ## Architecture
 
-The system has one agent core with two entrances: the analyst console and an MCP server, which lets
-other AI agents use the same tools. Both entrances pass through the same access checks and write to
-the same audit log.
+The system has one agent core. The analyst console reaches it through the API, which applies the
+access checks, and every step writes to the audit log.
 
 ![System architecture](docs/images/1-architecture.png)
+
+The diagram also shows parts that are not built yet: the MCP server, the LLM gateway and the Langfuse
+and Grafana views. The planned items are listed after the components.
 
 - **Analyst console** (Next.js): the case queue, file review, sign-off and a view of how the agent
   reached its draft.
 - **API** (FastAPI): signs analysts in through OIDC and enforces which cases each analyst may see.
-- **MCP server:** exposes the same tools to other agents, with the same logging.
 - **Agent core:** a plan-and-execute loop written by hand, so each step can be tested and audited. It is
   the only component that calls a language model.
 - **Tools:** screening against OpenSanctions, company officers and controlling persons from UK
   Companies House, parent companies from GLEIF, and search over KYC policy documents.
-- **PII redaction and LLM gateway:** personal data is removed before any request leaves for an
-  external model. The gateway lets the bank choose Cohere, Claude, OpenAI or a model it hosts itself.
+- **PII redaction and model interface:** personal data is removed before any request leaves for an
+  external model. The agent calls Claude through one small interface, either with `claude -p` on a
+  signed-in Claude Code subscription or through the Anthropic API when `LINEAGE_MODEL=api`.
 - **Postgres:** cases, the vector index for policy search, and the audit log. One database to secure,
   back up and audit.
 - **Ingestion jobs:** load the three data sources into Postgres. Tools read these local copies, which
   keeps screening fast and evaluation inputs repeatable.
-- **Tracing:** OpenTelemetry from every component, viewed in Langfuse and Grafana.
+- **Tracing:** the API and the agent core emit OpenTelemetry spans and export them over OTLP when
+  `OTEL_EXPORTER_OTLP_ENDPOINT` is set, to any collector or to Langfuse's OTLP endpoint. `compose.yaml`
+  includes Jaeger as a local trace viewer.
+
+Planned, not built yet: an MCP server that exposes the same tools to other agents, which is in the
+[scope](docs/scoping.md); adapters for model providers other than Claude, which are proposed in
+the [decisions](docs/decisions.md); and Langfuse and Grafana views over the exported traces.
 
 ### Security and audit
 
 Three controls decide whether a bank will accept the system. Access: analysts see only the cases
 assigned to them, enforced in the database as well as the API. Data leaving the bank: personal data is
-redacted before any external model call, and a self-hosted model keeps everything inside. Tamper
-evidence: each audit row stores a hash of the row before it, so editing history breaks the chain.
+redacted before any external model call. Tamper evidence: each audit row stores a hash of the row
+before it, so editing history breaks the chain.
 
 ![Access control, data egress and tamper evidence](docs/images/3-security-audit.png)
 
 ### Evaluation and releases
 
-Model behaviour is measured, not assumed. Five evals run on every pull request, each case eight times
-to expose variance: sanctions and PEP recall, ownership chain accuracy, citations and faithfulness,
-safety against prompt injection, and time per file. A change that misses a target is blocked, and prompt
-changes go through the same gate as code. The targets are in the [brief](docs/brief.md), and the way
-the tests are organised is in the [testing plan](docs/testing.md), [security and compliance](docs/security.md).
+Model behaviour is measured, not assumed. Three evals run in CI on every pull request and fail the
+build when they miss their gate: sanctions and PEP screening recall, ownership chains against the live
+Companies House register, and redaction. The ownership eval is skipped when the Companies House key is
+not available, as on Dependabot pull requests. The evals that call the model (citations and
+faithfulness, safety against prompt injection, policy answers, and time and cost per file) run each
+case eight times to expose variance, and their results are committed with the change that produced
+them. The targets are in the [brief](docs/brief.md), and the way the tests are organised is in the
+[testing plan](docs/testing.md), [security and compliance](docs/security.md).
 
 ![Pull request to production](docs/images/4-ci-cd.png)
 
+The diagram shows the intended pipeline. Today every pull request runs lint and type checks, unit and
+integration tests, the three evals above, Terraform and Helm chart checks, an end-to-end test of the
+console, and scans for secrets, dependency advisories and image issues. A release tag on `main`
+publishes the images and the Helm chart to GitHub packages, and nothing deploys automatically.
+
 ### Deployment
 
-The demo runs on GCP: Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
+The GCP deployment uses Cloud Run services, Cloud SQL for PostgreSQL and Secret Manager, all defined in
 Terraform. The same container images install into a bank's own Kubernetes cluster with a Helm chart,
-where the bank supplies its own sign-in, database and model choice.
+where the bank supplies its own sign-in, database and Anthropic API key.
 
-![Cloud demo on GCP and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
+![GCP deployment and bank install on Kubernetes](docs/images/5-deployment-gcp.png)
 
 How to deploy either way, what to configure, and how to run it day to day is in the
 [deployment guide](docs/deployment.md).
@@ -173,8 +189,8 @@ LLM Top 10, NIST AI RMF, UK GDPR, the UAE PDPL, and the UK, CBUAE and FATF due d
 
 ## Stack
 
-Python 3.12 with FastAPI and Pydantic, Next.js with TypeScript, Postgres with pgvector, LiteLLM,
-Presidio, Keycloak, OpenTelemetry, Langfuse, Grafana, Terraform, Helm and GitHub Actions.
+Python 3.12 with FastAPI and Pydantic, the Anthropic SDK, Next.js with TypeScript, Postgres with
+pgvector, Presidio, Keycloak, OpenTelemetry, Terraform, Helm and GitHub Actions.
 Data: OpenSanctions, UK Companies House and GLEIF.
 
 ## Documents
@@ -186,8 +202,19 @@ into a bank, from discovery to a signed-off pilot and handover.
 
 ## Contributing
 
-Work happens on short topic branches into `develop`, and `main` holds released code. Commits and pull
-request titles follow Conventional Commits. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions of any size are welcome: a bug fix, a clearer page of documentation, a faster query or
+a new capability.
+
+1. Fork the repository and branch from `develop`, naming the branch for the change, for example
+   `fix/audit-hash-order` or `feat/screening-tool`.
+2. Make the change with tests. A bug fix starts with a test that fails without it.
+3. Commit with a [Conventional Commits](https://www.conventionalcommits.org/) message that says why
+   the change is needed.
+4. Open a pull request into `develop`, link the issue, and say what changed and why.
+
+For anything beyond a small fix, open an issue first, so the approach is agreed before you write the
+code. [CONTRIBUTING.md](CONTRIBUTING.md) covers local setup, the checks a pull request must pass and
+how releases work. Report security problems privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## Licence
 
